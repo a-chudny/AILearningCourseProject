@@ -214,3 +214,74 @@ Estimate: ~95% (AI generated all updates, user provided yes/no decisions only)
 - Registration deadline is common real-world requirement
 
 ---
+
+## [2026-02-01 10:00] - FOUND-001: Backend Project Setup
+
+### Prompt
+"Implement FOUND-001 story from user stories file. Add gitignore file for backend. Project should have possibility to be opened via Visual Studio"
+
+### Context
+- First implementation story from user stories document
+- Setting up the foundation for .NET 10 Web API
+- Need Visual Studio solution file for IDE support
+- PostgreSQL database configuration required
+
+### Files Added/Modified
+- `backend/VolunteerPortal.sln` - Created: Solution file for Visual Studio
+- `backend/src/VolunteerPortal.API/VolunteerPortal.API.csproj` - Created: API project with NuGet packages
+- `backend/tests/VolunteerPortal.Tests/VolunteerPortal.Tests.csproj` - Created: Test project with xUnit
+- `backend/src/VolunteerPortal.API/Program.cs` - Created: Application entry point with DI configuration
+- `backend/src/VolunteerPortal.API/Data/ApplicationDbContext.cs` - Created: EF Core DbContext
+- `backend/src/VolunteerPortal.API/Controllers/HealthController.cs` - Created: Health check endpoint
+- `backend/src/VolunteerPortal.API/appsettings.json` - Created: Configuration file
+- `backend/src/VolunteerPortal.API/appsettings.Development.json` - Created: Dev configuration
+- `backend/src/VolunteerPortal.API/Properties/launchSettings.json` - Created: VS launch profiles
+- `backend/tests/VolunteerPortal.Tests/GlobalUsings.cs` - Created: Global test usings
+- `backend/tests/VolunteerPortal.Tests/Controllers/HealthControllerTests.cs` - Created: Health endpoint test
+- `backend/README.md` - Created: Backend documentation
+- `backend/.gitignore` - Created: Git ignore for .NET projects
+
+### Generated Code Summary
+- **Solution Structure**: Visual Studio solution with API and Test projects
+- **NuGet Packages**: 
+  - Microsoft.EntityFrameworkCore (9.0.4) - Explicit reference to resolve version conflicts
+  - Npgsql.EntityFrameworkCore.PostgreSQL (9.0.4)
+  - Swashbuckle.AspNetCore (7.3.2) - Swagger/OpenAPI
+  - FluentValidation.AspNetCore (11.3.0)
+  - BCrypt.Net-Next (4.0.3) - Password hashing
+  - AspNetCore.HealthChecks.NpgSql (9.0.0)
+  - Microsoft.AspNetCore.Authentication.JwtBearer (9.0.4)
+  - xUnit, Moq, FluentAssertions for testing
+- **Program.cs Configuration**:
+  - PostgreSQL with Entity Framework Core
+  - CORS for frontend at localhost:5173
+  - Swagger with JWT authentication setup
+  - Health checks with database verification
+  - FluentValidation auto-validation
+- **Health Endpoints**: 
+  - `GET /api/health` - Custom controller with status/version
+  - Built-in health check with NpgSql verification
+- **Launch Profiles**: HTTP, HTTPS, and IIS Express support
+
+### Result
+✅ Success
+- Solution builds successfully with `dotnet build` (no warnings)
+- Unit test passes (HealthController test)
+- Project can be opened in Visual Studio via .sln file
+- Swagger UI configured at /swagger
+- CORS configured for React frontend development
+- PostgreSQL connection ready (needs database creation)
+
+### AI Generation Percentage
+Estimate: ~98% (All code AI-generated, minor package version fix for health checks)
+
+### Learnings/Notes
+- .NET 10 SDK required for net10.0 target framework
+- AspNetCore.HealthChecks.NpgSql package needed for database health checks
+- FluentAssertions now has commercial licensing notice (works for non-commercial)
+- Visual Studio solution file format hasn't changed, standard GUIDs work
+- launchSettings.json needed for proper Visual Studio F5 debugging experience
+- Including JWT setup in initial Program.cs saves time for AUTH-002 story
+- When transitive dependencies cause version conflicts (e.g., EF Core 9.0.1 vs 9.0.4), add explicit package reference to force desired version
+
+---
