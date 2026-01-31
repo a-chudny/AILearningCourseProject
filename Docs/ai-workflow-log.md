@@ -56,3 +56,161 @@ Estimate: ~95% (AI generated the entire copilot-instructions.md file with minor 
 - This approach of documenting development workflow creates valuable learning trail for course participants
 
 ---
+
+## [2026-01-31 17:30] - Project Requirements Document
+
+### Prompt
+"Create requirements for current Volunteer Event Portal project. The project should not be overloaded with many features, the idea is small UI + API app, but it should include at least: several pages and components, Routing, A few different layouts (e.g. main layout, admin layout, etc.). Backend should be .NET 10 project, use ASP.NET API, EF, Postgres DB. Frontend should be React app on TypeScript. Both backend and frontend should be covered by unit tests."
+
+Follow-up: "Add business context section, skill preferences (predefined list), and admin CSV export reports."
+
+### Context
+- Need to define clear project scope before implementation
+- Balance between learning value and manageable complexity
+- Must include multiple layouts, routing, and full-stack features
+- Tech stack: .NET 10, PostgreSQL, React + TypeScript
+- Unit testing required for both layers
+
+### Files Added/Modified
+- `Docs/REQUIREMENTS.md` - Created: Comprehensive project requirements document
+
+### Generated Code Summary
+- Complete requirements document including:
+  - **Business Context**: Problem statement, solution overview, target users, business value, key metrics
+  - **4 User Roles**: Guest, Volunteer, Organizer, Admin
+  - **5 Feature Areas**: Authentication, Event Management, Registrations, Skill Preferences, Admin Reports
+  - **13 Pages** across 3 layouts (Main, Auth, Admin)
+  - **13 Reusable Components** including SkillBadge, SkillSelector, ExportButton
+  - **20+ API Endpoints** with auth requirements
+  - **4 Database Entities**: User, Event, Registration, Skill (with many-to-many relationships)
+  - **15 Predefined Skills** across categories
+  - **8 Development Phases** with task checklists
+  - Project structure for both backend and frontend
+  - Non-functional requirements (performance, security, code quality)
+  - Testing requirements and success criteria
+
+### Result
+✅ Success
+- Comprehensive yet focused requirements document
+- Clear scope: not too simple, not overwhelming
+- Business context provides real-world grounding
+- Skill preferences add interesting many-to-many relationship
+- CSV export demonstrates file generation capability
+- Phased development plan enables incremental progress
+
+### AI Generation Percentage
+Estimate: ~98% (AI generated entire document, user provided feature preferences only)
+
+### Learnings/Notes
+- Asking clarifying questions before generating (skills, export format) improved output quality
+- User preferences guided feature decisions: predefined skills list, CSV format, admin-only exports
+- Dropped hours tracking feature based on user feedback (keeping scope manageable)
+- Business context section adds professional documentation quality
+- The predefined skills table provides ready-to-use seed data
+- Many-to-many relationships (User-Skills, Event-Skills) add good learning complexity
+
+---
+
+## [2026-01-31 18:00] - User Stories Document
+
+### Prompt
+"Create detailed user stories based on requirements file, with technical tasks for each story."
+
+### Context
+- Requirements document completed, need implementation roadmap
+- User stories will guide development phases
+- Technical tasks provide specific implementation steps
+
+### Files Added/Modified
+- `Docs/USER-STORIES.md` - Created: 43 detailed user stories across 8 phases
+
+### Generated Code Summary
+- Complete user stories document including:
+  - **Phase 1 (Foundation)**: 5 stories - project setup, database schema, seeding, frontend setup
+  - **Phase 2 (Authentication)**: 8 stories - backend auth, JWT, frontend auth context, login/register pages
+  - **Phase 3 (Events)**: 8 stories - event CRUD, list/details pages, forms, layouts
+  - **Phase 4 (Registrations)**: 4 stories - registration endpoints, frontend flow, capacity validation
+  - **Phase 5 (Skills)**: 5 stories - skills API, profile selection, event requirements, filtering
+  - **Phase 6 (Admin)**: 4 stories - admin layout, dashboard, user/event management
+  - **Phase 7 (Reports)**: 3 stories - CSV export service, reports page, export endpoints
+  - **Phase 8 (Polish)**: 6 stories - testing, error handling, final polish
+- Each story includes: User story statement, acceptance criteria (checkboxes), technical tasks, dependencies, size estimate
+
+### Result
+✅ Success
+- 43 comprehensive user stories organized by development phase
+- Clear acceptance criteria for validation
+- Detailed technical tasks for AI code generation
+- Dependencies mapped for proper sequencing
+- Size estimates (S/M/L) for planning
+
+### AI Generation Percentage
+Estimate: ~97% (AI generated all stories based on requirements, structured format provided)
+
+### Learnings/Notes
+- Detailed requirements document enabled high-quality story generation
+- Technical tasks are specific enough for direct AI code generation
+- Phase structure mirrors requirements document phases
+- Acceptance criteria can serve as test case specifications
+- Dependencies help identify parallelizable work
+
+---
+
+## [2026-01-31 18:30] - Requirements Refinement
+
+### Prompt
+"Asked 14 clarifying questions about additional features and edge cases."
+
+User answers:
+1. Password reset - No
+2. Email verification - No
+3. Social login - Only email/password
+4. Event status - Yes (Active, Cancelled)
+5. Event images - Yes
+6. Recurring events - One time only
+7. Event time - Yes, start time + duration in minutes
+8. Waitlist - No
+9. Registration deadline - Yes
+10. Skill proficiency levels - No, binary (has/doesn't have)
+11. Soft delete - Yes, for users and events
+12. Audit log - No
+13. Notifications - No
+14. Timezone handling - Single timezone
+
+### Context
+- Requirements and user stories completed
+- Need to clarify edge cases and optional features
+- Keeping scope manageable while adding essential features
+
+### Files Added/Modified
+- `Docs/REQUIREMENTS.md` - Updated: Added new entity fields, EventStatus enum, soft delete, registration deadline
+- `Docs/USER-STORIES.md` - Updated: Updated stories for new features, added EVT-009 (Image Upload), EVT-010 (Event Cancellation)
+
+### Generated Code Summary
+- **New Entity Fields**:
+  - Event: StartTime, DurationMinutes, ImageUrl, RegistrationDeadline, Status, IsDeleted
+  - User: IsDeleted (soft delete)
+- **New Enum**: EventStatus (Active, Cancelled)
+- **New Requirements**: EVT-11 to EVT-13, REG-06 to REG-07
+- **New User Stories**: EVT-009 (Image Upload), EVT-010 (Event Cancellation)
+- **Updated Stories**: FOUND-003 (entities), EVT-006/007 (forms), REG-001 (deadline validation), ADM-003/004 (soft delete handling)
+
+### Result
+✅ Success
+- Requirements refined based on user answers
+- Scope kept manageable (no password reset, no email verification, no waitlist, no audit log, no notifications)
+- Essential features added (event status, images, time/duration, registration deadline, soft delete)
+- User stories updated to match new requirements
+
+### AI Generation Percentage
+Estimate: ~95% (AI generated all updates, user provided yes/no decisions only)
+
+### Learnings/Notes
+- Clarifying questions before implementation prevents rework
+- Binary decisions (yes/no) are easier for users than open-ended questions
+- Soft delete is a common pattern worth including for learning purposes
+- Event status (Active/Cancelled) adds realistic workflow without complexity
+- Image upload adds valuable file handling learning opportunity
+- Registration deadline is common real-world requirement
+
+---

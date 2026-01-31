@@ -108,6 +108,11 @@ export function Component({ ...props }: ComponentProps) {
 - "Add form for [entity]" → Form component + validation + API integration
 - "Create hook for [feature]" → Custom hook with proper typing
 
+### Quick Workflow Logging Commands
+- "Log it" → Add current work to workflow log at `Docs/ai-workflow-log.md`
+- "Log this step" → Add detailed entry to workflow log
+- "Update workflow log" → Add entry for completed work with all details
+
 ### Expected AI Behavior
 When asked to create a feature:
 1. Generate ALL necessary files without being asked
@@ -273,6 +278,7 @@ Estimate: ~X% (e.g., ~85% generated, ~15% manual adjustments)
 4. **Link Files**: Use relative paths for easy navigation
 5. **Quantify Generation**: Track percentage of AI-generated code per task
 6. **Note Prompt Effectiveness**: Record which prompts produced best results
+7. **Use Quick Commands**: Simply say "Log it" or "Log this step" to trigger logging
 
 ### Benefits of Workflow Logging
 - Track progress toward 90% AI-generation goal
