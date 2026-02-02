@@ -125,6 +125,16 @@ The API will start at:
 - **HTTP**: http://localhost:5000
 - **Swagger UI**: http://localhost:5000/swagger
 
+**Seeded Test Users**: The application automatically seeds the following test accounts on first run:
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@volunteer-portal.com | Admin123! |
+| Organizer | organizer@volunteer-portal.com | Organizer123! |
+| Volunteer | volunteer@volunteer-portal.com | Volunteer123! |
+
+The database is also seeded with 15 predefined skills (First Aid/CPR, Teaching/Tutoring, Driving, etc.).
+
 To run backend tests:
 
 ```bash

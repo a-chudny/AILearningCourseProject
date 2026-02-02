@@ -88,6 +88,14 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
+// Seed data on application startup (idempotent)
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var seeder = new DataSeeder(context);
+    await seeder.SeedAsync();
+}
+
 // Configure the HTTP request pipeline
 
 // Enable Swagger in development

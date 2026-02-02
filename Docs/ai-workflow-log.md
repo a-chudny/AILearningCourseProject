@@ -386,7 +386,7 @@ Estimate: ~95% (All code AI-generated, minor fixes for TypeScript 5.9 enum compa
 ## [2026-01-31 18:15] - Database Schema and Entities Implementation (FOUND-003)
 
 ### Prompt
-"Create complete database schema with domain entities (User, Event, Registration, Skill, UserSkill, EventSkill), enums (UserRole, RegistrationStatus, EventStatus), EF Core DbContext configurations, and Docker Compose setup for PostgreSQL. Include explicit join tables, global soft delete filter, and initial migration. Then deploy with pgAdmin UI and verify full-stack integration."
+"Implement Story FOUND-003 from user-stories. Add dockercompose file with postgres database to backend folder, to setup postgres locally in docker. Update readme file with this info regarding dockercompose. Ask if you have questions"
 
 ### Context
 - FOUND-003 story: "Create Domain Entities and Database Migrations"
@@ -447,3 +447,58 @@ Estimate: ~90% (Entity/enum code ~98%, Docker Compose pgAdmin ~95%, fixes were e
 
 ---
 
+## [2026-02-02 20:30] - FOUND-004: Seed Predefined Skills and Initial Users
+
+### Prompt
+"Implement Found-004 story from user stories. Also seed user table. Add at least one admin user and one organizer"
+
+### Context
+- Completed FOUND-003 (database schema, entities, migrations, Docker deployment)
+- Database tables created and verified
+- Need predefined skills list for volunteer skill matching
+- Need initial users (admin, organizer) to bootstrap the system
+- No existing seeding mechanism
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Data/DataSeeder.cs` - Created: Data seeding service with idempotent operations
+- `backend/src/VolunteerPortal.API/Program.cs` - Modified: Added seeder registration on app startup
+
+### Generated Code Summary
+- `DataSeeder` class with two main methods:
+  - `SeedSkillsAsync()`: Seeds all 15 predefined skills with categories (Medical, Education, Transportation, Food Service, General Labor, Media, Communications, Languages, Technology, Care, Outdoor, Skilled Trade, Support, Office)
+  - `SeedUsersAsync()`: Seeds 3 initial users with BCrypt hashed passwords
+    * System Administrator (admin@volunteer-portal.com, Admin123!, Role: Admin)
+    * Community Organizer (organizer@volunteer-portal.com, Organizer123!, Role: Organizer)
+    * John Volunteer (volunteer@volunteer-portal.com, Volunteer123!, Role: Volunteer)
+- Both methods check for existing data before inserting (idempotent)
+- Seeder registered in `Program.cs` with proper scoping and async execution
+- Runs automatically on application startup
+
+### Result
+✅ Success
+- All 15 skills seeded successfully into Skills table
+- 3 users created with proper roles (Admin=2, Organizer=1, Volunteer=0)
+- Passwords properly hashed using BCrypt
+- Verified database contains 15 skills and 3 users
+- Idempotency verified: Running application multiple times does not create duplicates
+- Seeder only performs SELECT EXISTS checks on subsequent runs
+
+### AI Generation Percentage
+Estimate: ~95% (AI generated complete DataSeeder class and Program.cs modification with minimal guidance)
+
+### Learnings/Notes
+- Prompt was clear and specific: "Implement Found-004 story + seed users"
+- AI correctly inferred BCrypt usage for password hashing (package already installed)
+- AI implemented idempotency without explicit instruction (best practice)
+- Seeder design follows single responsibility: separate methods for Skills and Users
+- Database verification commands:
+  ```sql
+  SELECT COUNT(*) FROM "Skills";  -- Returns 15
+  SELECT "Id", "Name", "Email", "Role" FROM "Users";  -- Shows 3 users
+  SELECT "Id", "Name", "Description" FROM "Skills" LIMIT 5;  -- Verify skill data
+  ```
+- EF Core warnings about global query filters are expected (soft delete implementation)
+- Initial user credentials documented for development/testing access
+- Seeding pattern is reusable for future data initialization needs
+
+---
