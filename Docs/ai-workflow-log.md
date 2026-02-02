@@ -502,3 +502,79 @@ Estimate: ~95% (AI generated complete DataSeeder class and Program.cs modificati
 - Seeding pattern is reusable for future data initialization needs
 
 ---
+## [2026-02-03 21:00] - FOUND-005: TypeScript Type Definitions
+
+### Prompt
+"Implement FOUND-005 story from user stories. Ask if something needed to clarify"
+
+Agent asked clarifying questions:
+1. Should `IsDeleted` flag be exposed in frontend types?
+2. Should all entities include `CreatedAt`/`UpdatedAt` timestamps?
+3. For Event entity - should all fields be included (StartTime, DurationMinutes, ImageUrl, RegistrationDeadline, Status)?
+
+User responses:
+1. No, should be hidden from frontend
+2. Yes
+3. Yes, continue with assumptions
+
+### Context
+- Completing Phase 1 (Foundation) before starting Phase 2 (Authentication)
+- FOUND-005 is a prerequisite for AUTH-004 (Frontend Auth Context)
+- Backend entities completed: User, Event, Registration, Skill, UserSkill, EventSkill
+- Backend enums: UserRole (int: 0/1/2), RegistrationStatus (string), EventStatus (string)
+- TypeScript 5.9 requires const object pattern instead of traditional enums
+- Dates come from API as ISO 8601 strings (JSON has no Date type)
+- IsDeleted flag excluded from frontend (internal backend concern)
+
+### Files Added/Modified
+- `frontend/src/types/enums.ts` - Created: 45 lines, const object enums for UserRole, RegistrationStatus, EventStatus with helper labels
+- `frontend/src/types/entities.ts` - Created: 80 lines, interfaces for Skill, User, Event, Registration, UserSkill, EventSkill
+- `frontend/src/types/api.ts` - Created: 50 lines, generic types for ApiResponse, PaginatedResponse, ApiError, QueryParams, EventQueryParams, UserQueryParams
+- `frontend/src/types/auth.ts` - Created: 45 lines, auth types for LoginRequest, RegisterRequest, AuthResponse, TokenPayload, UpdateUserSkillsRequest, UpdateUserRoleRequest
+- `frontend/src/types/index.ts` - Created: 12 lines, central re-export for all types
+
+### Generated Code Summary
+- **enums.ts**: Const object pattern enums matching backend (UserRole: 0/1/2, RegistrationStatus: Confirmed/Cancelled, EventStatus: Active/Cancelled) with type extraction using `typeof` and `keyof`, plus UserRoleLabels helper
+- **entities.ts**: Complete entity interfaces with proper TypeScript types, optional fields with `?`, dates as strings (ISO 8601), navigation properties optional, IsDeleted excluded, CreatedAt/UpdatedAt included
+- **api.ts**: Generic wrapper types for API responses, pagination support, error handling with validation errors, query parameters for list endpoints
+- **auth.ts**: Authentication flow types for login/register requests, JWT response with token and user, decoded token payload structure, user management types
+- **index.ts**: Clean central export for convenient imports throughout app: `import { User, Event } from '@/types'`
+
+All types use:
+- Const object pattern for enums (TypeScript 5.9 `erasableSyntaxOnly` compatibility)
+- String type for dates (matches JSON API responses)
+- Optional properties with `?` syntax
+- JSDoc comments for documentation
+- Proper type inference with generics
+
+### Result
+ Success
+- All 5 type files created successfully in frontend/src/types/
+- Types match backend entity structure exactly
+- Const object pattern used for all enums (TS 5.9 compatible)
+- Dates typed as strings (ISO 8601 from API)
+- Optional fields properly marked with `?`
+- IsDeleted flag excluded from frontend types
+- CreatedAt/UpdatedAt included for all entities
+- Central index.ts enables clean imports
+- All acceptance criteria met:
+  -  All entity types defined
+  -  All enum types defined
+  -  Request/Response DTO types defined
+  -  API error response type defined
+  -  Types exported from central location
+
+### AI Generation Percentage
+Estimate: ~98% (AI generated all 5 files with complete content totaling ~232 lines, user provided 3 clarification answers)
+
+### Learnings/Notes
+- Asking clarifying questions upfront (IsDeleted visibility, timestamps inclusion, field completeness) prevented rework
+- TypeScript 5.9's `erasableSyntaxOnly` compiler option requires const object pattern instead of traditional enums
+- Best practice: Type dates as strings in API contract types since JSON doesn't have Date type - frontend can parse to Date objects when needed for manipulation
+- Const object pattern provides same functionality as enums with better tree-shaking and no runtime overhead
+- User's concise responses ("1. No 2. Yes 3. Yes") worked well when questions were clearly numbered
+- PowerShell's here-string (`@"..."@`) and Out-File worked perfectly for creating multiple files efficiently
+- FOUND-005 now complete - Phase 1 (Foundation) finished, ready for Phase 2 (Authentication)
+- This story is a critical dependency for all Phase 2 frontend work (AUTH-004 and beyond)
+
+---
