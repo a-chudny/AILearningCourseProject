@@ -383,3 +383,67 @@ Estimate: ~95% (All code AI-generated, minor fixes for TypeScript 5.9 enum compa
 - Lazy loading routes with React.lazy() and Suspense provides code splitting
 
 ---
+## [2026-01-31 18:15] - Database Schema and Entities Implementation (FOUND-003)
+
+### Prompt
+"Create complete database schema with domain entities (User, Event, Registration, Skill, UserSkill, EventSkill), enums (UserRole, RegistrationStatus, EventStatus), EF Core DbContext configurations, and Docker Compose setup for PostgreSQL. Include explicit join tables, global soft delete filter, and initial migration. Then deploy with pgAdmin UI and verify full-stack integration."
+
+### Context
+- FOUND-003 story: "Create Domain Entities and Database Migrations"
+- Backend setup completed, need database layer with entities and relationships
+- User confirmed: PostgreSQL 16, explicit join entities, global soft delete filter, PasswordHash in User
+- Docker Compose for local PostgreSQL with pgAdmin for UI management
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Models/Enums/` - Created: UserRole, RegistrationStatus, EventStatus (3 files)
+- `backend/src/VolunteerPortal.API/Models/Entities/` - Created: User, Event, Registration, Skill, UserSkill, EventSkill (6 files)
+- `backend/src/VolunteerPortal.API/Data/ApplicationDbContext.cs` - Modified: Added DbSets, Fluent API configurations, global query filters
+- `backend/docker-compose.yml` - Created: PostgreSQL 16 + pgAdmin 4 services with bridge network
+- `backend/src/VolunteerPortal.API/Migrations/20260202_InitialCreate.cs` - Created: Full schema migration
+- `backend/src/VolunteerPortal.API/appsettings.Development.json` - Modified: Connection string (postgres/postgres, volunteer_portal)
+- `backend/src/VolunteerPortal.API/Properties/launchSettings.json` - Modified: Disabled launchBrowser for all profiles
+- `README.md` - Modified: Docker Compose and local setup instructions
+
+### Generated Code Summary
+- **Enums**: UserRole (Volunteer/Organizer/Admin), RegistrationStatus (Confirmed/Cancelled), EventStatus (Active/Cancelled)
+- **Entities**: 6 classes with validation attributes and navigation properties
+  - User: PasswordHash, Role, PhoneNumber, IsDeleted, timestamps
+  - Event: StartTime, DurationMinutes, Capacity, ImageUrl, RegistrationDeadline, Status, IsDeleted, OrganizerId FK
+  - Registration: EventId/UserId FKs, Status, RegisteredAt, Notes (unique EventId+UserId)
+  - Skill: Name, Description, CreatedAt
+  - UserSkill & EventSkill: Composite PKs, additional metadata properties
+- **DbContext**: DbSets for all entities, global query filters for soft deletes, Fluent API for relationships (Restrict/Cascade), unique constraints
+- **Docker**: PostgreSQL 16-alpine (port 5432) + pgAdmin 4 (port 5050) with bridge network, health checks, data persistence
+
+### Deployment Issues & Fixes
+1. **Connection String Mismatch**: Initial config used volunteer_portal_dev/dev_password instead of Docker's postgres/postgres on volunteer_portal → Fixed connection string
+2. **LaunchBrowser Failure**: Backend exited after startup due to browser launch in CLI environment → Set launchBrowser=false in all profiles
+3. **pgAdmin Email Validation**: Initial email (admin@volunteer-portal.local) rejected → Changed to admin@admin.com
+
+### Result
+✅ Success
+- All entities created with proper relationships and validation
+- DbContext configured with Fluent API and global soft delete filters
+- Docker services running and healthy (PostgreSQL + pgAdmin)
+- Migration applied: 6 entity tables + migrations history table created
+- Users table verified: 9 columns including PasswordHash, IsDeleted, timestamps
+- Backend API running (http://localhost:5000), health endpoint responding
+- Frontend running (http://localhost:5173), API proxy working
+- pgAdmin accessible at http://localhost:5050 for database inspection
+- Full-stack integration verified: Frontend ↔ Backend ↔ PostgreSQL ✅
+
+### AI Generation Percentage
+Estimate: ~90% (Entity/enum code ~98%, Docker Compose pgAdmin ~95%, fixes were environment-specific corrections)
+
+### Learnings/Notes
+- dotnet-ef 10.0.2 handles composite keys with `HasKey(us => new { us.UserId, us.SkillId })`
+- Global query filters with required relationships produce warnings but work correctly for soft deletes
+- DeleteBehavior.Restrict prevents cascade delete for organizer events (business logic)
+- Docker bridge networks enable service-to-service communication via container names
+- Connection string: use container name (postgres) not localhost for Docker network
+- LaunchBrowser must be false for CLI/headless environments
+- pgAdmin email validation requires proper domain format
+- Global filters: IgnoreQueryFilters() retrieves soft-deleted entities when needed
+
+---
+

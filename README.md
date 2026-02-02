@@ -30,7 +30,7 @@ Before running the project locally, ensure you have the following installed:
 
 - **Node.js 20+** and npm - [Download](https://nodejs.org/)
 - **.NET 10 SDK** - [Download](https://dotnet.microsoft.com/download/dotnet/10.0)
-- **PostgreSQL 16+** - [Download](https://www.postgresql.org/download/)
+- **Docker Desktop** - [Download](https://www.docker.com/products/docker-desktop/) (for PostgreSQL)
 - **Git** - [Download](https://git-scm.com/downloads)
 
 ## 🚀 Getting Started
@@ -42,16 +42,50 @@ git clone <repository-url>
 cd AILearningCourseProject
 ```
 
-### 2. Database Setup
+### 2. Database Setup with Docker
 
-Create a PostgreSQL database for the application:
+Start PostgreSQL using Docker Compose:
+
+```bash
+cd backend
+docker compose up -d
+```
+
+This will:
+- Pull and start PostgreSQL 16 in a Docker container
+- Create a database named `volunteer_portal`
+- Expose PostgreSQL on port `5432`
+- Use credentials: `postgres/postgres`
+- Persist data in a Docker volume
+
+Verify the database is running:
+
+```bash
+docker compose ps
+```
+
+To stop the database:
+
+```bash
+docker compose down
+```
+
+To stop and remove all data:
+
+```bash
+docker compose down -v
+```
+
+**Alternative:** If you prefer a local PostgreSQL installation instead of Docker:
+
+Create a PostgreSQL database manually:
 
 ```sql
 -- Connect to PostgreSQL (use psql or pgAdmin)
 CREATE DATABASE volunteer_portal;
 ```
 
-Update the connection string if needed in `backend/src/VolunteerPortal.API/appsettings.Development.json`:
+Update the connection string in `backend/src/VolunteerPortal.API/appsettings.Development.json`:
 
 ```json
 {
@@ -63,17 +97,21 @@ Update the connection string if needed in `backend/src/VolunteerPortal.API/appse
 
 ### 3. Backend Setup
 
-Navigate to the backend directory and restore dependencies:
+Navigate to the backend API directory:
 
 ```bash
-cd backend
+cd backend/src/VolunteerPortal.API
+```
+
+Restore dependencies:
+
+```bash
 dotnet restore
 ```
 
 Run Entity Framework migrations to create the database schema:
 
 ```bash
-cd src/VolunteerPortal.API
 dotnet ef database update
 ```
 
@@ -216,10 +254,17 @@ This project follows an AI-first development approach:
 
 ## 🐛 Troubleshooting
 
+### Docker issues
+- Ensure Docker Desktop is running
+- Check container status: `docker compose ps`
+- View logs: `docker compose logs postgres`
+- Restart containers: `docker compose restart`
+
 ### Backend won't start
-- Ensure PostgreSQL is running
+- Ensure PostgreSQL container is running: `docker compose ps`
 - Check database connection string in `appsettings.Development.json`
 - Verify .NET 10 SDK is installed: `dotnet --version`
+- Ensure migrations are applied: `dotnet ef database update`
 
 ### Frontend can't connect to API
 - Ensure backend is running on port 5000
@@ -227,9 +272,10 @@ This project follows an AI-first development approach:
 - Clear browser cache and reload
 
 ### Database migration errors
-- Ensure database exists: `CREATE DATABASE volunteer_portal;`
+- Ensure PostgreSQL container is running: `docker compose ps`
 - Drop and recreate database if needed
 - Verify EF Core tools: `dotnet tool install --global dotnet-ef`
+- Check connection string matches Docker Compose credentials (postgres/postgres)
 
 ### Node/npm issues
 - Clear npm cache: `npm cache clean --force`
