@@ -285,3 +285,101 @@ Estimate: ~98% (All code AI-generated, minor package version fix for health chec
 - When transitive dependencies cause version conflicts (e.g., EF Core 9.0.1 vs 9.0.4), add explicit package reference to force desired version
 
 ---
+
+## [2026-02-01 01:50] - FOUND-002: Frontend Project Setup
+
+### Prompt
+"Implement FOUND-002"
+
+Follow-up answers:
+- CSS Framework: Tailwind CSS
+- Form Library: Yes (React Hook Form)
+- ESLint Config: New flat config format
+- .gitignore: Yes, add it
+
+### Context
+- Backend project (FOUND-001) completed and running
+- Need React 19 + TypeScript + Vite frontend setup
+- Should integrate with backend API at localhost:5000
+- TanStack Query for server state management
+
+### Files Added/Modified
+- `frontend/package.json` - Created/Updated: Project config with all dependencies
+- `frontend/vite.config.ts` - Updated: Tailwind plugin, path aliases (@/), API proxy
+- `frontend/tsconfig.json` - Created: Base TypeScript configuration
+- `frontend/tsconfig.app.json` - Updated: Strict mode, path aliases, jest-dom types
+- `frontend/tsconfig.node.json` - Created: Node environment config for Vite
+- `frontend/eslint.config.js` - Updated: Flat config with Prettier integration
+- `frontend/vitest.config.ts` - Created: Test configuration with jsdom, coverage
+- `frontend/.prettierrc` - Created: Formatting rules (semi:false, singleQuote:true)
+- `frontend/.prettierignore` - Created: Files to exclude from formatting
+- `frontend/.gitignore` - Created: Git ignore for Node.js projects
+- `frontend/src/index.css` - Updated: Tailwind CSS v4 import with custom variables
+- `frontend/src/main.tsx` - Updated: Root element check and StrictMode
+- `frontend/src/App.tsx` - Updated: QueryClient, BrowserRouter, AppRoutes setup
+- `frontend/src/routes/index.tsx` - Created: Route configuration with lazy loading
+- `frontend/src/pages/HomePage.tsx` - Created: Landing page with health check
+- `frontend/src/pages/NotFoundPage.tsx` - Created: 404 error page
+- `frontend/src/services/api.ts` - Created: Axios instance with interceptors
+- `frontend/src/types/index.ts` - Created: TypeScript types for domain entities
+- `frontend/src/test/setup.ts` - Created: Vitest setup with mocks
+- `frontend/src/test/App.test.tsx` - Created: Sample tests for App and NotFoundPage
+- `frontend/src/components/` - Created: Empty folder for reusable components
+- `frontend/src/layouts/` - Created: Empty folder for layout components
+- `frontend/src/hooks/` - Created: Empty folder for custom hooks
+- `frontend/src/context/` - Created: Empty folder for React contexts
+- `frontend/src/utils/` - Created: Empty folder for utility functions
+
+### Generated Code Summary
+- **Vite 7.3.1** with React 19.2.0 and TypeScript 5.9.3
+- **Dependencies Installed**:
+  - react-router-dom v7.13.0 - Routing
+  - @tanstack/react-query v5.90.20 - Server state
+  - @tanstack/react-query-devtools - DevTools
+  - axios v1.13.4 - HTTP client
+  - react-hook-form v7.71.1 - Form handling
+  - @tailwindcss/vite v4.1.18 - CSS framework (v4)
+- **Dev Dependencies**:
+  - vitest v4.0.18 - Testing framework
+  - @testing-library/react v16.4.0 - Component testing
+  - @testing-library/jest-dom v6.6.3 - DOM matchers
+  - jsdom v26.1.0 - Browser environment
+  - @vitest/coverage-v8 - Code coverage
+  - eslint-plugin-prettier - Prettier integration
+  - prettier v3.5.3 - Code formatting
+- **Scripts Added**:
+  - `npm run test` - Run Vitest
+  - `npm run test:ui` - Vitest UI
+  - `npm run coverage` - Coverage report
+  - `npm run format` - Prettier formatting
+  - `npm run lint:fix` - Auto-fix ESLint
+  - `npm run typecheck` - TypeScript validation
+- **API Service**: Axios with JWT auth interceptor and error handling
+- **Type System**: BaseEntity, User, Event, Registration, Organization with const object pattern for enums (TypeScript 5.9 compatibility)
+- **Routing**: Lazy-loaded routes with Suspense fallback
+
+### Result
+✅ Success
+- TypeScript type checking passes (`npm run typecheck`)
+- ESLint passes after auto-fix (`npm run lint:fix`)
+- Production build succeeds (`npm run build` - 255KB main bundle)
+- Dev server runs at http://localhost:5173
+- Tests pass (2/2): App renders, NotFoundPage renders
+- HomePage displays health check status with Tailwind styling
+- Proxy configured to forward /api requests to backend
+
+### AI Generation Percentage
+Estimate: ~95% (All code AI-generated, minor fixes for TypeScript 5.9 enum compatibility and type imports)
+
+### Learnings/Notes
+- Vite 7.3.1 + React 19.2.0 is current latest (Jan 2026)
+- TypeScript 5.9 with `erasableSyntaxOnly` requires const object pattern instead of enums
+- TypeScript 5.9 with `verbatimModuleSyntax` requires type-only imports for types
+- PowerShell execution policy may block npm - use `Set-ExecutionPolicy RemoteSigned`
+- Tailwind CSS v4 uses `@import 'tailwindcss'` instead of v3 directives
+- @tanstack/react-query-devtools must be installed separately
+- Line ending warnings (CRLF vs LF) can be auto-fixed with `npm run lint:fix`
+- Vitest runs in jsdom environment for React component testing
+- Lazy loading routes with React.lazy() and Suspense provides code splitting
+
+---
