@@ -80,6 +80,47 @@ public class AuthService : IAuthService
         };
     }
 
+    /// <inheritdoc />
+    public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        // Find user by email (case-insensitive), exclude soft-deleted users
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == request.Email.ToLower() && !u.IsDeleted, cancellationToken);
+
+        // Return same error message for user not found or wrong password (security best practice)
+        if (user == null)
+        {
+            _logger.LogWarning("Login attempt with non-existent or deleted email: {Email}", request.Email);
+            throw new UnauthorizedAccessException("Invalid email or password");
+        }
+
+        // Verify password with BCrypt
+        var isPasswordValid = BCryptNet.Verify(request.Password, user.PasswordHash);
+
+        if (!isPasswordValid)
+        {
+            _logger.LogWarning("Login attempt with invalid password for user: {Email}", user.Email);
+            throw new UnauthorizedAccessException("Invalid email or password");
+        }
+
+        _logger.LogInformation("User logged in successfully: {Email}", user.Email);
+
+        // Generate JWT token
+        var token = GenerateJwtToken(user);
+
+        // Return authentication response
+        return new AuthResponse
+        {
+            Id = user.Id,
+            Email = user.Email,
+            Name = user.Name,
+            Role = (int)user.Role,
+            Token = token
+        };
+    }
+
     /// <summary>
     /// Generate JWT token for authenticated user
     /// </summary>

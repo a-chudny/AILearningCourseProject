@@ -215,4 +215,160 @@ public class AuthControllerIntegrationTests : IClassFixture<WebApplicationFactor
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    #region Login Integration Tests
+
+    [Fact]
+    public async Task Login_ValidCredentials_Returns200OK()
+    {
+        // Arrange - Register a user first
+        var registerRequest = new RegisterRequest
+        {
+            Email = "logintest@example.com",
+            Password = "Password123",
+            Name = "Login Test User"
+        };
+        await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+
+        var loginRequest = new LoginRequest
+        {
+            Email = "logintest@example.com",
+            Password = "Password123"
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        var authResponse = JsonSerializer.Deserialize<AuthResponse>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        Assert.NotNull(authResponse);
+        Assert.Equal(loginRequest.Email, authResponse.Email);
+        Assert.Equal("Login Test User", authResponse.Name);
+        Assert.NotEmpty(authResponse.Token);
+    }
+
+    [Fact]
+    public async Task Login_WrongPassword_Returns401Unauthorized()
+    {
+        // Arrange - Register a user first
+        var registerRequest = new RegisterRequest
+        {
+            Email = "wrongpasstest@example.com",
+            Password = "CorrectPassword123",
+            Name = "Test User"
+        };
+        await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+
+        var loginRequest = new LoginRequest
+        {
+            Email = "wrongpasstest@example.com",
+            Password = "WrongPassword456"
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Invalid email or password", content);
+    }
+
+    [Fact]
+    public async Task Login_NonExistentEmail_Returns401Unauthorized()
+    {
+        // Arrange
+        var loginRequest = new LoginRequest
+        {
+            Email = "nonexistent@example.com",
+            Password = "Password123"
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Invalid email or password", content);
+    }
+
+    [Fact]
+    public async Task Login_EmailCaseInsensitive_Returns200OK()
+    {
+        // Arrange - Register a user
+        var registerRequest = new RegisterRequest
+        {
+            Email = "casetest@example.com",
+            Password = "Password123",
+            Name = "Case Test User"
+        };
+        await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+
+        var loginRequest = new LoginRequest
+        {
+            Email = "CASETEST@EXAMPLE.COM", // Different case
+            Password = "Password123"
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        var authResponse = JsonSerializer.Deserialize<AuthResponse>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        Assert.NotNull(authResponse);
+        Assert.Equal("casetest@example.com", authResponse.Email); // Original case from DB
+    }
+
+    [Fact]
+    public async Task Login_InvalidEmailFormat_Returns400BadRequest()
+    {
+        // Arrange
+        var loginRequest = new LoginRequest
+        {
+            Email = "invalid-email",
+            Password = "Password123"
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Login_EmptyPassword_Returns400BadRequest()
+    {
+        // Arrange
+        var loginRequest = new LoginRequest
+        {
+            Email = "test@example.com",
+            Password = ""
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    #endregion
 }

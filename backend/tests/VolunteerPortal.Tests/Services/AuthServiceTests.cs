@@ -273,4 +273,165 @@ public class AuthServiceTests : IDisposable
         // Verify BCrypt hash format (starts with $2a$ or similar)
         Assert.Matches(@"^\$2[ayb]\$\d{2}\$", user.PasswordHash);
     }
+
+    #region Login Tests
+
+    [Fact]
+    public async Task LoginAsync_ValidCredentials_ReturnsAuthResponse()
+    {
+        // Arrange - Create a user first
+        var registerRequest = new RegisterRequest
+        {
+            Email = "login@example.com",
+            Password = "Password123",
+            Name = "Login User"
+        };
+        await _authService.RegisterAsync(registerRequest);
+
+        var loginRequest = new LoginRequest
+        {
+            Email = "login@example.com",
+            Password = "Password123"
+        };
+
+        // Act
+        var result = await _authService.LoginAsync(loginRequest);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(loginRequest.Email, result.Email);
+        Assert.Equal("Login User", result.Name);
+        Assert.Equal((int)UserRole.Volunteer, result.Role);
+        Assert.NotEmpty(result.Token);
+        Assert.True(result.Id > 0);
+    }
+
+    [Fact]
+    public async Task LoginAsync_WrongPassword_ThrowsUnauthorizedAccessException()
+    {
+        // Arrange - Create a user first
+        var registerRequest = new RegisterRequest
+        {
+            Email = "wrongpass@example.com",
+            Password = "CorrectPassword123",
+            Name = "Test User"
+        };
+        await _authService.RegisterAsync(registerRequest);
+
+        var loginRequest = new LoginRequest
+        {
+            Email = "wrongpass@example.com",
+            Password = "WrongPassword123"
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _authService.LoginAsync(loginRequest));
+
+        Assert.Equal("Invalid email or password", exception.Message);
+    }
+
+    [Fact]
+    public async Task LoginAsync_NonExistentEmail_ThrowsUnauthorizedAccessException()
+    {
+        // Arrange
+        var loginRequest = new LoginRequest
+        {
+            Email = "nonexistent@example.com",
+            Password = "Password123"
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _authService.LoginAsync(loginRequest));
+
+        Assert.Equal("Invalid email or password", exception.Message);
+    }
+
+    [Fact]
+    public async Task LoginAsync_DeletedUser_ThrowsUnauthorizedAccessException()
+    {
+        // Arrange - Create a user and mark as deleted
+        var user = new VolunteerPortal.API.Models.Entities.User
+        {
+            Email = "deleted@example.com",
+            Name = "Deleted User",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123"),
+            Role = UserRole.Volunteer,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            IsDeleted = true
+        };
+
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        var loginRequest = new LoginRequest
+        {
+            Email = "deleted@example.com",
+            Password = "Password123"
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _authService.LoginAsync(loginRequest));
+
+        Assert.Equal("Invalid email or password", exception.Message);
+    }
+
+    [Fact]
+    public async Task LoginAsync_EmailCaseInsensitive_ReturnsAuthResponse()
+    {
+        // Arrange - Create a user
+        var registerRequest = new RegisterRequest
+        {
+            Email = "case@example.com",
+            Password = "Password123",
+            Name = "Case User"
+        };
+        await _authService.RegisterAsync(registerRequest);
+
+        var loginRequest = new LoginRequest
+        {
+            Email = "CASE@EXAMPLE.COM", // Different case
+            Password = "Password123"
+        };
+
+        // Act
+        var result = await _authService.LoginAsync(loginRequest);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("case@example.com", result.Email); // Original case from DB
+    }
+
+    [Fact]
+    public async Task LoginAsync_GeneratesValidJwtToken()
+    {
+        // Arrange - Create a user
+        var registerRequest = new RegisterRequest
+        {
+            Email = "jwtlogin@example.com",
+            Password = "Password123",
+            Name = "JWT Login User"
+        };
+        await _authService.RegisterAsync(registerRequest);
+
+        var loginRequest = new LoginRequest
+        {
+            Email = "jwtlogin@example.com",
+            Password = "Password123"
+        };
+
+        // Act
+        var result = await _authService.LoginAsync(loginRequest);
+
+        // Assert
+        Assert.NotEmpty(result.Token);
+        // JWT token format: header.payload.signature
+        var tokenParts = result.Token.Split('.');
+        Assert.Equal(3, tokenParts.Length);
+    }
+
+    #endregion
 }
