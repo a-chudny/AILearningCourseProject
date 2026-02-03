@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using VolunteerPortal.API.Models.DTOs.Auth;
 using VolunteerPortal.API.Services.Interfaces;
 
@@ -94,6 +96,48 @@ public class AuthController : ControllerBase
         {
             _logger.LogError(ex, "Error during login for {Email}", request.Email);
             return BadRequest(new { message = "Login failed" });
+        }
+    }
+
+    /// <summary>
+    /// Get current authenticated user's profile
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>User profile with skills</returns>
+    /// <response code="200">User profile retrieved successfully</response>
+    /// <response code="401">Unauthorized - invalid or missing JWT token</response>
+    /// <response code="404">User not found</response>
+    [HttpGet("me")]
+    [Authorize]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserResponse>> GetCurrentUser(CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Extract user ID from JWT claims
+            var userIdClaim = User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
+            
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                _logger.LogWarning("Invalid user ID in JWT token");
+                return Unauthorized(new { message = "Invalid token" });
+            }
+
+            var response = await _authService.GetCurrentUserAsync(userId, cancellationToken);
+            
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("User not found"))
+        {
+            _logger.LogWarning("User not found: {Message}", ex.Message);
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving current user");
+            return BadRequest(new { message = "Failed to retrieve user profile" });
         }
     }
 }

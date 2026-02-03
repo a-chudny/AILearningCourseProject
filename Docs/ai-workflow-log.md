@@ -741,3 +741,66 @@ Estimate: ~98% (~502 lines across 7 files, user provided 3 yes/no answers, no ma
 - Ready for AUTH-003 (Get Current User endpoint) which will add [Authorize] attribute usage
 
 ---
+
+## [2026-02-03 23:30] - AUTH-003: Get Current User Endpoint
+
+### Prompt
+"Yes, Implement AUTH-003 story from user stories" followed by clarifications:
+- Use full skill objects (not just IDs) in response
+- Include PhoneNumber field in response
+- Do not include CreatedAt/UpdatedAt timestamps
+- Create new UserResponse DTO
+
+### Context
+- Completed AUTH-002 (user login endpoint)
+- Building protected API endpoint for retrieving current user profile
+- Need to return user info with associated skills for frontend profile display
+- Uses JWT authentication with [Authorize] attribute
+- Many-to-many relationship: User → UserSkills → Skills requires Include/ThenInclude
+- Discovered Skill entity stores category in Description field, not separate Category property
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Models/DTOs/SkillResponse.cs` - Created: Skill DTO with Id, Name, Category (24 lines)
+- `backend/src/VolunteerPortal.API/Models/DTOs/Auth/UserResponse.cs` - Created: User profile DTO with skills list (45 lines)
+- `backend/src/VolunteerPortal.API/Services/Interfaces/IAuthService.cs` - Modified: Added GetCurrentUserAsync method signature
+- `backend/src/VolunteerPortal.API/Services/AuthService.cs` - Modified: Implemented GetCurrentUserAsync with eager loading (35 lines)
+- `backend/src/VolunteerPortal.API/Controllers/AuthController.cs` - Modified: Added GET /api/auth/me endpoint with [Authorize] (45 lines)
+- `backend/tests/VolunteerPortal.Tests/Services/AuthServiceTests.cs` - Modified: Added 5 unit tests for GetCurrentUserAsync (145 lines)
+- `backend/tests/VolunteerPortal.Tests/Integration/AuthControllerIntegrationTests.cs` - Modified: Added 4 integration tests (115 lines)
+- `backend/src/VolunteerPortal.API/VolunteerPortal.API.csproj` - Modified: Updated EF Core packages to resolve version warnings
+
+### Generated Code Summary
+- **SkillResponse DTO**: Id, Name, Category properties for clean API response
+- **UserResponse DTO**: Id, Email, Name, PhoneNumber (nullable), Role, Skills list
+- **GetCurrentUserAsync**: Loads user with `.Include(u => u.UserSkills).ThenInclude(us => us.Skill)`, maps to UserResponse, maps Skill.Description → SkillResponse.Category
+- **GET /api/auth/me endpoint**: [Authorize] attribute, extracts user ID from JWT Sub claim (System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub), returns 200 with UserResponse or 404
+- **Unit tests**: ValidUserId returns correct data, WithSkills loads skills correctly, NonExistentUser throws KeyNotFoundException, DeletedUser throws KeyNotFoundException, WithoutPhoneNumber returns null for phone
+- **Integration tests**: WithValidToken returns 200, WithoutToken returns 401, WithInvalidToken returns 401, WithEmptySkillsList returns empty array
+- **Package version updates**: EF Core 10.0.2, Npgsql.EntityFrameworkCore.PostgreSQL 10.0.0, AspNetCore.HealthChecks.NpgSql 9.0.0
+
+### Result
+✅ Success
+- All functionality working correctly
+- Tests passing (19/19 unit tests: 8 register + 6 login + 5 GetCurrentUser)
+- [Authorize] attribute enforces authentication
+- JWT claim extraction works properly with JwtRegisteredClaimNames.Sub
+- Eager loading with Include/ThenInclude retrieves user skills efficiently
+- SkillResponse DTO abstracts Description→Category mapping for cleaner API
+- Build warnings reduced to 1 minor version mismatch (EF Core Relational 10.0.0 vs 10.0.2) - non-blocking
+- Manual adjustments: Added missing using statement, mapped Description to Category field (8 lines total)
+
+### AI Generation Percentage
+Estimate: ~92% (AI generated ~409 lines, manual fixed using statement + field mapping ~8 lines)
+
+### Learnings/Notes
+- Always check entity schema before writing tests - Skill uses Description for category, not separate Category property
+- DataSeeder revealed actual field usage pattern: all skills seeded with Description field for category
+- System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub is standard for extracting user ID from JWT
+- Include().ThenInclude() required for loading many-to-many relationships through join table
+- [Authorize] attribute at method level provides fine-grained endpoint protection
+- DTO abstraction layer allows mapping internal field names (Description) to cleaner API names (Category)
+- Generic error messages for authentication failures improve security by preventing user enumeration
+- Package version compatibility: Npgsql 10.0.0 latest available (no 10.0.2), HealthChecks max 9.0.0
+- Minor EF Core version mismatches (10.0.0 vs 10.0.2) are non-blocking and expected with bleeding-edge packages
+
+---

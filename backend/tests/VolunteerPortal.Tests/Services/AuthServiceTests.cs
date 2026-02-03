@@ -434,4 +434,140 @@ public class AuthServiceTests : IDisposable
     }
 
     #endregion
+
+    #region GetCurrentUser Tests
+
+    [Fact]
+    public async Task GetCurrentUserAsync_ValidUserId_ReturnsUserResponse()
+    {
+        // Arrange - Create a user first
+        var registerRequest = new RegisterRequest
+        {
+            Email = "currentuser@example.com",
+            Password = "Password123",
+            Name = "Current User",
+            PhoneNumber = "1234567890"
+        };
+        var authResponse = await _authService.RegisterAsync(registerRequest);
+
+        // Act
+        var result = await _authService.GetCurrentUserAsync(authResponse.Id);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(authResponse.Id, result.Id);
+        Assert.Equal(registerRequest.Email, result.Email);
+        Assert.Equal(registerRequest.Name, result.Name);
+        Assert.Equal(registerRequest.PhoneNumber, result.PhoneNumber);
+        Assert.Equal((int)UserRole.Volunteer, result.Role);
+        Assert.NotNull(result.Skills);
+        Assert.Empty(result.Skills); // No skills assigned yet
+    }
+
+    [Fact]
+    public async Task GetCurrentUserAsync_WithSkills_ReturnsUserWithSkills()
+    {
+        // Arrange - Create user and add skills
+        var skill1 = new VolunteerPortal.API.Models.Entities.Skill
+        {
+            Name = "First Aid",
+            Description = "Medical",
+            CreatedAt = DateTime.UtcNow
+        };
+        var skill2 = new VolunteerPortal.API.Models.Entities.Skill
+        {
+            Name = "Teaching",
+            Description = "Education",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Skills.AddRange(skill1, skill2);
+        await _context.SaveChangesAsync();
+
+        var registerRequest = new RegisterRequest
+        {
+            Email = "skilluser@example.com",
+            Password = "Password123",
+            Name = "Skill User"
+        };
+        var authResponse = await _authService.RegisterAsync(registerRequest);
+
+        // Add skills to user
+        var user = await _context.Users.FindAsync(authResponse.Id);
+        user!.UserSkills = new List<VolunteerPortal.API.Models.Entities.UserSkill>
+        {
+            new() { UserId = user.Id, SkillId = skill1.Id },
+            new() { UserId = user.Id, SkillId = skill2.Id }
+        };
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _authService.GetCurrentUserAsync(authResponse.Id);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Skills.Count);
+        Assert.Contains(result.Skills, s => s.Name == "First Aid" && s.Category == "Medical");
+        Assert.Contains(result.Skills, s => s.Name == "Teaching" && s.Category == "Education");
+    }
+
+    [Fact]
+    public async Task GetCurrentUserAsync_NonExistentUser_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        int nonExistentUserId = 99999;
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _authService.GetCurrentUserAsync(nonExistentUserId));
+
+        Assert.Equal("User not found", exception.Message);
+    }
+
+    [Fact]
+    public async Task GetCurrentUserAsync_DeletedUser_ThrowsInvalidOperationException()
+    {
+        // Arrange - Create and delete user
+        var user = new VolunteerPortal.API.Models.Entities.User
+        {
+            Email = "deleteduser@example.com",
+            Name = "Deleted User",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123"),
+            Role = UserRole.Volunteer,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            IsDeleted = true
+        };
+
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _authService.GetCurrentUserAsync(user.Id));
+
+        Assert.Equal("User not found", exception.Message);
+    }
+
+    [Fact]
+    public async Task GetCurrentUserAsync_UserWithoutPhoneNumber_ReturnsNullPhoneNumber()
+    {
+        // Arrange - Create user without phone
+        var registerRequest = new RegisterRequest
+        {
+            Email = "nophone2@example.com",
+            Password = "Password123",
+            Name = "No Phone User"
+        };
+        var authResponse = await _authService.RegisterAsync(registerRequest);
+
+        // Act
+        var result = await _authService.GetCurrentUserAsync(authResponse.Id);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Null(result.PhoneNumber);
+    }
+
+    #endregion
 }

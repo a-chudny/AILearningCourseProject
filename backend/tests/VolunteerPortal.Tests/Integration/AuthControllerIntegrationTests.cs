@@ -371,4 +371,113 @@ public class AuthControllerIntegrationTests : IClassFixture<WebApplicationFactor
     }
 
     #endregion
+
+    #region GetCurrentUser Integration Tests
+
+    [Fact]
+    public async Task GetMe_WithValidToken_Returns200OK()
+    {
+        // Arrange - Register and login to get token
+        var registerRequest = new RegisterRequest
+        {
+            Email = "getme@example.com",
+            Password = "Password123",
+            Name = "Get Me User",
+            PhoneNumber = "1234567890"
+        };
+        var registerResponse = await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+        var registerContent = await registerResponse.Content.ReadAsStringAsync();
+        var authResponse = JsonSerializer.Deserialize<AuthResponse>(registerContent, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        // Add Authorization header with JWT token
+        _client.DefaultRequestHeaders.Authorization = 
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse!.Token);
+
+        // Act
+        var response = await _client.GetAsync("/api/auth/me");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        var userResponse = JsonSerializer.Deserialize<UserResponse>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        Assert.NotNull(userResponse);
+        Assert.Equal(registerRequest.Email, userResponse.Email);
+        Assert.Equal(registerRequest.Name, userResponse.Name);
+        Assert.Equal(registerRequest.PhoneNumber, userResponse.PhoneNumber);
+        Assert.Equal((int)UserRole.Volunteer, userResponse.Role);
+        Assert.NotNull(userResponse.Skills);
+    }
+
+    [Fact]
+    public async Task GetMe_WithoutToken_Returns401Unauthorized()
+    {
+        // Arrange - No token in header
+
+        // Act
+        var response = await _client.GetAsync("/api/auth/me");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetMe_WithInvalidToken_Returns401Unauthorized()
+    {
+        // Arrange - Invalid token
+        _client.DefaultRequestHeaders.Authorization = 
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "invalid.token.here");
+
+        // Act
+        var response = await _client.GetAsync("/api/auth/me");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetMe_ReturnsEmptySkillsList()
+    {
+        // Arrange - Register user without skills
+        var registerRequest = new RegisterRequest
+        {
+            Email = "noskills@example.com",
+            Password = "Password123",
+            Name = "No Skills User"
+        };
+        var registerResponse = await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+        var registerContent = await registerResponse.Content.ReadAsStringAsync();
+        var authResponse = JsonSerializer.Deserialize<AuthResponse>(registerContent, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        _client.DefaultRequestHeaders.Authorization = 
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse!.Token);
+
+        // Act
+        var response = await _client.GetAsync("/api/auth/me");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        var userResponse = JsonSerializer.Deserialize<UserResponse>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        Assert.NotNull(userResponse);
+        Assert.NotNull(userResponse.Skills);
+        Assert.Empty(userResponse.Skills);
+    }
+
+    #endregion
 }

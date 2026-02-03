@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using VolunteerPortal.API.Data;
+using VolunteerPortal.API.Models.DTOs;
 using VolunteerPortal.API.Models.DTOs.Auth;
 using VolunteerPortal.API.Models.Entities;
 using VolunteerPortal.API.Models.Enums;
@@ -155,5 +156,40 @@ public class AuthService : IAuthService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    /// <inheritdoc />
+    public async Task<UserResponse> GetCurrentUserAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        // Find user with skills
+        var user = await _context.Users
+            .Include(u => u.UserSkills)
+                .ThenInclude(us => us.Skill)
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, cancellationToken);
+
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found");
+        }
+
+        _logger.LogInformation("Retrieved current user profile: {UserId}", userId);
+
+        // Map to response
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email,
+            Name = user.Name,
+            PhoneNumber = user.PhoneNumber,
+            Role = (int)user.Role,
+            Skills = user.UserSkills
+                .Select(us => new SkillResponse
+                {
+                    Id = us.Skill.Id,
+                    Name = us.Skill.Name,
+                    Category = us.Skill.Description ?? string.Empty
+                })
+                .ToList()
+        };
     }
 }
