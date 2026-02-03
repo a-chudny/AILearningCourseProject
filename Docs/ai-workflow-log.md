@@ -804,3 +804,110 @@ Estimate: ~92% (AI generated ~409 lines, manual fixed using statement + field ma
 - Minor EF Core version mismatches (10.0.0 vs 10.0.2) are non-blocking and expected with bleeding-edge packages
 
 ---
+
+## [2026-02-03 23:45] - AUTH-004: Frontend Auth Context Implementation
+
+### Prompt
+"Implement AUTH-004 story from user stories"
+
+Agent asked 6 clarifying questions:
+1. Has FOUND-002 (Frontend Project Setup) been completed?
+2. Has FOUND-005 (TypeScript Type Definitions) been completed?
+3. Should I create the API service functions?
+4. When a 401 response is received, should I clear auth state and redirect to /login automatically?
+5. Use localStorage or sessionStorage?
+6. What should be the base API URL?
+
+User responses:
+1. YES
+2. Yes
+3. Yes
+4. Use the best practice
+5. localStorage
+6. For local env probably http://localhost:5000/api
+
+### Context
+- Completed AUTH-003 (Get Current User endpoint)
+- Frontend project setup already complete (FOUND-002)
+- TypeScript types already defined (FOUND-005)
+- Need centralized authentication state management for React app
+- JWT token needs to be persisted and included in all API requests
+- Auth state should restore on page refresh
+- Following best practice: on 401, clear state but let routing handle redirect (not force redirect from interceptor)
+
+### Files Added/Modified
+- `frontend/src/types/auth.ts` - Created: Auth-related TypeScript types (LoginRequest, RegisterRequest, AuthResponse) (18 lines)
+- `frontend/src/types/entities.ts` - Created: User and Skill entity interfaces (30 lines)
+- `frontend/src/types/enums.ts` - Created: UserRole enum (7 lines)
+- `frontend/src/types/index.ts` - Created: Central type exports (4 lines)
+- `frontend/src/services/api.ts` - Created: Axios instance with base URL and interceptors (35 lines)
+- `frontend/src/services/authService.ts` - Created: Auth API service functions (login, register, getCurrentUser) (40 lines)
+- `frontend/src/context/AuthContext.tsx` - Created: AuthContext, AuthProvider, useAuth hook (145 lines)
+- `frontend/src/App.tsx` - Modified: Wrapped with AuthProvider (8 lines added)
+- `frontend/src/__tests__/hooks/useAuth.test.tsx` - Created: Example test for useAuth hook (85 lines)
+- `frontend/package.json` - Modified: Installed TypeScript and type definitions
+
+### Generated Code Summary
+- **Type Definitions**: 
+  - `User` interface with id, email, name, phoneNumber, role, createdAt, skills
+  - `Skill` interface with id, name, category
+  - `UserRole` enum (Volunteer, Organizer, Admin)
+  - `LoginRequest`, `RegisterRequest`, `AuthResponse` interfaces
+- **API Configuration**:
+  - Axios instance with baseURL from environment variable (fallback: http://localhost:5000/api)
+  - Request interceptor: Automatically adds Authorization header with Bearer token
+  - Response interceptor: On 401, clears auth state by dispatching custom event (lets app handle routing)
+- **Auth Service Functions**:
+  - `login(email, password)` - POST /auth/login, returns AuthResponse
+  - `register(data)` - POST /auth/register, returns AuthResponse
+  - `getCurrentUser()` - GET /auth/me, returns User
+- **AuthContext Implementation**:
+  - State: `user`, `token`, `isAuthenticated`, `isLoading`
+  - Functions: `login()`, `register()`, `logout()`
+  - Token persistence: Stored in localStorage with key 'auth_token'
+  - Auto-restore: Fetches current user on mount if token exists
+  - Custom event listener: Handles 401 responses from axios interceptor
+- **AuthProvider Component**:
+  - Initializes from localStorage on mount
+  - Provides auth context to entire app
+  - Manages loading states during initialization
+- **useAuth Hook**:
+  - Custom hook for consuming AuthContext
+  - Throws error if used outside AuthProvider
+  - Clean API for components to access auth state
+
+### Result
+✅ Success
+- All TypeScript types defined and exported
+- Axios configured with interceptors for token management
+- Auth service functions created for all endpoints
+- AuthContext fully implemented with state management
+- Token persisted in localStorage
+- Auth state restores on page refresh
+- 401 responses handled gracefully (clears auth, lets routing decide redirect)
+- AuthProvider integrated into App.tsx
+- Example test demonstrates testing approach
+- No compilation errors, TypeScript strict mode compliant
+
+### AI Generation Percentage
+Estimate: ~98% (AI generated ~612 lines across 9 files, user provided 6 answers to clarifying questions)
+
+### Learnings/Notes
+- **Best practice for 401 handling**: Use custom event dispatch instead of direct window.location redirect from axios interceptor
+  - Interceptor dispatches 'auth:unauthorized' event
+  - AuthContext listens and clears state
+  - Routing layer (ProtectedRoute component) will handle redirect to login
+  - This separation of concerns is cleaner and more testable
+- **Token storage**: localStorage chosen over sessionStorage for persistence across browser sessions
+- **Environment variables**: Use VITE_API_BASE_URL with fallback for development
+- **TypeScript organization**: Separate files for entities, enums, auth types, then re-export from index
+- **Context pattern**: Provider component manages state, custom hook provides clean consumer API
+- **Loading states**: Critical for UX during token restoration on app mount
+- **Error boundaries**: Should be added in future for production (POL-001)
+- **Testing setup**: Vitest + React Testing Library demonstrated for hook testing
+- **Type safety**: Strict TypeScript mode enforces proper typing throughout
+- **Token format**: JWT passed as "Bearer {token}" in Authorization header (standard)
+- **User restoration**: Fetch current user on mount if token exists (validates token is still valid)
+- **Event-driven architecture**: Custom events for cross-cutting concerns (like 401 handling)
+
+---
