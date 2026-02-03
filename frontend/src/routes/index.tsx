@@ -4,6 +4,7 @@ import { Suspense, lazy } from 'react'
 // Lazy load pages for code splitting
 const HomePage = lazy(() => import('@/pages/HomePage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
 
 // Loading fallback component
 function PageLoader() {
@@ -22,10 +23,10 @@ export function AppRoutes() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
         {/* Add more routes here as features are implemented */}
         {/* <Route path="/events" element={<EventsPage />} /> */}
         {/* <Route path="/events/:id" element={<EventDetailPage />} /> */}
-        {/* <Route path="/login" element={<LoginPage />} /> */}
         {/* <Route path="/register" element={<RegisterPage />} /> */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

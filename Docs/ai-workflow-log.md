@@ -911,3 +911,131 @@ Estimate: ~98% (AI generated ~612 lines across 9 files, user provided 6 answers 
 - **Event-driven architecture**: Custom events for cross-cutting concerns (like 401 handling)
 
 ---
+
+## [2026-02-03 23:51] - AUTH-005 Implement Login Page
+
+### Prompt
+"Implement AUTH-005 story from user stories. Ask if something needed to clarify."
+
+Agent asked 6 clarifying questions:
+1. Route path: /login or /auth/login? → **Answer: /login**
+2. Return URL handling support? → **Answer: yes**
+3. Form validation timing (blur, submit, real-time)? → **Answer: use best practice**
+4. AuthLayout dependency (AUTH-007 not done yet)? → **Answer: just use basic centered div**
+5. Registration page route? → **Answer: /register**
+6. Additional features (Remember me, Forgot password)? → **Answer: no**
+
+### Context
+- AUTH-004 (Frontend Auth Context) completed ✓
+- useAuth hook available in context directory ✓
+- TypeScript types for LoginRequest, AuthResponse available ✓
+- authService.login() function ready ✓
+- React Router v7 configured ✓
+- Tailwind CSS v4 available for styling ✓
+- Need to add /login route to AppRoutes
+- Need to create LoginPage component with form validation
+
+### Files Added/Modified
+- `frontend/src/pages/auth/LoginPage.tsx` - Created: Complete login page component (264 lines)
+- `frontend/src/hooks/useAuth.ts` - Created: Hook for consuming AuthContext (11 lines)
+- `frontend/src/__tests__/pages/auth/LoginPage.test.tsx` - Created: Comprehensive tests (153 lines)
+- `frontend/src/routes/index.tsx` - Modified: Added /login route and lazy-loaded LoginPage component
+- `frontend/src/context/AuthContext.tsx` - Modified: Fixed type-only import for ReactNode
+- `frontend/postcss.config.js` - Modified: Updated to use @tailwindcss/postcss plugin
+- `frontend/package.json` - Modified: Added autoprefixer and @tailwindcss/postcss dev dependencies
+
+### Generated Code Summary
+- **LoginPage Component** (264 lines):
+  - Controlled form with email and password fields
+  - Form validation on blur (best practice)
+    - Email: Required, valid format check with regex
+    - Password: Required
+  - Loading states during submission
+  - Error display for API failures
+  - Redirects authenticated users away from login page
+  - Return URL support from location state and query params
+  - Link to /register page
+  - Basic centered layout with card design (no AuthLayout dependency)
+  - Accessibility: ARIA labels, proper error announcements, semantic HTML
+  - Responsive design with Tailwind classes
+  - Spinner animation during loading
+- **useAuth Hook** (11 lines):
+  - Wrapper for useContext(AuthContext)
+  - Throws error if used outside AuthProvider
+  - Clean API for components
+- **Comprehensive Tests** (8 test cases, 153 lines):
+  - Renders login form correctly
+  - Validates empty fields on submit
+  - Validates invalid email format
+  - Calls login function with correct credentials
+  - Displays API error messages on login failure
+  - Shows loading state during submission (button disabled, spinner shown)
+  - Redirects authenticated users to home (or returnUrl)
+  - Has link to registration page
+  - All tests passing (8/8) ✓
+- **Route Configuration**:
+  - Added /login route with lazy-loaded LoginPage
+  - Maintains code splitting for performance
+
+### Result
+✅ Success
+- LoginPage component fully functional with validation and error handling
+- Return URL support implemented (from state or query params)
+- All 8 tests passing
+- Frontend builds successfully (TypeScript compilation ✓)
+- All 13 frontend tests passing (including existing tests)
+- No TypeScript errors with strict mode
+- Responsive design works on all screen sizes
+- Accessibility features implemented (ARIA, semantic HTML, keyboard navigation)
+- Loading states provide good UX during async operations
+- Manual fix: Added missing autoprefixer and @tailwindcss/postcss dependencies (~2 minutes)
+- Manual fix: Updated postcss.config.js to use new Tailwind PostCSS plugin
+
+### AI Generation Percentage
+Estimate: ~97% (AI generated ~428 lines across 3 new files, ~15 lines modified, manual configuration fixes ~5 lines)
+
+### Learnings/Notes
+- **Best practice validation timing**: Validate on blur (after user leaves field) for better UX than real-time
+  - Doesn't show errors while user is still typing
+  - Provides immediate feedback when moving to next field
+  - Also validates all fields on submit attempt
+- **Return URL pattern**: Support both location.state and query params for flexibility
+  - `location.state.from` - passed from ProtectedRoute redirects
+  - `?returnUrl=...` - for direct links (e.g., from emails)
+  - Defaults to '/' if neither provided
+- **Authenticated user redirect**: useEffect watches isAuthenticated and navigates away
+  - Prevents already-logged-in users from seeing login page
+  - Uses `replace: true` to avoid back button issues
+- **Loading state management**: Separate loading state for form submission vs auth checking
+  - `authLoading` - from useAuth, indicates checking existing session
+  - `isSubmitting` - local state, indicates form submission in progress
+  - Different UI for each state
+- **Error handling patterns**: 
+  - Field-level errors (email, password) shown below inputs
+  - General errors (API failures) shown at top of form
+  - Error messages user-friendly, not raw technical errors
+- **Accessibility best practices**:
+  - `aria-invalid` on fields with errors
+  - `aria-describedby` linking errors to inputs
+  - `role="alert"` on error messages for screen readers
+  - Semantic HTML (label, form, button elements)
+  - Focus management (automatic focus states)
+- **Tailwind CSS v4 changes**: 
+  - New PostCSS plugin: `@tailwindcss/postcss` instead of `tailwindcss`
+  - Still uses @import 'tailwindcss' in CSS
+  - Required autoprefixer as separate dependency
+- **Type-only imports**: TypeScript `verbatimModuleSyntax` requires `import type` for types
+  - `import type { FormEvent } from 'react'`
+  - Ensures types are erased at runtime, no impact on bundle size
+- **Test organization**: Mock router hooks at file level, not per-test for consistency
+- **Form UX patterns**:
+  - noValidate on form to use custom validation
+  - autocomplete attributes for browser autofill
+  - placeholder text for guidance
+  - Disabled state during submission prevents double-submit
+- **Navigation patterns**: Navigate on successful auth change (in useEffect), not immediately after login call
+  - Allows auth context to update first
+  - Ensures isAuthenticated is true before navigation
+  - Cleaner separation of concerns
+
+---
