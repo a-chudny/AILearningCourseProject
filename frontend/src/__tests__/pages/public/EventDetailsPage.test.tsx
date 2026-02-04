@@ -287,4 +287,98 @@ describe('EventDetailsPage', () => {
       expect(screen.getByText('3 hours')).toBeInTheDocument();
     });
   });
+
+  it('displays "Almost Full" banner when event is >80% full but not full', async () => {
+    const almostFullEvent = {
+      ...mockEvent,
+      registrationCount: 45,
+      capacity: 50,
+      availableSpots: 5,
+      isFull: false,
+    }; // 90% full
+    vi.mocked(eventService.getEventById).mockResolvedValue(almostFullEvent);
+
+    window.history.pushState({}, '', '/events/1');
+    renderWithProviders(<EventDetailsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Almost Full - Only 5 spots remaining!/)).toBeInTheDocument();
+      expect(screen.getByText(/This event is filling up fast/)).toBeInTheDocument();
+    });
+  });
+
+  it('does not display "Almost Full" banner when event is exactly at 80%', async () => {
+    const eightyPercentEvent = {
+      ...mockEvent,
+      registrationCount: 40,
+      capacity: 50,
+      availableSpots: 10,
+      isFull: false,
+    }; // 80% full
+    vi.mocked(eventService.getEventById).mockResolvedValue(eightyPercentEvent);
+
+    window.history.pushState({}, '', '/events/1');
+    renderWithProviders(<EventDetailsPage />);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Almost Full/)).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not display "Almost Full" banner when event is full', async () => {
+    const fullEvent = {
+      ...mockEvent,
+      registrationCount: 50,
+      capacity: 50,
+      availableSpots: 0,
+      isFull: true,
+    };
+    vi.mocked(eventService.getEventById).mockResolvedValue(fullEvent);
+
+    window.history.pushState({}, '', '/events/1');
+    renderWithProviders(<EventDetailsPage />);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Almost Full/)).not.toBeInTheDocument();
+      expect(screen.getByText(/\(Full\)/)).toBeInTheDocument();
+    });
+  });
+
+  it('does not display "Almost Full" banner when event is cancelled', async () => {
+    const cancelledAlmostFullEvent = {
+      ...mockEvent,
+      registrationCount: 45,
+      capacity: 50,
+      availableSpots: 5,
+      isFull: false,
+      status: EventStatus.Cancelled,
+    };
+    vi.mocked(eventService.getEventById).mockResolvedValue(cancelledAlmostFullEvent);
+
+    window.history.pushState({}, '', '/events/1');
+    renderWithProviders(<EventDetailsPage />);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Almost Full/)).not.toBeInTheDocument();
+      expect(screen.getByText(/This event has been cancelled/)).toBeInTheDocument();
+    });
+  });
+
+  it('displays correct spot count with singular "spot" when 1 spot remaining', async () => {
+    const oneSpotLeftEvent = {
+      ...mockEvent,
+      registrationCount: 49,
+      capacity: 50,
+      availableSpots: 1,
+      isFull: false,
+    };
+    vi.mocked(eventService.getEventById).mockResolvedValue(oneSpotLeftEvent);
+
+    window.history.pushState({}, '', '/events/1');
+    renderWithProviders(<EventDetailsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Almost Full - Only 1 spot remaining!/)).toBeInTheDocument();
+    });
+  });
 });

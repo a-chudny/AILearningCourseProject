@@ -310,6 +310,10 @@ public class EventService : IEventService
     /// </summary>
     private EventResponse MapToResponse(Event eventEntity)
     {
+        var registrationCount = eventEntity.Registrations.Count(r => r.Status == RegistrationStatus.Confirmed);
+        var availableSpots = eventEntity.Capacity - registrationCount;
+        var isFull = registrationCount >= eventEntity.Capacity;
+
         return new EventResponse
         {
             Id = eventEntity.Id,
@@ -322,7 +326,9 @@ public class EventService : IEventService
             ImageUrl = eventEntity.ImageUrl,
             RegistrationDeadline = eventEntity.RegistrationDeadline,
             Status = eventEntity.Status,
-            RegistrationCount = eventEntity.Registrations.Count(r => r.Status == RegistrationStatus.Confirmed),
+            RegistrationCount = registrationCount,
+            AvailableSpots = availableSpots,
+            IsFull = isFull,
             OrganizerId = eventEntity.OrganizerId,
             OrganizerName = eventEntity.Organizer.Name,
             OrganizerEmail = eventEntity.Organizer.Email,

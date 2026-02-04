@@ -151,4 +151,39 @@ describe('EventCard', () => {
     const progressBar = container.querySelector('.bg-orange-500');
     expect(progressBar).toBeInTheDocument();
   });
+
+  it('shows "Almost Full" badge when event is >80% full but not full', () => {
+    const almostFullEvent = { ...mockEvent, registrationCount: 45, capacity: 50 }; // 90%
+    renderWithRouter(<EventCard event={almostFullEvent} />);
+
+    expect(screen.getByText('Almost Full')).toBeInTheDocument();
+  });
+
+  it('does not show "Almost Full" badge when event is exactly at 80%', () => {
+    const eightyPercentEvent = { ...mockEvent, registrationCount: 40, capacity: 50 }; // 80%
+    renderWithRouter(<EventCard event={eightyPercentEvent} />);
+
+    expect(screen.queryByText('Almost Full')).not.toBeInTheDocument();
+  });
+
+  it('does not show "Almost Full" badge when event is full', () => {
+    const fullEvent = { ...mockEvent, registrationCount: 50, capacity: 50 }; // 100%
+    renderWithRouter(<EventCard event={fullEvent} />);
+
+    expect(screen.queryByText('Almost Full')).not.toBeInTheDocument();
+    expect(screen.getByText('Full')).toBeInTheDocument();
+  });
+
+  it('does not show "Almost Full" badge when event is cancelled', () => {
+    const cancelledAlmostFullEvent = {
+      ...mockEvent,
+      registrationCount: 45,
+      capacity: 50,
+      status: EventStatus.Cancelled,
+    };
+    renderWithRouter(<EventCard event={cancelledAlmostFullEvent} />);
+
+    expect(screen.queryByText('Almost Full')).not.toBeInTheDocument();
+    expect(screen.getByText('Cancelled')).toBeInTheDocument();
+  });
 });

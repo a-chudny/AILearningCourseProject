@@ -63,6 +63,16 @@ public class EventResponse
     public int RegistrationCount { get; set; }
 
     /// <summary>
+    /// Number of available spots remaining (Capacity - RegistrationCount).
+    /// </summary>
+    public int AvailableSpots { get; set; }
+
+    /// <summary>
+    /// Indicates whether the event has reached its capacity limit.
+    /// </summary>
+    public bool IsFull { get; set; }
+
+    /// <summary>
     /// Foreign key to the user who organized this event.
     /// </summary>
     public int OrganizerId { get; set; }
