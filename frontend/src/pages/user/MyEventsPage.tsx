@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useMyRegistrations, useCancelRegistration } from '@/hooks/useRegistrations';
 import { RegistrationCard } from '@/components/registrations/RegistrationCard';
 import { CancelRegistrationModal } from '@/components/modals/CancelRegistrationModal';
-import { RegistrationResponse, EventSummary } from '@/services/registrationService';
+import type { RegistrationResponse, EventSummary } from '@/services/registrationService';
 
 export default function MyEventsPage() {
   const { data: registrations, isLoading, isError, error } = useMyRegistrations();

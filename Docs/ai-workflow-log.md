@@ -3572,3 +3572,44 @@ Estimate: ~95%
 - Category colors use Tailwind's 50/700 shade pattern for accessibility
 
 ---
+
+## [2026-02-05 00:30] - Backend Integration Test Fixes
+
+### Prompt
+"Could you fix these errors which appeared? Also fix all ui tests and fix integration tests of backend part"
+
+### Context
+- SKL-005 implementation complete with all tests passing
+- 32 backend integration tests failing with "JWT Secret is not configured"
+- Previous tests used inline WebApplicationFactory configuration which didn't work for JWT settings
+- Program.cs reads JWT config at startup, before WebApplicationFactory callbacks execute
+
+### Files Added/Modified
+- `backend/tests/VolunteerPortal.Tests/Integration/CustomWebApplicationFactory.cs` - Created: Shared test factory with InMemoryDatabaseRoot and JWT env vars
+- `backend/tests/VolunteerPortal.Tests/appsettings.Testing.json` - Created: Test JWT configuration (not used, replaced by env vars)
+- `backend/tests/VolunteerPortal.Tests/Integration/AuthControllerIntegrationTests.cs` - Modified: Use CustomWebApplicationFactory
+- `backend/tests/VolunteerPortal.Tests/Integration/EventsControllerIntegrationTests.cs` - Modified: Use CustomWebApplicationFactory, real JWT tokens
+- `backend/tests/VolunteerPortal.Tests/VolunteerPortal.Tests.csproj` - Modified: Added appsettings.Testing.json copy directive
+- `backend/src/VolunteerPortal.API/Controllers/EventsController.cs` - Modified: GetEventById null check (NoContentNotFound)
+- `backend/src/VolunteerPortal.API/Controllers/AuthController.cs` - Modified: JWT claim type lookup (ClaimTypes.NameIdentifier fallback)
+
+### Generated Code Summary
+- CustomWebApplicationFactory: Sets JWT env vars in constructor before host build, uses shared InMemoryDatabaseRoot
+- EventsController GetEventById: Fixed to check for null and return NotFound instead of relying on KeyNotFoundException
+- AuthController GetMe: Fixed to look for ClaimTypes.NameIdentifier (mapped by JwtBearer middleware) instead of only Sub claim
+- Test classes: Updated to use shared factory, helper methods generate real JWT tokens via login endpoint
+
+### Result
+ Success - All 101 backend tests passing (32 integration + 69 unit tests)
+
+### AI Generation Percentage
+Estimate: ~88%
+
+### Learnings/Notes
+- WebApplicationFactory.ConfigureAppConfiguration runs AFTER host is built, too late for Program.cs startup config
+- Environment variables set in factory constructor execute before host build - correct timing for JWT config
+- ASP.NET Core JwtBearer middleware maps standard JWT 'sub' claim to ClaimTypes.NameIdentifier by default
+- Shared InMemoryDatabaseRoot ensures all tests use same database instance for proper test isolation
+- EventService.GetByIdAsync returns null (not exception), controller must check null explicitly
+
+---

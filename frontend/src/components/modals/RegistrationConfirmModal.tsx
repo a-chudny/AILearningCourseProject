@@ -1,7 +1,7 @@
-import { Event } from '@/types/entities';
+import type { EventResponse } from '@/services/eventService';
 
 interface RegistrationConfirmModalProps {
-  event: Event;
+  event: EventResponse;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -47,7 +47,7 @@ export function RegistrationConfirmModal({
     return `${mins} minute${mins > 1 ? 's' : ''}`;
   };
 
-  const availableSpots = event.capacity - event.registrationCount;
+  const availableSpots = event.capacity - (event.registrationCount ?? 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
@@ -155,7 +155,7 @@ export function RegistrationConfirmModal({
             </div>
 
             {/* Required skills */}
-            {event.requiredSkills.length > 0 && (
+            {event.requiredSkills && event.requiredSkills.length > 0 && (
               <div className="flex items-start gap-3">
                 <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path

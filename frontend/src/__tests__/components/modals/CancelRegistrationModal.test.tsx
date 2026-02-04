@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CancelRegistrationModal } from '@/components/modals/CancelRegistrationModal';
-import { EventSummary } from '@/services/registrationService';
+import type { EventSummary } from '@/services/registrationService';
 import { EventStatus } from '@/types/enums';
 
 const mockEvent: EventSummary = {
@@ -11,7 +11,7 @@ const mockEvent: EventSummary = {
   startTime: '2026-03-15T09:00:00Z',
   durationMinutes: 180,
   status: EventStatus.Active,
-  imageUrl: null,
+  imageUrl: undefined,
 };
 
 describe('CancelRegistrationModal', () => {

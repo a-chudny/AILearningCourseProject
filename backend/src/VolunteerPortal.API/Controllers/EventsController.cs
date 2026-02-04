@@ -35,7 +35,18 @@ public class EventsController : ControllerBase
     [ProducesResponseType(typeof(EventListResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<EventListResponse>> GetEvents([FromQuery] EventQueryParams queryParams)
     {
-        var result = await _eventService.GetAllAsync(queryParams);
+        // Extract userId from claims if authenticated (for "Match My Skills" feature)
+        int? currentUserId = null;
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(userIdClaim, out var userId))
+            {
+                currentUserId = userId;
+            }
+        }
+
+        var result = await _eventService.GetAllAsync(queryParams, currentUserId);
         return Ok(result);
     }
 
@@ -50,15 +61,12 @@ public class EventsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EventResponse>> GetEventById(int id)
     {
-        try
-        {
-            var eventResponse = await _eventService.GetByIdAsync(id);
-            return Ok(eventResponse);
-        }
-        catch (KeyNotFoundException)
+        var eventResponse = await _eventService.GetByIdAsync(id);
+        if (eventResponse == null)
         {
             return NotFound(new { message = $"Event with ID {id} not found." });
         }
+        return Ok(eventResponse);
     }
 
     /// <summary>

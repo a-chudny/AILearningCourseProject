@@ -44,4 +44,16 @@ public class EventQueryParams
     /// Sort direction: asc or desc. Default is asc.
     /// </summary>
     public string SortDirection { get; set; } = "asc";
+
+    /// <summary>
+    /// Optional list of skill IDs to filter events by.
+    /// Returns events that require ANY of the specified skills.
+    /// </summary>
+    public List<int>? SkillIds { get; set; }
+
+    /// <summary>
+    /// When true, filters events that match the authenticated user's skills.
+    /// Requires authentication. Ignored if user is not authenticated.
+    /// </summary>
+    public bool MatchMySkills { get; set; } = false;
 }

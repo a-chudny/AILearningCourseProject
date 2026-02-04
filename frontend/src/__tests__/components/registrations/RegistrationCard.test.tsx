@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { RegistrationCard } from '@/components/registrations/RegistrationCard';
-import { RegistrationResponse } from '@/services/registrationService';
+import type { RegistrationResponse } from '@/services/registrationService';
 import { EventStatus } from '@/types/enums';
 
 const mockRegistration: RegistrationResponse = {
@@ -18,7 +18,7 @@ const mockRegistration: RegistrationResponse = {
     startTime: '2026-03-15T09:00:00Z',
     durationMinutes: 180,
     status: EventStatus.Active,
-    imageUrl: null,
+    imageUrl: undefined,
   },
 };
 

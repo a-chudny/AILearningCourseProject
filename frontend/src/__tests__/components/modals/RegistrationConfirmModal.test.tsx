@@ -1,28 +1,25 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { RegistrationConfirmModal } from '@/components/modals/RegistrationConfirmModal';
-import { Event } from '@/types/entities';
-import { EventStatus } from '@/types/enums';
+import type { EventResponse } from '@/services/eventService';
 
-const mockEvent: Event = {
+const mockEvent: EventResponse = {
   id: 1,
   title: 'Beach Cleanup',
   description: 'Help us clean up the local beach',
   startTime: new Date('2026-03-15T09:00:00').toISOString(),
-  endTime: new Date('2026-03-15T12:00:00').toISOString(),
   durationMinutes: 180,
   location: '123 Beach St, San Diego, CA',
   capacity: 20,
   registrationCount: 15,
-  registrationDeadline: new Date('2026-03-14T23:59:59').toISOString(),
-  status: EventStatus.Active,
+  status: 'Active',
   organizerId: 2,
   organizerName: 'John Doe',
   requiredSkills: [
-    { id: 1, name: 'Teamwork', description: 'Work well in a team' },
-    { id: 2, name: 'Physical Fitness', description: 'Able to do physical work' },
+    { id: 1, name: 'Teamwork', description: 'Work well in a team', createdAt: new Date().toISOString() },
+    { id: 2, name: 'Physical Fitness', description: 'Able to do physical work', createdAt: new Date().toISOString() },
   ],
-  imageUrl: null,
+  imageUrl: undefined,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { RegistrationResponse } from '@/services/registrationService';
+import type { RegistrationResponse } from '@/services/registrationService';
 import { EventStatus } from '@/types/enums';
 
 interface RegistrationCardProps {

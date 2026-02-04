@@ -194,7 +194,7 @@ export default function EventDetailsPage() {
     );
   }
 
-  const availableSpots = event.availableSpots ?? event.capacity - event.registrationCount;
+  const availableSpots = event.capacity - event.registrationCount;
   const isNearlyFull = !isFull && (event.registrationCount / event.capacity) > 0.8;
 
   return (

@@ -1,4 +1,4 @@
-import { EventSummary } from '@/services/registrationService';
+import type { EventSummary } from '@/services/registrationService';
 
 interface CancelRegistrationModalProps {
   event: EventSummary;

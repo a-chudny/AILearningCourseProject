@@ -51,6 +51,8 @@ export interface EventQueryParams extends QueryParams {
   status?: string; // Filter by EventStatus (Active/Cancelled)
   sortBy?: string; // Sort field: StartTime, Title, CreatedAt (default: StartTime)
   sortDirection?: 'asc' | 'desc'; // Sort direction (default: asc)
+  skillIds?: number[]; // Filter by required skills (ANY match)
+  matchMySkills?: boolean; // Filter by authenticated user's skills (default: false)
 }
 
 /**
