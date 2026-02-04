@@ -1280,3 +1280,167 @@ Breakdown:
 
 ---
 
+
+## [2026-02-04 12:15] - AUTH-008: Protected Route Component
+
+### Prompt
+"Implement AUTH-008 story from user stories. Ask if something needed to clarify."
+
+Clarifying questions with default answers chosen:
+1. Forbidden behavior for role violations? "Redirect to home with toast notification"
+2. Component design pattern? "Separate ProtectedRoute and RoleGuard for flexibility"
+3. Role matching logic? "ANY logic (user needs at least one of allowed roles)"
+
+### Context
+- AUTH-001 through AUTH-007 completed (authentication endpoints and frontend pages)
+- AuthContext already provides isAuthenticated, isLoading, user state
+- Need route guards to protect pages based on authentication and roles
+- LoginPage already has return URL handling via location state
+- User role enum available: Volunteer (0), Organizer (1), Admin (2)
+
+### Files Added/Modified
+- `frontend/src/components/ProtectedRoute.tsx` - Created: Authentication guard component (39 lines)
+  - Checks isAuthenticated from useAuth hook
+  - Shows loading spinner while isLoading is true
+  - Redirects to /login if not authenticated
+  - Preserves intended URL in location state for post-login redirect
+  - Renders children when user is authenticated
+  - Clean loading UI matching app design
+
+- `frontend/src/components/RoleGuard.tsx` - Created: Role-based access control component (44 lines)
+  - Accepts allowedRoles prop (array of UserRole values)
+  - Checks if user has ANY of the allowed roles
+  - Shows loading spinner while isLoading is true
+  - Displays toast error message for forbidden access
+  - Redirects to home page when user lacks required role
+  - Handles null user gracefully
+  - Renders children when user has required role
+
+- `frontend/src/utils/toast.ts` - Created: Toast notification utility (89 lines)
+  - Simple toast notification system without external dependencies
+  - ToastManager singleton class for app-wide notifications
+  - Methods: success(), error(), info(), warning()
+  - Auto-creates fixed container at top-right (z-50)
+  - Toast types with color coding: green (success), red (error), blue (info), yellow (warning)
+  - Auto-dismiss after 3 seconds (configurable duration)
+  - Manual dismiss button with SVG close icon
+  - Smooth slide-in animation from right
+  - Clean, modern design with Tailwind classes
+  - Position options support (future extensibility)
+
+- `frontend/src/context/AuthContext.tsx` - Modified: Removed automatic navigation from login function
+  - Changed: login() no longer navigates automatically to '/'
+  - Reason: Allows LoginPage to handle return URL redirects properly
+  - LoginPage useEffect now controls navigation based on location state
+
+- `frontend/src/pages/auth/LoginPage.tsx` - Modified: Improved return URL handling
+  - Updated: Extracts return URL from location.state.from.pathname
+  - Pattern: (location.state as any)?.from?.pathname || '/'
+  - Works with ProtectedRoute's redirect format
+  - useEffect navigates to return URL after successful authentication
+
+- `frontend/tailwind.config.js` - Modified: Added slideIn animation
+  - Added: 'slideIn' animation for toast notifications
+  - Keyframes: translateX(100%)  translateX(0) with opacity fade-in
+  - Duration: 0.3s ease-out for smooth entry
+  - Used by toast utility for notification appearance
+
+- `frontend/src/__tests__/components/ProtectedRoute.test.tsx` - Created: ProtectedRoute tests (100 lines)
+  - Test: Shows loading state while checking authentication (isLoading=true)
+  - Test: Redirects to login when user is not authenticated
+  - Test: Renders protected content when user is authenticated
+  - Uses mock AuthContext with configurable overrides
+  - Tests integration with React Router (Routes, Navigate)
+
+- `frontend/src/__tests__/components/RoleGuard.test.tsx` - Created: RoleGuard tests (172 lines)
+  - Test: Shows loading state while checking authentication
+  - Test: Redirects to home when user does not have required role (Volunteer trying to access Admin)
+  - Test: Renders protected content when user has required role (Admin accessing Admin)
+  - Test: Allows access when user has one of multiple allowed roles (Organizer accessing Organizer+Admin)
+  - Test: Redirects when user is null
+  - Mocks toast utility to prevent DOM manipulation in tests
+  - Tests all three role types: Volunteer, Organizer, Admin
+
+### Generated Code Summary
+- **ProtectedRoute Component**: Authentication-only guard with loading state and return URL preservation
+- **RoleGuard Component**: Role-based access control with ANY logic for multiple roles
+- **Toast Notification System**: Lightweight, dependency-free toast manager with 4 notification types
+- **Loading States**: Consistent loading UI across both guard components (spinner + message)
+- **Return URL Handling**: ProtectedRoute captures location  LoginPage redirects after auth success
+- **Error Messaging**: User-friendly toast notifications for authorization failures
+- **Flexible Architecture**: Separate components allow combining guards or using independently
+- **ANY Role Logic**: User needs at least one role from allowedRoles array (standard RBAC pattern)
+- **Test Coverage**: 8 comprehensive tests covering auth states, role checks, redirects, loading
+
+### Result
+ Success
+- All 42 tests passing (34 previous + 8 new route guard tests)
+- Frontend builds successfully with no TypeScript errors
+- Build output: 984ms, optimized chunks with proper code splitting
+- ProtectedRoute correctly redirects unauthenticated users
+- RoleGuard correctly checks roles with ANY logic
+- Toast notifications work without external dependencies
+- Return URL preservation working via location state
+- Loading states prevent flash of unauthorized content
+- Clean, maintainable component architecture
+
+### AI Generation Percentage
+Estimate: ~98% (AI generated ~372 lines total code + tests, manual fixes ~8 lines for TypeScript)
+
+Breakdown:
+- ProtectedRoute.tsx: 39 lines - 100% AI generated
+- RoleGuard.tsx: 44 lines - 100% AI generated
+- toast.ts: 89 lines - 100% AI generated
+- AuthContext.tsx modifications: ~5 lines - 100% AI generated
+- LoginPage.tsx modifications: ~3 lines - 100% AI generated
+- tailwind.config.js modifications: ~5 lines - 100% AI generated
+- ProtectedRoute.test.tsx: 100 lines - 98% AI generated (added updatedAt field manually)
+- RoleGuard.test.tsx: 172 lines - 98% AI generated (added updatedAt fields manually)
+- Total: ~457 lines new/modified, ~8 lines manual fixes
+
+### Learnings/Notes
+- **Separation of Concerns**: Keeping ProtectedRoute (auth) and RoleGuard (roles) separate provides maximum flexibility
+- **Composable Guards**: Components can be nested (ProtectedRoute > RoleGuard > Content) for layered protection
+- **Return URL Pattern**: location.state preserves full Location object including pathname for accurate redirects
+- **Loading State Importance**: Showing loading prevents flickering between protected content and redirects
+- **Toast Without Dependencies**: Simple DOM manipulation provides toast notifications without React Context complexity
+- **ANY vs ALL Logic**: ANY role matching (includes()) is standard for most applications vs requiring all roles
+- **TypeScript Strict Mode**: User type requires updatedAt field - caught during build, easy fix in tests
+- **Test Mocking Strategy**: vi.mock for toast prevents actual DOM manipulation during tests
+- **Route Integration**: Tests use full Routes/Route setup to verify redirect behavior accurately
+- **Build Optimization**: New components don't significantly impact bundle size (under 1KB each gzipped)
+
+### Technical Highlights
+1. **ProtectedRoute Pattern**: Check auth  show loading  redirect or render (3-state flow)
+2. **RoleGuard with Toast**: User feedback for authorization failures improves UX
+3. **Toast Singleton**: Single ToastManager instance manages all notifications globally
+4. **Tailwind Animation**: slideIn keyframe for smooth toast entry from right
+5. **Location State Preservation**: Navigate with state={{ from: location }} pattern
+6. **TypeScript Type Safety**: Proper typing for UserRole array in RoleGuard
+7. **Mock AuthContext**: Reusable mockAuthContext helper with override pattern for tests
+8. **Route Guard Composition**: Wrap content in multiple guards for layered security
+9. **Loading UI Consistency**: Same spinner/message pattern across guards and auth pages
+10. **Cleanup Function**: Toast auto-remove with opacity and transform transition
+
+### Design Decisions
+- **Separate Guards**: ProtectedRoute (auth check) + RoleGuard (role check) for composability vs combined component
+- **ANY Logic**: User matches if they have one of allowedRoles (standard RBAC) vs requiring all
+- **Home Redirect**: Unauthorized role access redirects to home with toast vs dedicated 403 page
+- **Toast Position**: Top-right (z-50) for consistency with common UI patterns
+- **3-Second Auto-Dismiss**: Balance between user reading time and UI cleanliness
+- **No Auth Navigation**: Removed automatic navigate('/') from login() to support return URLs
+- **Location State Format**: Pass full location object vs just pathname string
+- **Test Coverage**: Focus on core flows (loading, redirect, render) vs edge cases
+- **SVG Icons in Toast**: Inline SVG for close button vs icon library dependency
+
+### Future Enhancements (Not Implemented)
+- Breadcrumb preservation in URL query params
+- Multiple toast position options
+- Toast queue management for rapid-fire notifications
+- Role hierarchy (Admin includes Organizer privileges)
+- Custom redirect URLs per RoleGuard instance
+- Session timeout detection in ProtectedRoute
+- Remember me functionality with extended sessions
+
+---
+

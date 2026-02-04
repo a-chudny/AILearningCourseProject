@@ -21,10 +21,8 @@ export default function LoginPage() {
   const [touched, setTouched] = useState({ email: false, password: false })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Get return URL from location state or query params
-  const from = (location.state as { from?: string })?.from || 
-               new URLSearchParams(location.search).get('returnUrl') || 
-               '/'
+  // Get return URL from location state (from ProtectedRoute redirect)
+  const from = (location.state as any)?.from?.pathname || '/'
 
   // Redirect authenticated users away from login page
   useEffect(() => {

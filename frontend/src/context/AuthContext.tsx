@@ -75,6 +75,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Login function
+   * Note: Navigation is handled by the calling component to support return URLs
    */
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
@@ -82,15 +83,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await authService.login(email, password);
       setToken(response.token);
       setUser(response.user);
-      // Navigate to home page after successful login
-      navigate('/');
+      // Note: No automatic navigation - let calling component handle redirect
     } catch (error) {
       // Re-throw error to be handled by the component
       throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [navigate]);
+  }, []);
 
   /**
    * Register function
