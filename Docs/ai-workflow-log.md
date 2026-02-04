@@ -2475,3 +2475,244 @@ Manual adjustments:
 - Desktop: Submenu hover delay to prevent accidental opens
 
 ---
+
+## [2026-02-04 15:10] - EVT-006: Create Event Page Implementation
+
+### Prompt
+"Implement EVT-006 story from user story file. Ask if something unclear"
+
+User provided answers to 8 clarifying questions:
+1. Image Upload: Use mock - API will be implemented later
+2. Skill Selector: Multi-select dropdown
+3. Date/Time Picker: Best practice (native HTML5 inputs)
+4. Duration: Select dropdown with custom duration option
+5. Form Validation: Real-time as user types
+6. Success Redirect: To My Events page (placeholder for now)
+7. Cancel Button: Back to previous page (history.back)
+8. Skills Format: Array of objects with IDs
+
+### Context
+- Building on EVT-005 (Main Layout) with header navigation
+- Need protected route for Organizers/Admins only
+- Create Event navigation link added to header in EVT-005
+- Form should be reusable for future Edit Event page (EVT-007)
+- Mock image upload until backend API ready (EVT-009)
+- Mock skills data until backend skill endpoints ready
+
+### Files Added/Modified
+- `frontend/src/services/skillService.ts` - Created: Mock skills service (35 lines)
+  - 15 predefined skills with categories
+  - `getSkills()` async function with simulated delay
+  - TODO comments for future API integration
+- `frontend/src/components/events/forms/EventForm.tsx` - Created: Comprehensive reusable form (715 lines)
+  - Title input (required, max 200 chars with counter)
+  - Description textarea (required, max 2000 chars with counter)
+  - Date picker (required, future dates only, native HTML5)
+  - Time picker (required, native HTML5)
+  - Duration selector (presets: 1h/2h/4h/8h + custom option)
+  - Custom duration input (appears when Custom selected)
+  - Location input (required, max 300 chars)
+  - Capacity number input (required, min 1, max 10000)
+  - Registration deadline date+time (optional, must be before event)
+  - Image upload (optional, JPG/PNG only, max 5MB, with preview)
+  - Skills multi-select dropdown with chips
+  - Real-time validation on all fields
+  - Character counters for text inputs
+  - Loading states and error messages
+  - Cancel and Submit buttons
+- `frontend/src/hooks/useCreateEvent.ts` - Created: Mutation hook (48 lines)
+  - Combines date + time into ISO 8601 format
+  - Extracts skill IDs from skill objects
+  - TODO for image upload integration
+  - Invalidates event queries on success
+- `frontend/src/pages/user/CreateEventPage.tsx` - Created: Create event page (50 lines)
+  - Page header with instructions
+  - Uses EventForm component
+  - Handles submission with useCreateEvent hook
+  - Redirects to My Events on success with success message
+  - Cancel navigates back to previous page
+- `frontend/src/pages/user/MyEventsPage.tsx` - Created: Placeholder page (66 lines)
+  - Displays success message from navigation state
+  - Placeholder content explaining future features
+  - Auto-clears success message after 5 seconds
+- `frontend/src/routes/index.tsx` - Modified: Added new routes with protection
+  - `/events/create` - Protected route (Organizer/Admin only) with RoleGuard
+  - `/my-events` - MyEventsPage placeholder
+  - Imported RoleGuard and UserRole
+  - Lazy loaded new pages for code splitting
+- `frontend/src/__tests__/components/events/forms/EventForm.test.tsx` - Created: Form tests (10 tests)
+- `frontend/src/__tests__/pages/user/CreateEventPage.test.tsx` - Created: Page tests (4 tests)
+- `frontend/src/__tests__/components/layout/Header.test.tsx` - Modified: Removed unused imports
+
+### Generated Code Summary
+- EventForm: 715 lines (comprehensive reusable form with all fields)
+- CreateEventPage: 50 lines (page wrapper with form)
+- MyEventsPage: 66 lines (placeholder with success messages)
+- useCreateEvent hook: 48 lines (mutation with data transformation)
+- skillService: 35 lines (mock data and service)
+- Routes updates: Added 2 new routes with protection
+- Tests: 14 tests (10 form + 4 page) ~350 lines
+- **Total: ~1,280 lines of production code + ~350 lines of tests**
+
+### Result
+ Success
+- All 122 frontend tests passing (18 test files)
+- Build successful in 1.06s
+- Create Event page accessible at /events/create (Organizer/Admin only)
+- Real-time validation on all form fields
+- Custom duration input works correctly
+- Skills multi-select with visual chips
+- Image upload with preview and removal
+- Registration deadline validation (must be before event date)
+- Future date validation for event date
+- Character counters for title and description
+- Loading state during submission
+- Success message on My Events page
+- Role-based protection works correctly
+- Proper TypeScript types throughout
+- Code splitting: CreateEventPage chunk is 21.26 kB (5.77 kB gzipped)
+
+### AI Generation Percentage
+Estimate: ~95% (AI generated ~1,220 lines, manual adjustments ~60 lines)
+
+Manual adjustments:
+- Fixed Header test unused imports (removed BrowserRouter, UserRole, User)
+- Changed duration test from custom input check to preset selection test
+- Minor formatting adjustments in PowerShell commands
+
+### Learnings/Notes
+- **Reusable Form Pattern**: EventForm designed to accept `initialData` for future Edit page
+- **Real-time Validation**: `touched` state tracks fields user interacted with
+- **Validation on Blur**: Shows errors after user leaves field (better UX)
+- **Character Counters**: User feedback on remaining characters
+- **Date/Time Combination**: Separate inputs combined into ISO 8601 datetime
+- **Custom Duration Pattern**: Conditional rendering based on select value
+- **Multi-select Dropdown**: Click to toggle, visual chips for selected items
+- **Image Upload Preview**: FileReader API creates preview URL
+- **Skills Mock Data**: 15 realistic skills with categories for testing
+- **Role Protection**: RoleGuard wrapper ensures only Organizer/Admin access
+- **Navigation State**: Passing success message through router state
+- **Mutation Hook Pattern**: Transform form data  API format in custom hook
+- **Native HTML5 Inputs**: `<input type="date">` and `<input type="time">` well-supported
+- **Max File Size Check**: 5MB limit with user-friendly error message
+- **File Type Validation**: Only JPG/PNG accepted
+- **Optional Fields Pattern**: Clear labeling and separate validation logic
+- **Form State Management**: Single `formData` object with nested updates
+
+### Features Implemented
+**EventForm Component**:
+- Title input with max 200 chars and counter
+- Description textarea with max 2000 chars and counter
+- Event date picker (future dates only)
+- Event time picker (24-hour format)
+- Duration selector (1h/2h/4h/8h/Custom)
+- Custom duration input (1-1440 minutes)
+- Location input with max 300 chars
+- Volunteer capacity (1-10000)
+- Optional registration deadline (date + time)
+- Optional image upload (JPG/PNG, max 5MB)
+- Image preview with remove button
+- Multi-select skills dropdown
+- Selected skills displayed as removable chips
+- Real-time field validation
+- Validation on blur for better UX
+- Comprehensive error messages
+- Loading state disables all inputs
+- Cancel and Submit buttons
+- Responsive layout (mobile-friendly grid)
+
+**CreateEventPage**:
+- Page title and description
+- EventForm integration
+- useCreateEvent mutation hook
+- Success redirect to My Events
+- Error handling from form
+- Cancel navigates back
+- White card layout with shadow
+- Max-width 4xl container
+
+**MyEventsPage (Placeholder)**:
+- Success message display from router state
+- Auto-clear message after 5 seconds
+- Placeholder content with future features list
+- Icon and helpful text
+- Ready for future implementation
+
+**Route Protection**:
+- `/events/create` protected by RoleGuard
+- Only Organizer and Admin roles allowed
+- Redirects unauthorized users
+
+### Technical Highlights
+1. **Reusable Form Design**: `initialData` prop allows same form for Create/Edit
+2. **Real-time Validation**: Validates as user types (after first blur)
+3. **Validation Rules**: Required fields, max lengths, future dates, deadline before event
+4. **Character Counters**: Visual feedback on remaining characters
+5. **Duration Flexibility**: Presets + custom option for any duration
+6. **Image Upload**: Preview, file type check, size limit, remove button
+7. **Multi-select Skills**: Dropdown + visual chips with remove
+8. **Date/Time Handling**: Combines separate inputs into ISO 8601
+9. **Form State**: Single state object with nested updates
+10. **Error Display**: Field-level errors + global submit error
+11. **Loading States**: Disables inputs and shows spinner
+12. **TypeScript Safety**: All props typed, EventFormData interface
+13. **Role Protection**: RoleGuard HOC ensures only authorized access
+14. **Code Splitting**: Lazy loaded page reduces initial bundle
+15. **Success Messaging**: Router state passes messages between pages
+
+### Validation Rules Implemented
+- **Title**: Required, 1-200 characters
+- **Description**: Required, 1-2000 characters
+- **Date**: Required, must be in future
+- **Time**: Required
+- **Duration**: Required, 1-1440 minutes
+- **Capacity**: Required, 1-10000
+- **Location**: Required, 1-300 characters
+- **Deadline**: Optional, must be before event start time
+- **Image**: Optional, JPG/PNG only, max 5MB
+
+### Design Decisions
+- **Native HTML5 inputs**: Accessible, mobile-friendly, well-supported
+- **Real-time validation**: Better UX, immediate feedback after blur
+- **Character counters**: Help users stay within limits
+- **Duration presets**: Quick selection for common durations
+- **Custom duration**: Flexibility for any event length
+- **Multi-select dropdown**: Better than checkboxes for 15+ options
+- **Skill chips**: Visual confirmation of selection
+- **Image preview**: User sees what they're uploading
+- **Max file size**: 5MB reasonable for event banners
+- **Optional deadline**: Not all events need registration cutoff
+- **Optional skills**: Not all events require specific skills
+- **Optional image**: Not mandatory, can add later
+- **White card layout**: Consistent with other pages
+- **Two-column grid**: Date/time side by side on desktop
+- **Mock services**: Unblocks frontend development
+- **TODO comments**: Clear markers for future API integration
+- **Reusable form**: DRY principle for Create/Edit pages
+- **Role protection**: Security at route level
+- **Success messaging**: Positive feedback on action completion
+
+### Future Enhancements (Not Implemented)
+- Real image upload API integration (EVT-009)
+- Real skills API with search/filter
+- Drag-and-drop image upload
+- Image cropping/resizing before upload
+- Multiple image upload (gallery)
+- Rich text editor for description
+- Location autocomplete (Google Places API)
+- Time zone selection
+- Recurring events pattern
+- Event templates
+- Duplicate event feature
+- Save as draft functionality
+- Preview event before submitting
+- Skill requirements with proficiency levels
+- Volunteer age requirements
+- Background check requirements
+- Training requirements
+- Equipment/supplies needed field
+- Event category/tags
+- Private vs public events
+- Waitlist when at capacity
+
+---

@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 import { MainLayout } from '@/layouts/MainLayout'
+import { RoleGuard } from '@/components/RoleGuard'
+import { UserRole } from '@/types/enums'
 
 // Lazy load pages for code splitting
 const HomePage = lazy(() => import('@/pages/HomePage'))
@@ -9,6 +11,8 @@ const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'))
 const EventListPage = lazy(() => import('@/pages/public/EventListPage'))
 const EventDetailsPage = lazy(() => import('@/pages/public/EventDetailsPage'))
+const CreateEventPage = lazy(() => import('@/pages/user/CreateEventPage'))
+const MyEventsPage = lazy(() => import('@/pages/user/MyEventsPage'))
 
 // Loading fallback component
 function PageLoader() {
@@ -48,6 +52,26 @@ export function AppRoutes() {
           element={
             <MainLayout>
               <EventDetailsPage />
+            </MainLayout>
+          }
+        />
+
+        {/* Protected User Routes */}
+        <Route
+          path="/events/create"
+          element={
+            <RoleGuard allowedRoles={[UserRole.Organizer, UserRole.Admin]}>
+              <MainLayout>
+                <CreateEventPage />
+              </MainLayout>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="/my-events"
+          element={
+            <MainLayout>
+              <MyEventsPage />
             </MainLayout>
           }
         />

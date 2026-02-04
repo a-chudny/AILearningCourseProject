@@ -1,10 +1,8 @@
 ﻿import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { BrowserRouter, MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
 import { Header } from '@/components/layout/Header'
 import { AuthProvider } from '@/context/AuthContext'
-import { UserRole } from '@/types/enums'
-import type { User } from '@/types'
 
 const mockNavigate = vi.fn()
 
