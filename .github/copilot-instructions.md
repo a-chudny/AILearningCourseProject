@@ -217,6 +217,9 @@ frontend/
 ### Log Each Significant Development Step
 Document every major development activity in `ai-workflow-log.md` located in the /Docs folder. This creates a learning trail and helps track AI-generated code progress.
 
+### CRITICAL: Always Add New Entries at the END of the File
+**⚠️ IMPORTANT:** New workflow log entries must ALWAYS be appended to the END of the `Docs/ai-workflow-log.md` file, NOT at the beginning. This maintains chronological order with the oldest entries at the top and newest at the bottom.
+
 ### What Qualifies as "Significant"
 - New feature implementations
 - Major refactoring efforts
@@ -279,6 +282,7 @@ Estimate: ~X% (e.g., ~85% generated, ~15% manual adjustments)
 5. **Quantify Generation**: Track percentage of AI-generated code per task
 6. **Note Prompt Effectiveness**: Record which prompts produced best results
 7. **Use Quick Commands**: Simply say "Log it" or "Log this step" to trigger logging
+8. **⚠️ APPEND TO END**: Always add new entries at the END of the file, maintaining chronological order (oldest→newest)
 
 ### Benefits of Workflow Logging
 - Track progress toward 90% AI-generation goal

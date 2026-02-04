@@ -42,13 +42,15 @@ export interface QueryParams {
 }
 
 /**
- * Event query parameters
+ * Event query parameters - matches backend EventQueryParams
  */
 export interface EventQueryParams extends QueryParams {
-  skillIds?: number[];
-  matchMySkills?: boolean;
-  includeAll?: boolean; // Include past events (admin only)
-  status?: string; // Filter by EventStatus
+  includePastEvents?: boolean; // Include past events (default: false)
+  includeDeleted?: boolean; // Include soft-deleted events (default: false)
+  searchTerm?: string; // Search by title/description
+  status?: string; // Filter by EventStatus (Active/Cancelled)
+  sortBy?: string; // Sort field: StartTime, Title, CreatedAt (default: StartTime)
+  sortDirection?: 'asc' | 'desc'; // Sort direction (default: asc)
 }
 
 /**

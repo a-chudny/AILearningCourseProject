@@ -1,11 +1,19 @@
 import { Routes, Route } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
+import { MainLayout } from '@/layouts/MainLayout'
+import { RoleGuard } from '@/components/RoleGuard'
+import { UserRole } from '@/types/enums'
 
 // Lazy load pages for code splitting
 const HomePage = lazy(() => import('@/pages/HomePage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'))
+const EventListPage = lazy(() => import('@/pages/public/EventListPage'))
+const EventDetailsPage = lazy(() => import('@/pages/public/EventDetailsPage'))
+const CreateEventPage = lazy(() => import('@/pages/user/CreateEventPage'))
+const EditEventPage = lazy(() => import('@/pages/user/EditEventPage'))
+const MyEventsPage = lazy(() => import('@/pages/user/MyEventsPage'))
 
 // Loading fallback component
 function PageLoader() {
@@ -23,13 +31,75 @@ export function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        {/* Main Layout Routes - pages with header and footer */}
+        <Route
+          path="/"
+          element={
+            <MainLayout>
+              <HomePage />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/events"
+          element={
+            <MainLayout>
+              <EventListPage />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/events/:id"
+          element={
+            <MainLayout>
+              <EventDetailsPage />
+            </MainLayout>
+          }
+        />
+
+        {/* Protected User Routes */}
+        <Route
+          path="/events/create"
+          element={
+            <RoleGuard allowedRoles={[UserRole.Organizer, UserRole.Admin]}>
+              <MainLayout>
+                <CreateEventPage />
+              </MainLayout>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="/events/:id/edit"
+          element={
+            <RoleGuard allowedRoles={[UserRole.Organizer, UserRole.Admin]}>
+              <MainLayout>
+                <EditEventPage />
+              </MainLayout>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="/my-events"
+          element={
+            <MainLayout>
+              <MyEventsPage />
+            </MainLayout>
+          }
+        />
+
+        {/* Auth pages use AuthLayout (no MainLayout) */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        {/* Add more routes here as features are implemented */}
-        {/* <Route path="/events" element={<EventsPage />} /> */}
-        {/* <Route path="/events/:id" element={<EventDetailPage />} /> */}
-        <Route path="*" element={<NotFoundPage />} />
+
+        {/* 404 page with MainLayout */}
+        <Route
+          path="*"
+          element={
+            <MainLayout>
+              <NotFoundPage />
+            </MainLayout>
+          }
+        />
       </Routes>
     </Suspense>
   )
