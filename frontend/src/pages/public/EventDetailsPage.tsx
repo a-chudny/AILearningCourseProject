@@ -193,7 +193,8 @@ export default function EventDetailsPage() {
     );
   }
 
-  const availableSpots = event.capacity - event.registrationCount;
+  const availableSpots = event.availableSpots ?? event.capacity - event.registrationCount;
+  const isNearlyFull = !isFull && (event.registrationCount / event.capacity) > 0.8;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -244,6 +245,26 @@ export default function EventDetailsPage() {
                 <p className="font-semibold text-amber-900">This event has been cancelled</p>
                 <p className="mt-1 text-sm text-amber-800">
                   This event is no longer accepting registrations and will not take place as scheduled.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Nearly full banner */}
+          {!isEventCancelled && !isFull && isNearlyFull && (
+            <div className="mb-6 rounded-lg border border-orange-300 bg-orange-50 px-4 py-3 flex items-start gap-3">
+              <svg className="h-6 w-6 text-orange-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div>
+                <p className="font-semibold text-orange-900">Almost Full - Only {availableSpots} spot{availableSpots !== 1 ? 's' : ''} remaining!</p>
+                <p className="mt-1 text-sm text-orange-800">
+                  This event is filling up fast. Register soon to secure your spot.
                 </p>
               </div>
             </div>

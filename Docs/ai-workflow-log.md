@@ -3384,3 +3384,41 @@ Estimate: ~90% (AI generated ~920 lines, ~100 lines manual test adjustments)
 - Separate sections better UX than tabs for seeing all at once
 
 ---
+
+## [2026-02-04 19:15] - REG-004 Capacity Validation Enhancement
+
+### Prompt
+Implement REG-004 story from user story file. Ask if something unclear. You can also use workflow log to check what was done before if you need. After it will be done, In log entry for promt section use my exact prompt without changes from your side. (you can add this rule to common isntruction)
+
+### Context
+- REG-001 already implemented capacity validation in backend
+- EventResponse already had RegistrationCount field
+- Frontend already displayed basic capacity info
+- User preferences: Banner style (A), >80% threshold, 'Almost Full - Only X spots remaining!', show on event cards too
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Models/DTOs/Events/EventResponse.cs` - Modified: Added AvailableSpots and IsFull computed properties
+- `backend/src/VolunteerPortal.API/Services/EventService.cs` - Modified: Calculate AvailableSpots and IsFull in MapToResponse
+- `frontend/src/pages/public/EventDetailsPage.tsx` - Modified: Added nearly full banner (>80%), use backend isFull field
+- `frontend/src/components/events/EventCard.tsx` - Modified: Added 'Almost Full' badge when >80% capacity
+- `frontend/src/__tests__/components/events/EventCard.test.tsx` - Modified: Added 4 tests for nearly full badge logic
+
+### Generated Code Summary
+- Backend DTO enhancements: AvailableSpots (capacity - registrationCount), IsFull boolean
+- Nearly full banner on EventDetailsPage: Orange alert showing remaining spots
+- Nearly full badge on EventCard: Yellow badge appearing at >80% capacity
+- Comprehensive tests covering edge cases (80% boundary, full vs nearly full, cancelled events)
+
+### Result
+ Success - Backend builds, frontend 184/185 tests passing (1 pre-existing failure)
+
+### AI Generation Percentage
+Estimate: ~88%
+
+### Learnings/Notes
+- Most capacity logic already existed from REG-001
+- User clarifications upfront (4 questions answered) prevented rework
+- Boundary testing important: exactly 80% vs >80%
+- Conditional rendering: Nearly full hidden when cancelled or full
+
+---

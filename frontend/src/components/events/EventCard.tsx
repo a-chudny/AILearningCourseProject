@@ -30,7 +30,7 @@ export function EventCard({ event }: EventCardProps) {
   const availableSpots = event.capacity - event.registrationCount;
   const capacityPercentage = (event.registrationCount / event.capacity) * 100;
   const isFull = availableSpots <= 0;
-  const isAlmostFull = capacityPercentage >= 80 && !isFull;
+  const isAlmostFull = capacityPercentage > 80 && !isFull;
 
   // Show only first 8 skills, with "+X more" indicator
   const maxVisibleSkills = 8;
@@ -95,6 +95,15 @@ export function EventCard({ event }: EventCardProps) {
             <div className="absolute top-2 right-2">
               <span className="inline-flex rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-800">
                 Full
+              </span>
+            </div>
+          )}
+
+          {/* Nearly full badge */}
+          {!isCancelled && !isFull && isAlmostFull && (
+            <div className="absolute top-2 right-2">
+              <span className="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">
+                Almost Full
               </span>
             </div>
           )}
