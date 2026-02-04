@@ -2275,3 +2275,203 @@ Breakdown:
 
 ---
 
+
+## [2026-02-04 14:40] - EVT-005: Main Application Layout Implementation
+
+### Prompt
+"Implement EVT-005 story from user story file. Ask if something unclear"
+
+User provided answers to 8 clarifying questions:
+1. Logo: Use same SVG from AuthLayout, store as separate file
+2. Dropdown: On hover, include Profile, My Events, Logout
+3. Mobile breakpoint: sm (640px)
+4. Footer: Copyright, about, contact (randomly generated)
+5. Layout scope: Best practice (apply to main pages, exclude auth pages)
+6. Navigation highlighting: Yes
+7. Header style: Fixed, color should fit layout organically
+8. "My Events" link: Navigate to specific route (page TBD)
+
+### Context
+- Continuing EVT series after successful EVT-003 (Event List) and EVT-004 (Event Details)
+- Need consistent navigation structure for entire application
+- Auth pages already have AuthLayout, need MainLayout for app pages
+- Fixed header allows persistent navigation
+- Mobile-first design with sm breakpoint
+- Role-based navigation items for different user types
+
+### Files Added/Modified
+- `frontend/src/assets/Logo.tsx` - Created: Reusable SVG logo component (25 lines)
+  - Extracted from AuthLayout for reuse
+  - Props: className, size (default 64)
+  - Clean SVG with heart + hands + circle design
+- `frontend/src/components/layout/Header.tsx` - Created: Main header with navigation (245 lines)
+  - Logo with brand name
+  - Dynamic navigation based on auth state
+  - Public links: Home, Events
+  - Authenticated links: + My Events
+  - Role-specific links: Create Event (Organizer/Admin), Admin Panel (Admin)
+  - User dropdown (hover) with Profile, My Events, Logout
+  - Login/Sign Up buttons for guests
+  - Mobile hamburger menu (sm breakpoint)
+  - Active route highlighting
+  - Smooth transitions and hover effects
+- `frontend/src/components/layout/Footer.tsx` - Created: Footer with 3 sections (123 lines)
+  - About section with mission statement
+  - Quick Links: Browse Events, About, Privacy, Terms
+  - Contact: Email, phone, address (randomly generated)
+  - Social media icons (Facebook, Twitter, LinkedIn)
+  - Dynamic copyright year
+  - Responsive 3-column grid (stacks on mobile)
+- `frontend/src/layouts/MainLayout.tsx` - Created: Layout wrapper (23 lines)
+  - Fixed header at top
+  - Flexible main content area (pt-16 for header)
+  - Max-width container (7xl) with padding
+  - Footer at bottom
+  - Min-height flex column layout
+- `frontend/src/layouts/AuthLayout.tsx` - Modified: Updated to use shared Logo component
+  - Removed inline SVG
+  - Imported Logo from `@/assets/Logo`
+- `frontend/src/routes/index.tsx` - Modified: Applied MainLayout to app pages
+  - Wrapped /, /events, /events/:id, 404 with MainLayout
+  - Auth pages (/login, /register) use AuthLayout (no MainLayout)
+- `frontend/src/__tests__/assets/Logo.test.tsx` - Created: Logo tests (4 tests)
+- `frontend/src/__tests__/components/layout/Header.test.tsx` - Created: Header tests (5 tests)
+- `frontend/src/__tests__/components/layout/Footer.test.tsx` - Created: Footer tests (6 tests)
+- `frontend/src/__tests__/layouts/MainLayout.test.tsx` - Created: MainLayout tests (5 tests)
+
+### Generated Code Summary
+- Complete layout system with header, footer, and wrapper
+- Logo: 25 lines (reusable component with props)
+- Header: 245 lines (navigation, dropdown, mobile menu, role logic)
+- Footer: 123 lines (3-section layout with links and contact)
+- MainLayout: 23 lines (wrapper with header/footer)
+- Tests: 20 tests across 4 files (~200 lines)
+- Route updates: Wrapped 4 routes with MainLayout
+- AuthLayout update: 1 line change (use shared Logo)
+- **Total: ~640 lines of production code + ~200 lines of tests**
+
+### Result
+ Success
+- All 108 frontend tests passing (16 test files)
+- Build successful in 1.13s
+- Fixed header with white background and subtle shadow
+- Responsive navigation (desktop + mobile hamburger menu)
+- Active route highlighting (blue underline)
+- Hover dropdown for authenticated users
+- Role-specific navigation (Organizer, Admin)
+- Mobile menu toggles correctly at sm breakpoint
+- Footer with 3-section grid, responsive layout
+- Social media links with external navigation
+- Dynamic copyright year
+- Proper TypeScript types throughout
+- Accessibility: ARIA labels, semantic HTML, keyboard nav
+
+### AI Generation Percentage
+Estimate: ~93% (AI generated ~590 lines, manual adjustments ~50 lines)
+
+Manual adjustments:
+- Fixed import path for useAuth (was `@/contexts`  `@/context`)
+- Fixed import for UserRole (was `@/types/api`  `@/types/enums`)
+- Fixed Footer test copyright regex (lost special character)
+- Adjusted MainLayout import paths for Header/Footer
+- Created test directories with PowerShell
+
+### Learnings/Notes
+- **Reusable Component Pattern**: Extracting Logo to separate file enables reuse across layouts
+- **Fixed Header Best Practice**: Using `pt-16` on main content prevents overlap
+- **Role-Based Navigation**: Clean conditional logic based on UserRole enum
+- **Hover Dropdown**: `onMouseEnter`/`onMouseLeave` for desktop UX
+- **Mobile Menu Pattern**: Conditional rendering based on state, closes on link click
+- **Active Route Highlighting**: `useLocation` + conditional classes
+- **Footer Grid**: 3-column on desktop, stacks on mobile with Tailwind `sm:grid-cols-3`
+- **Social Media Links**: `target="_blank"` + `rel="noopener noreferrer"` for security
+- **Test Organization**: Separate test files for each component, mirrors structure
+- **Layout Scope Decision**: Auth pages excluded from MainLayout (different UX needs)
+- **Import Path Gotcha**: Context folder is singular (`@/context`), not plural
+- **TypeScript Strict**: All components properly typed with interfaces
+- **Consistent Styling**: White header, gray-50 footer, blue-600 accents match existing components
+
+### Features Implemented
+**Header**:
+- Logo + brand name (hidden brand on mobile for space)
+- Dynamic navigation (public vs authenticated)
+- Role-specific links (Organizer: Create Event, Admin: Admin Panel)
+- User avatar circle with first initial
+- Hover dropdown with Profile, My Events, Logout
+- Active route highlighting (blue text + bottom border)
+- Login/Sign Up buttons for guests
+- Mobile hamburger menu (sm breakpoint = 640px)
+- User info in mobile menu (avatar + name + email)
+- Smooth transitions on all interactive elements
+
+**Footer**:
+- About section with mission statement
+- Quick Links section (4 links)
+- Contact section (email, phone, address)
+- Social media icons (Facebook, Twitter, LinkedIn)
+- Dynamic copyright year
+- Responsive 3-column grid  stacks on mobile
+- Hover effects on all links
+
+**MainLayout**:
+- Fixed header (always visible)
+- Flexible content area (grows to fill space)
+- Max-width container (7xl = 1280px)
+- Consistent padding (px-4, py-8)
+- Footer at bottom (flex-col layout)
+- Min-height 100vh (full viewport)
+
+**Tests** (20 total, all passing):
+- Logo: Default props, custom size, custom className, SVG structure
+- Header: Logo/brand render, public links, active highlighting, mobile toggle, menu close
+- Footer: Copyright, about section, quick links, contact section, social links, styling
+- MainLayout: Children render, header present, footer present, layout structure, max-width container
+
+### Technical Highlights
+1. **Component Extraction**: Logo component DRY principle applied
+2. **Conditional Navigation**: Different nav items per auth state + role
+3. **Hover Interactions**: Dropdown + chevron rotation on hover
+4. **Mobile-First**: Hamburger menu at sm, desktop nav hidden below
+5. **Route Awareness**: useLocation for active highlighting
+6. **Fixed Positioning**: Header stays at top, content offset with padding
+7. **Flex Layout**: Header  flex-1 main  footer pattern
+8. **TypeScript Safety**: All props typed, UserRole enum used correctly
+9. **Accessibility**: ARIA labels, semantic HTML (header, nav, main, footer)
+10. **Test Coverage**: 20 tests covering all major features and interactions
+
+### Design Decisions
+- **sm breakpoint**: Aligns with Tailwind defaults, good for tablet/phone split
+- **Fixed header**: Keeps navigation always accessible (UX best practice)
+- **White header**: Clean, professional look with subtle shadow
+- **Hover dropdown**: Better UX than click for desktop users
+- **Mobile menu**: Full-width overlay with user info at top
+- **Active highlighting**: Blue underline + text color for clear indication
+- **Footer 3-column**: Standard layout pattern, responsive stacking
+- **Random contact info**: Realistic placeholder data for demo
+- **Exclude auth pages**: Auth has different UX needs (centered, no nav)
+- **My Events link**: Navigate to route even though page not yet built
+- **Logo size 40**: Smaller in header (40px) vs auth page (64px)
+- **Brand hidden mobile**: Save space, logo is recognizable alone
+- **User avatar**: Friendly visual with first initial
+- **Role-specific links**: Only show what user can access
+- **Social links**: New tab + security attributes for external links
+
+### Future Enhancements (Not Implemented)
+- Search bar in header
+- Notifications dropdown
+- User settings in dropdown
+- Language selector
+- Dark mode toggle
+- Breadcrumb navigation
+- Mega menu for Events category
+- Footer newsletter signup
+- Sticky footer (always at bottom even with little content)
+- Header scroll behavior (hide on scroll down, show on scroll up)
+- User avatar image upload (currently just initial)
+- Badge/notification count on menu items
+- Keyboard shortcuts hint in dropdown
+- Accessibility: Skip to content link
+- Mobile: Slide-in animation for menu
+- Desktop: Submenu hover delay to prevent accidental opens
+
+---

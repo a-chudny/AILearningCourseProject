@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
+import { MainLayout } from '@/layouts/MainLayout'
 
 // Lazy load pages for code splitting
 const HomePage = lazy(() => import('@/pages/HomePage'))
@@ -25,13 +26,45 @@ export function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        {/* Main Layout Routes - pages with header and footer */}
+        <Route
+          path="/"
+          element={
+            <MainLayout>
+              <HomePage />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/events"
+          element={
+            <MainLayout>
+              <EventListPage />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/events/:id"
+          element={
+            <MainLayout>
+              <EventDetailsPage />
+            </MainLayout>
+          }
+        />
+
+        {/* Auth pages use AuthLayout (no MainLayout) */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/events" element={<EventListPage />} />
-        <Route path="/events/:id" element={<EventDetailsPage />} />
-        {/* Add more routes here as features are implemented */}
-        <Route path="*" element={<NotFoundPage />} />
+
+        {/* 404 page with MainLayout */}
+        <Route
+          path="*"
+          element={
+            <MainLayout>
+              <NotFoundPage />
+            </MainLayout>
+          }
+        />
       </Routes>
     </Suspense>
   )
