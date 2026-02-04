@@ -3534,3 +3534,41 @@ Estimate: 0% (discovery and verification only)
 - No missing functionality - all acceptance criteria met
 
 ---
+
+## [2026-02-04 19:12] - SKL-004: Skill Badges on Events
+
+### Prompt
+Implement SKL-004 story from user story file. Ask if something unclear. You can also use workflow log to check what was done before if you need
+
+### Context
+- SKL-001, SKL-002, SKL-003 complete
+- EventCard and EventDetailsPage already showed skills, but without color coding
+- Changed max visible skills from 8 to 3 per requirements
+
+### Files Added/Modified
+- `frontend/src/utils/skillColors.ts` - Created: Category-to-color mapping utility (12 categories, each with bg/text/border/hover colors)
+- `frontend/src/components/skills/SkillBadge.tsx` - Created: SkillBadge component with tooltip, SkillBadgeList component for +N more indicator
+- `frontend/src/components/events/EventCard.tsx` - Modified: Use SkillBadgeList with max 3 skills and tooltips
+- `frontend/src/pages/public/EventDetailsPage.tsx` - Modified: Use SkillBadge with medium size and tooltips
+- `frontend/src/__tests__/components/events/EventCard.test.tsx` - Modified: Updated test from 8 to 3 skills
+
+### Generated Code Summary
+- skillColors.ts: Maps 12 categories to Tailwind color variants (red, purple, blue, indigo, orange, amber, green, pink, cyan, violet, slate, rose)
+- SkillBadge: Single badge with size variants (sm/md/lg), hover tooltip showing category, optional click/remove handlers
+- SkillBadgeList: Shows up to N skills with "+X more" indicator, tooltips on "+N more" show all hidden skills
+- EventCard: Shows max 3 skills with category colors and tooltips
+- EventDetailsPage: Shows all skills with medium badges and category tooltips
+
+### Result
+ Success - All EventCard tests passing (18/18), frontend builds successfully
+
+### AI Generation Percentage
+Estimate: ~95%
+
+### Learnings/Notes
+- Color-coded badges improve visual scanning of skill requirements
+- Tooltip on "+N more" badge shows full list without cluttering UI
+- Changed from 8 to 3 max visible skills per acceptance criteria
+- Category colors use Tailwind's 50/700 shade pattern for accessibility
+
+---
