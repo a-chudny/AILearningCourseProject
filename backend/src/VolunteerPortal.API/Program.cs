@@ -65,6 +65,7 @@ builder.Services.AddAuthorization();
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEventService, EventService>();
 
 // Add controllers with FluentValidation
 builder.Services.AddControllers();

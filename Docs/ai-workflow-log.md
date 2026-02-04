@@ -1444,3 +1444,88 @@ Breakdown:
 
 ---
 
+## [2026-02-04 12:45] - EVT-001: Event CRUD Service Implementation
+
+### Prompt
+"Implement EVT-001 story from user story file. Ask if something unclear" followed by "Use default assumptions" after clarifying questions were asked about delete behavior, pagination, filtering, update restrictions, and sorting.
+
+### Context
+- Completed Phase 2 (Authentication) with all 8 stories merged to main
+- Starting Phase 3 (Events Core) with EVT-001 as the first story
+- Building service layer for event management
+- Using existing Event entity with StartTime, DurationMinutes, ImageUrl, RegistrationDeadline, Status, IsDeleted
+- Following established patterns from AuthService implementation
+- Need complete CRUD operations with business logic separation from controllers
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Models/DTOs/Events/CreateEventRequest.cs` - Created (67 lines): Request DTO with Title, Description, Location, StartTime, DurationMinutes, Capacity, ImageUrl?, RegistrationDeadline?, RequiredSkillIds
+- `backend/src/VolunteerPortal.API/Models/DTOs/Events/UpdateEventRequest.cs` - Created (72 lines): Update DTO including Status field for event cancellation
+- `backend/src/VolunteerPortal.API/Models/DTOs/Events/EventResponse.cs` - Created (97 lines): Complete event response with organizer details, registration count (Confirmed only), required skills
+- `backend/src/VolunteerPortal.API/Models/DTOs/Events/EventQueryParams.cs` - Created (49 lines): Query parameters with Page (default 1), PageSize (default 20), IncludePastEvents (default false), IncludeDeleted (default false), SearchTerm, Status, SortBy (default "StartTime"), SortDirection (default "asc")
+- `backend/src/VolunteerPortal.API/Models/DTOs/Events/EventListResponse.cs` - Created (50 lines): Paginated response with Events list and metadata (Page, PageSize, TotalCount, TotalPages, HasPreviousPage, HasNextPage)
+- `backend/src/VolunteerPortal.API/Services/Interfaces/IEventService.cs` - Created (57 lines): Service interface with CreateAsync, UpdateAsync, DeleteAsync, GetByIdAsync, GetAllAsync methods with XML documentation
+- `backend/src/VolunteerPortal.API/Services/EventService.cs` - Created (338 lines): Complete implementation with all business logic
+- `backend/src/VolunteerPortal.API/Validators/CreateEventRequestValidator.cs` - Created (78 lines): FluentValidation with custom rules (BeInFuture, BeValidUrlOrNull, BeBeforeStartTime, BeUniqueSkillIds)
+- `backend/src/VolunteerPortal.API/Validators/UpdateEventRequestValidator.cs` - Created (75 lines): Similar validation without future date requirement for admin flexibility
+- `backend/src/VolunteerPortal.API/Program.cs` - Modified: Added EventService DI registration after AuthService
+- `backend/tests/VolunteerPortal.Tests/Services/EventServiceTests.cs` - Created (747 lines): 20 comprehensive unit tests with helper methods
+
+### Generated Code Summary
+**Service Implementation (EventService.cs - 338 lines):**
+- **CreateAsync**: Validates organizer exists (KeyNotFoundException), checks future date (InvalidOperationException), validates registration deadline before start time, creates event, associates skills via EventSkills join table
+- **UpdateAsync**: Validates event exists, checks ownership (owner or admin), allows admin to bypass future date check, updates all fields including skills (removes old, adds new)
+- **DeleteAsync**: Soft delete with IsDeleted flag, validates ownership (owner or admin)
+- **GetByIdAsync**: Retrieves with eager loading (Organizer, Registrations, EventSkills.Skill), excludes soft-deleted by default
+- **GetAllAsync**: Query builder with filtering (IsDeleted, past/upcoming events, status, search by title/description), sorting (StartTime/Title/CreatedAt with asc/desc), pagination with ToListAsync, returns EventListResponse with metadata
+
+**DTOs (5 files - 335 lines total):**
+- Full DataAnnotations validation attributes (Required, MaxLength, Range, Url)
+- Comprehensive XML documentation
+- EventResponse includes calculated RegistrationCount (Confirmed status only)
+- EventQueryParams with sensible defaults for user-focused discovery
+
+**Validators (2 files - 153 lines total):**
+- Custom validation rules with clear error messages
+- BeInFuture: StartTime must be in the future
+- BeValidUrlOrNull: HTTP/HTTPS URL format validation
+- BeBeforeStartTime: RegistrationDeadline before StartTime
+- BeUniqueSkillIds: No duplicate skill IDs
+
+**Tests (747 lines with 20 tests):**
+- CreateAsync: 5 tests (valid request, invalid organizer, past start time, invalid deadline, with skills)
+- UpdateAsync: 5 tests (valid update, nonexistent event, non-owner authorization, admin override, skill updates)
+- DeleteAsync: 4 tests (valid soft delete, nonexistent event, non-owner authorization, admin delete)
+- GetByIdAsync: 3 tests (valid ID, nonexistent ID, soft-deleted returns null)
+- GetAllAsync: 8 tests (upcoming events only, include past, search filter, pagination, status filter, soft-deleted excluded, registration count calculation)
+
+### Result
+✅ Success
+- All 20 EventService tests passing (23 total including existing tests)
+- Service layer fully implemented with business logic separation
+- Soft delete pattern consistent with User entity design
+- Role-based authorization working (owner or admin can update/delete)
+- Pagination and filtering infrastructure ready for scalability
+- Organizer validation ensures events have valid creators
+- Registration count calculated correctly (Confirmed status only)
+- Skills association working through EventSkills join table
+- Manual adjustments: Fixed Skill entity mapping (Category doesn't exist, used Description) in 2 places (EventService.cs line 332 and EventServiceTests.cs line 43, 361)
+
+### AI Generation Percentage
+Estimate: ~95% (AI generated ~1,880 lines, manual fixed 4 lines for Skill.Category→Description mapping)
+
+### Learnings/Notes
+- Detailed prompt with entity properties and clarifying questions produced excellent comprehensive results
+- AI correctly inferred navigation properties and join table patterns from existing codebase
+- Generated tests covered edge cases automatically without explicit instruction
+- Default assumptions approach worked well: soft delete, 20 items/page, upcoming events by default, owner/admin authorization, sort by StartTime ascending
+- Minor schema mismatch required manual fix: Skill entity has Description not Category field
+- Prompt pattern "Implement [story-id] from user story file" + "Use default assumptions" is highly effective for rapid development
+- Service layer complexity (338 lines) handled well with proper separation of concerns
+- FluentValidation custom rules generated correctly with proper error messages
+- Test infrastructure with in-memory database reused existing patterns perfectly
+- **Workflow logging issue identified**: Initial log entry was incorrectly placed at beginning of file instead of end - this is a recurring pattern that needed correction
+- **Process improvement**: Updated `.github/copilot-instructions.md` with CRITICAL warning section and additional emphasis in Logging Guidelines (point #8) to always append logs at END of file
+- **Manual correction required**: Moved EVT-001 entry from lines 1-88 to end of file to maintain proper chronological order (oldest→newest)
+
+---
+
