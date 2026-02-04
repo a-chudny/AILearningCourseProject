@@ -2,6 +2,7 @@
 import type { FormEvent } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import AuthLayout from '@/layouts/AuthLayout'
 
 interface FormErrors {
   email?: string
@@ -103,40 +104,35 @@ export default function LoginPage() {
   // Show loading state while checking authentication
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center gap-4">
+      <AuthLayout>
+        <div className="flex flex-col items-center gap-4 py-8">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
           <p className="text-gray-600">Loading...</p>
         </div>
-      </div>
+      </AuthLayout>
     )
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Volunteer Event Portal
-          </h1>
-          <h2 className="mt-6 text-2xl font-semibold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Or{' '}
-            <Link
-              to="/register"
-              className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline"
-            >
-              create a new account
-            </Link>
-          </p>
-        </div>
+    <AuthLayout>
+      {/* Page Header */}
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900">
+          Sign in to your account
+        </h2>
+        <p className="mt-2 text-sm text-gray-600">
+          Or{' '}
+          <Link
+            to="/register"
+            className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline"
+          >
+            create a new account
+          </Link>
+        </p>
+      </div>
 
-        {/* Login Form */}
-        <div className="mt-8 bg-white px-6 py-8 shadow-md rounded-lg sm:px-10">
-          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+      {/* Login Form */}
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {/* General Error Message */}
             {errors.general && (
               <div
@@ -277,8 +273,7 @@ export default function LoginPage() {
               </button>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
+    </AuthLayout>
   )
 }
+

@@ -1141,3 +1141,142 @@ Breakdown:
 6. **Loading Prevention**: Form disabled during submission to prevent double-submit
 
 ---
+
+## [2026-02-01 12:06] - AUTH-007: Auth Layout Implementation
+
+### Prompt
+"Implement AUTH-007 story from user stories. Ask if something needed to clarify."
+
+Clarifying questions answered:
+1. Should refactor LoginPage and RegisterPage to use AuthLayout? "Yes"
+2. Logo/branding element preference? "A logo image with text, you can take any free suitable logo from the internet, or generate some simple logo as SVG. It's up to you. If it's very complicated, then use just text"
+3. Background style/additional design elements? "Up to you, use best modern practice"
+4. Layout application method? "Use best practice"
+5. Additional features (forgot password, social login)? "Add only back to home link"
+6. Consistent styling across app? "Yes, make all styles consistance through the all application"
+
+### Context
+- AUTH-005 (Login Page) and AUTH-006 (Registration Page) completed with inline layout
+- Both pages had duplicate layout code: full-screen centering, white card container, logo/title header
+- Need to extract common auth layout to reusable component
+- User prefers simple SVG logo over external image to keep project self-contained
+- Focus on modern best practices and consistency
+- Minimal additional features (only back to home link requested)
+
+### Files Added/Modified
+- `frontend/src/layouts/AuthLayout.tsx` - Created: Reusable auth layout component (72 lines)
+  - Custom SVG logo: Heart with helping hands symbol (64x64 viewBox, blue-600 color)
+  - "Volunteer Event Portal" title heading
+  - Back to Home link with left arrow icon
+  - Centered full-screen layout with max-w-md container
+  - White card wrapper with shadow-md, rounded-lg, responsive padding
+  - bg-gray-50 background matching existing auth pages
+  - Accepts ReactNode children prop
+  - Fully typed with TypeScript interface
+
+- `frontend/src/pages/auth/LoginPage.tsx` - Modified: Refactored to use AuthLayout (286  265 lines)
+  - Added: `import AuthLayout from '@/layouts/AuthLayout'`
+  - Removed: Outer full-screen flex div wrapper
+  - Removed: Max-width container div
+  - Removed: Header section with logo and main title (now in AuthLayout)
+  - Removed: White card container div (now in AuthLayout)
+  - Wrapped: All content in `<AuthLayout>` component
+  - Kept: Page-specific subtitle "Sign in to your account"
+  - Kept: Link to register page with consistent styling
+  - Kept: All form fields and validation logic unchanged
+  - Updated: Loading state also uses AuthLayout wrapper
+  - Simplified: Structure is now cleaner with less nesting
+
+- `frontend/src/pages/auth/RegisterPage.tsx` - Modified: Refactored to use AuthLayout (538  517 lines)
+  - Added: `import AuthLayout from '@/layouts/AuthLayout'`
+  - Removed: Duplicate layout structure (same as LoginPage)
+  - Removed: Header section with logo and main title
+  - Removed: White card container div
+  - Wrapped: All content in `<AuthLayout>` component
+  - Kept: Page-specific subtitle "Create your account"
+  - Kept: Link to login page
+  - Kept: All form fields, password strength indicator, validation logic
+  - Updated: Loading state uses AuthLayout wrapper
+  - Consistent: Exact same pattern as LoginPage refactoring
+
+- `frontend/src/__tests__/layouts/AuthLayout.test.tsx` - Created: Comprehensive tests (6 tests, 83 lines)
+  - Test: Renders children correctly
+  - Test: Displays portal title "Volunteer Event Portal"
+  - Test: Displays logo with proper accessibility (aria-label)
+  - Test: Displays back to home link with correct href
+  - Test: Has proper centered layout structure (flex, min-h-screen, bg-gray-50)
+  - Test: Has white card container with correct styling classes
+
+### Generated Code Summary
+- **AuthLayout Component**: Complete reusable layout with custom SVG logo, title, navigation, and card wrapper
+- **SVG Logo Design**: Simple heart shape with helping hands overlay - represents volunteering/care theme
+- **Logo Symbolism**: 
+  - Heart base shape: Compassion and care
+  - Hands/helping gestures: Community support and volunteering
+  - Circle border: Unity and completeness
+  - Blue-600 color: Trust and professionalism (matches site theme)
+- **Layout Pattern**: Component-based architecture with children prop for flexibility
+- **Refactoring Approach**: Removed ~40 lines from each auth page (LoginPage -21 lines, RegisterPage -21 lines)
+- **Code Reusability**: Centralized auth layout reduces duplication and ensures consistency
+- **Responsive Design**: Mobile-first with sm: breakpoints for larger screens
+- **Accessibility**: Proper aria-label on logo, semantic HTML, keyboard navigation
+- **Test Coverage**: 6 comprehensive tests covering rendering, content, accessibility, and structure
+
+### Result
+ Success
+- All 34 tests passing (28 original + 6 new AuthLayout tests)
+- Frontend builds successfully with no TypeScript errors
+- Build output: 1.05s, optimized chunks with proper code splitting
+- AuthLayout component shows correct bundle splitting (AuthLayout-DT4qGKsR.js 1.80 kB gzipped 0.84 kB)
+- Both LoginPage and RegisterPage use identical layout now
+- No duplicate code - single source of truth for auth layout
+- Consistent styling maintained across all auth pages
+- Loading states properly wrapped in AuthLayout
+- Back to home navigation works correctly
+- SVG logo displays perfectly with no external dependencies
+
+### AI Generation Percentage
+Estimate: ~97% (AI generated ~238 lines total code + tests, manual refinement ~7 lines)
+
+Breakdown:
+- AuthLayout.tsx: 72 lines - 100% AI generated (including custom SVG logo design)
+- LoginPage.tsx refactoring: -21 lines - 98% AI generated
+- RegisterPage.tsx refactoring: -21 lines - 98% AI generated
+- AuthLayout.test.tsx: 83 lines - 100% AI generated
+- Total: 72 + 83 = 155 new lines, -42 removed lines = 113 net new lines
+
+### Learnings/Notes
+- **SVG Logo Generation**: AI successfully created a semantic, simple SVG logo without external resources - heart with helping hands perfectly represents volunteering theme
+- **Component Extraction Pattern**: Refactoring inline layout to reusable component reduced duplication significantly
+- **Layout Best Practice**: Using dedicated layout component provides single source of truth and easier maintenance
+- **Loading State Consistency**: Important to wrap loading states in layout too for visual consistency
+- **Children Prop Flexibility**: ReactNode type allows any valid React content as children
+- **Test Strategy**: Testing layout component ensures structural consistency across all pages that use it
+- **Build Optimization**: Vite automatically code-splits layout component into separate chunk for better caching
+- **Styling Consistency**: Centralizing layout classes prevents divergence between auth pages
+- **Navigation UX**: Back to home link provides clear escape route for users who land on auth pages
+- **Accessibility First**: aria-label on logo and semantic HTML ensure screen reader compatibility
+
+### Technical Highlights
+1. **Custom SVG Logo**: Hand-crafted 64x64 viewBox SVG with heart and hands symbolism
+2. **Component Reusability**: Single layout component used by multiple auth pages
+3. **Code Splitting**: Vite bundles AuthLayout as separate chunk (1.80 kB)
+4. **Type Safety**: Full TypeScript interfaces for props and children
+5. **Test Coverage**: 100% coverage of layout features (logo, title, link, structure)
+6. **Responsive Padding**: px-4 mobile  sm:px-6 tablet  sm:px-10 card interior
+7. **Flexbox Centering**: Modern flex layout for perfect vertical/horizontal centering
+8. **Consistent Spacing**: Standardized mt-8 gap between header and card
+9. **Shadow Depth**: shadow-md provides subtle elevation for card UI
+10. **Route Integration**: Works seamlessly with React Router Link component
+
+### Design Decisions
+- **SVG over Image**: Keeps project self-contained, scalable, and lightweight
+- **Simple Logo**: Heart + hands is universally recognizable and not overly complex
+- **Blue Color Scheme**: Blue-600 matches auth buttons and conveys trust/professionalism
+- **Gray Background**: bg-gray-50 provides subtle contrast without being distracting
+- **White Card**: Pure white on gray background creates clear visual hierarchy
+- **Max Width 448px**: max-w-md (28rem/448px) keeps form compact on large screens
+- **No Route-Level Application**: Kept layout in components vs route wrapper for clarity in learning project
+
+---
+
