@@ -14,10 +14,14 @@ namespace VolunteerPortal.API.Controllers;
 public class EventsController : ControllerBase
 {
     private readonly IEventService _eventService;
+    private readonly IFileStorageService _fileStorageService;
 
-    public EventsController(IEventService eventService)
+    public EventsController(
+        IEventService eventService,
+        IFileStorageService fileStorageService)
     {
         _eventService = eventService;
+        _fileStorageService = fileStorageService;
     }
 
     /// <summary>
@@ -151,6 +155,134 @@ public class EventsController : ControllerBase
         catch (UnauthorizedAccessException ex)
         {
             return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Upload an image for an event
+    /// </summary>
+    /// <param name="id">Event ID</param>
+    /// <param name="file">Image file (JPG or PNG, max 5MB)</param>
+    /// <returns>Updated event with image URL</returns>
+    [HttpPost("{id}/image")]
+    [Authorize(Roles = "Organizer,Admin")]
+    [ProducesResponseType(typeof(EventResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<EventResponse>> UploadEventImage(int id, [FromForm] IFormFile file)
+    {
+        try
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            
+            // Verify event exists and user has permission
+            var existingEvent = await _eventService.GetByIdAsync(id);
+            var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+            
+            if (existingEvent.OrganizerId != userId && userRole != "Admin")
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, 
+                    new { message = "You don't have permission to upload images for this event." });
+            }
+
+            // Delete old image if exists
+            if (!string.IsNullOrEmpty(existingEvent.ImageUrl))
+            {
+                await _fileStorageService.DeleteAsync(existingEvent.ImageUrl);
+            }
+
+            // Upload new image
+            var imageUrl = await _fileStorageService.UploadAsync(file, "events");
+
+            // Update event with new image URL
+            var updateRequest = new UpdateEventRequest
+            {
+                Title = existingEvent.Title,
+                Description = existingEvent.Description,
+                Location = existingEvent.Location,
+                StartTime = existingEvent.StartTime,
+                DurationMinutes = existingEvent.DurationMinutes,
+                Capacity = existingEvent.Capacity,
+                ImageUrl = imageUrl,
+                RegistrationDeadline = existingEvent.RegistrationDeadline,
+                RequiredSkillIds = existingEvent.RequiredSkills.Select(s => s.Id).ToList(),
+                Status = existingEvent.Status
+            };
+
+            var updatedEvent = await _eventService.UpdateAsync(id, updateRequest, userId);
+            return Ok(updatedEvent);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (IOException ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Delete an event's image
+    /// </summary>
+    /// <param name="id">Event ID</param>
+    /// <returns>Updated event without image</returns>
+    [HttpDelete("{id}/image")]
+    [Authorize(Roles = "Organizer,Admin")]
+    [ProducesResponseType(typeof(EventResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<EventResponse>> DeleteEventImage(int id)
+    {
+        try
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            
+            // Verify event exists and user has permission
+            var existingEvent = await _eventService.GetByIdAsync(id);
+            var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+            
+            if (existingEvent.OrganizerId != userId && userRole != "Admin")
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, 
+                    new { message = "You don't have permission to delete images for this event." });
+            }
+
+            // Delete image file if exists
+            if (!string.IsNullOrEmpty(existingEvent.ImageUrl))
+            {
+                await _fileStorageService.DeleteAsync(existingEvent.ImageUrl);
+            }
+
+            // Update event to remove image URL
+            var updateRequest = new UpdateEventRequest
+            {
+                Title = existingEvent.Title,
+                Description = existingEvent.Description,
+                Location = existingEvent.Location,
+                StartTime = existingEvent.StartTime,
+                DurationMinutes = existingEvent.DurationMinutes,
+                Capacity = existingEvent.Capacity,
+                ImageUrl = null,
+                RegistrationDeadline = existingEvent.RegistrationDeadline,
+                RequiredSkillIds = existingEvent.RequiredSkills.Select(s => s.Id).ToList(),
+                Status = existingEvent.Status
+            };
+
+            var updatedEvent = await _eventService.UpdateAsync(id, updateRequest, userId);
+            return Ok(updatedEvent);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
         }
     }
 }

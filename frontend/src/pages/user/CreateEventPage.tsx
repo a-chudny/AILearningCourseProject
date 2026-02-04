@@ -1,6 +1,7 @@
 ﻿import { useNavigate } from 'react-router-dom'
 import { EventForm, type EventFormData } from '@/components/events/forms/EventForm'
 import { useCreateEvent } from '@/hooks/useCreateEvent'
+import { uploadEventImage } from '@/services/imageService'
 
 export default function CreateEventPage() {
   const navigate = useNavigate()
@@ -9,6 +10,16 @@ export default function CreateEventPage() {
   const handleSubmit = async (formData: EventFormData) => {
     try {
       const createdEvent = await createEventMutation.mutateAsync(formData)
+      
+      // Upload image if one was selected
+      if (formData.imageFile) {
+        try {
+          await uploadEventImage(createdEvent.id, formData.imageFile)
+        } catch (imageError) {
+          console.error('Failed to upload image:', imageError)
+          // Don't fail the whole operation if just image upload fails
+        }
+      }
       
       // Redirect to My Events page (placeholder route)
       // TODO: Update route when My Events page is implemented

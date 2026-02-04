@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { UserRole } from '@/types'
 import type { Skill } from '@/types'
 import type { UpdateEventRequest, EventResponse } from '@/services/eventService'
+import { uploadEventImage, deleteEventImage } from '@/services/imageService'
 
 /**
  * Modal component for unsaved changes confirmation
@@ -177,11 +178,29 @@ export default function EditEventPage() {
         registrationDeadline,
         requiredSkillIds,
         status: event.status, // Keep current status
-        // Note: Image upload will be handled separately in EVT-009
+        // Note: Image upload will be handled separately
       }
 
       // Submit update
       await updateEvent.mutateAsync({ id: eventId, data: updateRequest })
+      
+      // Handle image upload/deletion
+      if (formData.imageFile) {
+        // New image selected - upload it
+        try {
+          await uploadEventImage(eventId, formData.imageFile)
+        } catch (imageError) {
+          console.error('Failed to upload image:', imageError)
+          // Don't fail the whole operation if just image upload fails
+        }
+      } else if (!formData.imagePreview && event.imageUrl) {
+        // Image was removed - delete it
+        try {
+          await deleteEventImage(eventId)
+        } catch (imageError) {
+          console.error('Failed to delete image:', imageError)
+        }
+      }
       
       // Clear unsaved changes flag
       setHasUnsavedChanges(false)

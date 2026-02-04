@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, type FormEvent, type ChangeEvent } from 'react'
 import type { Skill } from '@/types'
 import { getSkills } from '@/services/skillService'
+import { ImageUpload } from '@/components/ImageUpload'
 
 export interface EventFormData {
   title: string
@@ -290,49 +291,6 @@ export function EventForm({
     
     // Notify parent of changes
     onChange?.()
-  }
-
-  // Handle image file selection
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    
-    if (file) {
-      // Validate file type
-      if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        setErrors(prev => ({
-          ...prev,
-          submit: 'Only JPG and PNG images are allowed',
-        }))
-        return
-      }
-
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({
-          ...prev,
-          submit: 'Image size must be less than 5MB',
-        }))
-        return
-      }
-
-      // Create preview
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          imageFile: file,
-          imagePreview: reader.result as string,
-        }))
-        // Notify parent of changes
-        onChange?.()
-      }
-      reader.readAsDataURL(file)
-      
-      setErrors(prev => {
-        const { submit, ...rest } = prev
-        return rest
-      })
-    }
   }
 
   // Remove selected image
@@ -718,61 +676,26 @@ export function EventForm({
           Event Image (Optional)
         </label>
         
-        {formData.imagePreview ? (
-          <div className="relative">
-            <img
-              src={formData.imagePreview}
-              alt="Event preview"
-              className="w-full h-48 object-cover rounded-md"
-            />
-            <button
-              type="button"
-              onClick={handleRemoveImage}
-              className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-colors"
-              disabled={isLoading}
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        ) : (
-          <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-            <div className="space-y-1 text-center">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              <div className="flex text-sm text-gray-600">
-                <label
-                  htmlFor="image"
-                  className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                >
-                  <span>Upload a file</span>
-                  <input
-                    id="image"
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    onChange={handleImageChange}
-                    className="sr-only"
-                    disabled={isLoading}
-                  />
-                </label>
-                <p className="pl-1">or drag and drop</p>
-              </div>
-              <p className="text-xs text-gray-500">PNG or JPG up to 5MB</p>
-            </div>
-          </div>
-        )}
+        <ImageUpload
+          imageUrl={formData.imagePreview}
+          onImageSelect={(file) => {
+            // Create preview
+            const reader = new FileReader()
+            reader.onloadend = () => {
+              setFormData(prev => ({
+                ...prev,
+                imageFile: file,
+                imagePreview: reader.result as string,
+              }))
+              // Notify parent of changes
+              onChange?.()
+            }
+            reader.readAsDataURL(file)
+          }}
+          onImageRemove={handleRemoveImage}
+          isUploading={false}
+          disabled={isLoading}
+        />
       </div>
 
       {/* Required Skills (Optional) */}

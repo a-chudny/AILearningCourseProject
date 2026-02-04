@@ -66,6 +66,7 @@ builder.Services.AddAuthorization();
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
 // Add controllers with FluentValidation
 builder.Services.AddControllers();
@@ -149,6 +150,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Enable static file serving for uploaded images
+app.UseStaticFiles();
 
 // Enable CORS
 app.UseCors("AllowFrontend");
