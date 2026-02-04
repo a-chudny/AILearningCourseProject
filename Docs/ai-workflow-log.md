@@ -3461,3 +3461,76 @@ Estimate: ~92%
 - Complete replace pattern: Remove all  validate  add new
 
 ---
+
+## [2026-02-04 18:58] - SKL-002: User Skill Selection in Profile (Frontend)
+
+### Prompt
+Implement SKL-002 story from user story file. Ask if something unclear. You can also use workflow log to check what was done before if you need
+
+### Context
+- SKL-001 backend complete, implementing frontend profile page
+- User clarifications: B) Save button, B) Basic profile info + skills, collapsible categories, add Profile link to nav
+- Profile link already existed in Header dropdown menu
+
+### Files Added/Modified
+- `frontend/src/services/skillService.ts` - Modified: Replaced mock with real API calls (getSkills, getUserSkills, updateUserSkills)
+- `frontend/src/hooks/useSkills.ts` - Created: Query hooks (useSkills, useUserSkills, useUpdateUserSkills) with React Query
+- `frontend/src/components/skills/SkillSelector.tsx` - Created: Multi-select with accordion categories, select/deselect all per category, skill badges
+- `frontend/src/pages/user/ProfilePage.tsx` - Created: Profile page with read-only info (name, email, role) and skill management
+- `frontend/src/routes/index.tsx` - Modified: Added /profile route with authentication guard
+
+### Generated Code Summary
+- SkillSelector: Category grouping with expand/collapse, select all per category, badges with remove buttons
+- ProfilePage: Basic profile info display, skill selector, save/cancel buttons, unsaved changes warning, success message
+- Hooks: Standard React Query patterns with proper cache invalidation
+- Save behavior: Batched updates with save button (not immediate on change)
+
+### Result
+ Success - Frontend builds, 184/185 tests passing (1 pre-existing failure)
+
+### AI Generation Percentage
+Estimate: ~93%
+
+### Learnings/Notes
+- Accordion UI for categories improves UX with many skills
+- Unsaved changes tracking with useEffect comparing Sets
+- Profile link already existed in dropdown (no nav update needed)
+- Skills use description field as category (backend pattern from FOUND-004)
+
+---
+
+## [2026-02-04 19:04] - SKL-003: Event Skill Requirements in Form
+
+### Prompt
+Implement SKL-003 story from user story file. Ask if something unclear. You can also use workflow log to check what was done before if you need
+
+### Context
+- SKL-001 and SKL-002 complete
+- Discovered SKL-003 already fully implemented in previous phase (likely FOUND-004 or EVT phase)
+
+### Files Already Implemented
+- `backend/src/VolunteerPortal.API/Models/DTOs/Events/CreateEventRequest.cs` - Has RequiredSkillIds property
+- `backend/src/VolunteerPortal.API/Models/DTOs/Events/UpdateEventRequest.cs` - Has RequiredSkillIds property  
+- `backend/src/VolunteerPortal.API/Services/EventService.cs` - Handles EventSkills in Create and Update methods
+- `frontend/src/components/events/forms/EventForm.tsx` - Full skill selector UI with dropdown, badges, and toggle
+- `frontend/src/hooks/useCreateEvent.ts` - Maps requiredSkills to requiredSkillIds
+- `frontend/src/pages/user/EditEventPage.tsx` - Extracts skill IDs and passes to update API
+
+### Verification Results
+- Backend EventService tests: 23/23 passing
+- Frontend EventForm: Skill selector fully functional with dropdown UI, selected badges, category display
+- API integration: Both create and update endpoints properly save EventSkill associations
+
+### Result
+ Already Complete - No changes needed
+
+### AI Generation Percentage
+Estimate: 0% (discovery and verification only)
+
+### Learnings/Notes
+- Important to check workflow log and existing codebase before implementing
+- Skills infrastructure (FOUND-004) included event-skill relationships from the start
+- EventForm was created with full skill selection UI already built in
+- No missing functionality - all acceptance criteria met
+
+---
