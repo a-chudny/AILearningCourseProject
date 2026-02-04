@@ -23,7 +23,7 @@ const mockUpcomingRegistration: RegistrationResponse = {
     startTime: '2026-03-15T09:00:00Z',
     durationMinutes: 180,
     status: EventStatus.Active,
-    imageUrl: null,
+    imageUrl: undefined,
   },
 };
 
@@ -40,7 +40,7 @@ const mockPastRegistration: RegistrationResponse = {
     startTime: '2026-01-20T14:00:00Z',
     durationMinutes: 120,
     status: EventStatus.Active,
-    imageUrl: null,
+    imageUrl: undefined,
   },
 };
 
@@ -57,7 +57,7 @@ const mockCancelledRegistration: RegistrationResponse = {
     startTime: '2026-01-25T10:00:00Z',
     durationMinutes: 90,
     status: EventStatus.Active,
-    imageUrl: null,
+    imageUrl: undefined,
   },
 };
 

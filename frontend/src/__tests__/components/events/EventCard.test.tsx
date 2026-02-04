@@ -98,27 +98,27 @@ describe('EventCard', () => {
     expect(screen.getByText('Driving')).toBeInTheDocument();
   });
 
-  it('shows "+X more" indicator when more than 8 skills', () => {
-    const manySkills = Array.from({ length: 10 }, (_, i) => ({
+  it('shows "+X more" indicator when more than 3 skills', () => {
+    const manySkills = Array.from({ length: 5 }, (_, i) => ({
       id: i + 1,
       name: `Skill ${i + 1}`,
-      description: `Description ${i + 1}`,
+      description: 'Test Category',
       createdAt: '2026-01-01T00:00:00Z',
     }));
     const eventWithManySkills = { ...mockEvent, requiredSkills: manySkills };
 
     renderWithRouter(<EventCard event={eventWithManySkills} />);
 
-    // Should show first 8 skills
+    // Should show first 3 skills
     expect(screen.getByText('Skill 1')).toBeInTheDocument();
-    expect(screen.getByText('Skill 8')).toBeInTheDocument();
+    expect(screen.getByText('Skill 3')).toBeInTheDocument();
 
     // Should show +2 more badge
     expect(screen.getByText('+2 more')).toBeInTheDocument();
 
-    // Should NOT show skill 9 and 10
-    expect(screen.queryByText('Skill 9')).not.toBeInTheDocument();
-    expect(screen.queryByText('Skill 10')).not.toBeInTheDocument();
+    // Should NOT show skill 4 and 5
+    expect(screen.queryByText('Skill 4')).not.toBeInTheDocument();
+    expect(screen.queryByText('Skill 5')).not.toBeInTheDocument();
   });
 
   it('links to event detail page', () => {

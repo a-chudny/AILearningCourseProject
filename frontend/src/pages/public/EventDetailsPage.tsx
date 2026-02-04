@@ -11,6 +11,7 @@ import {
 import { toast } from '@/utils/toast';
 import { CancelEventModal } from '@/components/modals/CancelEventModal';
 import { RegistrationConfirmModal } from '@/components/modals/RegistrationConfirmModal';
+import { SkillBadge } from '@/components/skills/SkillBadge';
 
 export default function EventDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -193,7 +194,7 @@ export default function EventDetailsPage() {
     );
   }
 
-  const availableSpots = event.availableSpots ?? event.capacity - event.registrationCount;
+  const availableSpots = event.capacity - event.registrationCount;
   const isNearlyFull = !isFull && (event.registrationCount / event.capacity) > 0.8;
 
   return (
@@ -404,20 +405,16 @@ export default function EventDetailsPage() {
           {/* Required skills */}
           {event.requiredSkills.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-lg font-semibold text-gray-900">Required Skills</h2>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">Required Skills</h2>
+              <p className="text-sm text-gray-600 mb-3">Volunteers should have the following skills:</p>
+              <div className="flex flex-wrap gap-2">
                 {event.requiredSkills.map((skill) => (
-                  <div
-                    key={skill.id}
-                    className="group relative rounded-lg border border-gray-200 bg-gray-50 p-3 transition-colors hover:bg-blue-50 hover:border-blue-200"
-                    title={skill.description}
-                  >
-                    <p className="font-medium text-gray-900">{skill.name}</p>
-                    {/* Description on hover */}
-                    <div className="invisible absolute left-0 top-full z-10 mt-2 w-64 rounded-lg border border-gray-200 bg-white p-3 shadow-lg opacity-0 transition-all group-hover:visible group-hover:opacity-100">
-                      <p className="text-sm text-gray-600">{skill.description}</p>
-                    </div>
-                  </div>
+                  <SkillBadge 
+                    key={skill.id} 
+                    skill={skill} 
+                    size="md"
+                    showTooltip={true}
+                  />
                 ))}
               </div>
             </div>

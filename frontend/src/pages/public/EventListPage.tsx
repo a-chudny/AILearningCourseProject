@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useEvents } from '@/hooks/useEvents';
 import { EventCard } from '@/components/events/EventCard';
 import { Pagination } from '@/components/events/Pagination';
@@ -6,14 +7,76 @@ import { EventFilters } from '@/components/events/EventFilters';
 import type { EventQueryParams } from '@/types/api';
 
 export default function EventListPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initialize query params from URL
+  const getInitialQueryParams = (): EventQueryParams => {
+    const page = Number(searchParams.get('page')) || 1;
+    const pageSize = Number(searchParams.get('pageSize')) || 20;
+    const includePastEvents = searchParams.get('includePastEvents') === 'true';
+    const searchTerm = searchParams.get('searchTerm') || undefined;
+    const status = searchParams.get('status') || undefined;
+    const sortBy = searchParams.get('sortBy') || 'StartTime';
+    const sortDirection = (searchParams.get('sortDirection') as 'asc' | 'desc') || 'asc';
+    
+    // Parse skillIds from comma-separated string
+    const skillIdsParam = searchParams.get('skillIds');
+    const skillIds = skillIdsParam
+      ? skillIdsParam.split(',').map(Number).filter((id) => !isNaN(id))
+      : undefined;
+    
+    const matchMySkills = searchParams.get('matchMySkills') === 'true';
+
+    return {
+      page,
+      pageSize,
+      includePastEvents,
+      searchTerm,
+      status,
+      sortBy,
+      sortDirection,
+      skillIds,
+      matchMySkills,
+    };
+  };
+
   // State for query parameters
-  const [queryParams, setQueryParams] = useState<EventQueryParams>({
-    page: 1,
-    pageSize: 20,
-    includePastEvents: false,
-    sortBy: 'StartTime',
-    sortDirection: 'asc',
-  });
+  const [queryParams, setQueryParams] = useState<EventQueryParams>(getInitialQueryParams);
+
+  // Update URL when query params change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    if (queryParams.page && queryParams.page > 1) {
+      params.set('page', queryParams.page.toString());
+    }
+    if (queryParams.pageSize && queryParams.pageSize !== 20) {
+      params.set('pageSize', queryParams.pageSize.toString());
+    }
+    if (queryParams.includePastEvents) {
+      params.set('includePastEvents', 'true');
+    }
+    if (queryParams.searchTerm) {
+      params.set('searchTerm', queryParams.searchTerm);
+    }
+    if (queryParams.status) {
+      params.set('status', queryParams.status);
+    }
+    if (queryParams.sortBy && queryParams.sortBy !== 'StartTime') {
+      params.set('sortBy', queryParams.sortBy);
+    }
+    if (queryParams.sortDirection && queryParams.sortDirection !== 'asc') {
+      params.set('sortDirection', queryParams.sortDirection);
+    }
+    if (queryParams.skillIds && queryParams.skillIds.length > 0) {
+      params.set('skillIds', queryParams.skillIds.join(','));
+    }
+    if (queryParams.matchMySkills) {
+      params.set('matchMySkills', 'true');
+    }
+
+    setSearchParams(params, { replace: true });
+  }, [queryParams, setSearchParams]);
 
   // Fetch events using React Query
   const { data, isLoading, isError, error } = useEvents(queryParams);
@@ -30,6 +93,8 @@ export default function EventListPage() {
     searchTerm?: string;
     status?: string;
     includePastEvents?: boolean;
+    skillIds?: number[];
+    matchMySkills?: boolean;
   }) => {
     setQueryParams((prev) => ({
       ...prev,
@@ -65,6 +130,8 @@ export default function EventListPage() {
             initialSearchTerm={queryParams.searchTerm}
             initialStatus={queryParams.status}
             initialIncludePastEvents={queryParams.includePastEvents}
+            initialSkillIds={queryParams.skillIds}
+            initialMatchMySkills={queryParams.matchMySkills}
           />
         </div>
 
@@ -151,7 +218,7 @@ export default function EventListPage() {
             </svg>
             <h3 className="mt-4 text-lg font-semibold text-gray-900">No events found</h3>
             <p className="mt-2 text-gray-600">
-              {queryParams.searchTerm || queryParams.status
+              {queryParams.searchTerm || queryParams.status || queryParams.skillIds || queryParams.matchMySkills
                 ? 'Try adjusting your filters to see more results'
                 : 'Check back later for upcoming volunteer opportunities'}
             </p>

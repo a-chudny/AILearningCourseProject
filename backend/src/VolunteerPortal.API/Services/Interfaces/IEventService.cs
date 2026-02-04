@@ -47,6 +47,7 @@ public interface IEventService
     /// Gets a paginated list of events based on query parameters.
     /// </summary>
     /// <param name="queryParams">Query parameters for filtering, sorting, and pagination.</param>
+    /// <param name="currentUserId">Optional user ID for skill-based filtering (for MatchMySkills).</param>
     /// <returns>Paginated list of events.</returns>
-    Task<EventListResponse> GetAllAsync(EventQueryParams queryParams);
+    Task<EventListResponse> GetAllAsync(EventQueryParams queryParams, int? currentUserId = null);
 }

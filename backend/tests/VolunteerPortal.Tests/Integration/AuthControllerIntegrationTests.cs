@@ -1,10 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using VolunteerPortal.API.Data;
 using VolunteerPortal.API.Models.DTOs.Auth;
 using VolunteerPortal.API.Models.Enums;
 using Xunit;
@@ -14,40 +10,16 @@ namespace VolunteerPortal.Tests.Integration;
 /// <summary>
 /// Integration tests for Auth endpoints
 /// </summary>
-public class AuthControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
+public class AuthControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>, IDisposable
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly CustomWebApplicationFactory _factory;
     private readonly HttpClient _client;
 
-    public AuthControllerIntegrationTests(WebApplicationFactory<Program> factory)
+    public AuthControllerIntegrationTests(CustomWebApplicationFactory factory)
     {
-        _factory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                // Remove PostgreSQL DbContext registration
-                var dbContextDescriptor = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
-
-                if (dbContextDescriptor != null)
-                {
-                    services.Remove(dbContextDescriptor);
-                }
-
-                // Add In-Memory database for testing
-                services.AddDbContext<ApplicationDbContext>(options =>
-                {
-                    options.UseInMemoryDatabase("IntegrationTestDb_" + Guid.NewGuid());
-                });
-            });
-        });
-
+        _factory = factory;
+        _factory.EnsureDatabaseCreated();
         _client = _factory.CreateClient();
-        
-        // Initialize database after factory is created
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        db.Database.EnsureCreated();
     }
 
     public void Dispose()

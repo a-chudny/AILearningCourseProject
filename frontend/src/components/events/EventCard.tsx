@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { EventResponse } from '@/services/eventService';
 import { EventStatus } from '@/types/enums';
+import { SkillBadgeList } from '@/components/skills/SkillBadge';
 
 interface EventCardProps {
   event: EventResponse;
@@ -31,11 +32,6 @@ export function EventCard({ event }: EventCardProps) {
   const capacityPercentage = (event.registrationCount / event.capacity) * 100;
   const isFull = availableSpots <= 0;
   const isAlmostFull = capacityPercentage > 80 && !isFull;
-
-  // Show only first 8 skills, with "+X more" indicator
-  const maxVisibleSkills = 8;
-  const visibleSkills = event.requiredSkills.slice(0, maxVisibleSkills);
-  const remainingSkillsCount = Math.max(0, event.requiredSkills.length - maxVisibleSkills);
 
   // Check if event is cancelled
   const isCancelled = event.status === EventStatus.Cancelled;
@@ -189,21 +185,11 @@ export function EventCard({ event }: EventCardProps) {
           {event.requiredSkills.length > 0 && (
             <div className="mt-4 flex-1">
               <h4 className="text-xs font-semibold text-gray-700 mb-2">Required Skills</h4>
-              <div className="flex flex-wrap gap-1.5">
-                {visibleSkills.map((skill) => (
-                  <span
-                    key={skill.id}
-                    className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700"
-                  >
-                    {skill.name}
-                  </span>
-                ))}
-                {remainingSkillsCount > 0 && (
-                  <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                    +{remainingSkillsCount} more
-                  </span>
-                )}
-              </div>
+              <SkillBadgeList 
+                skills={event.requiredSkills} 
+                maxVisible={3}
+                showTooltips={true}
+              />
             </div>
           )}
 

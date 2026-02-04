@@ -117,7 +117,9 @@ public class AuthController : ControllerBase
         try
         {
             // Extract user ID from JWT claims
-            var userIdClaim = User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
+            // Note: JwtBearer middleware maps 'sub' claim to ClaimTypes.NameIdentifier by default
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) 
+                ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
             
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
             {

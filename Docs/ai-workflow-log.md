@@ -3422,3 +3422,194 @@ Estimate: ~88%
 - Conditional rendering: Nearly full hidden when cancelled or full
 
 ---
+
+## [2026-02-04 18:44] - SKL-001: Skills API Endpoints (Backend)
+
+### Prompt
+Implement SKL-001 story from user story file. Ask if something unclear. You can also use workflow log to check what was done before if you need
+
+### Context
+- Starting Phase 5 (Skills Feature), Phase 4 (Registrations) merged to main
+- Skills infrastructure already exists: 15 seeded skills, Skill entity, UserSkill join table (from FOUND-004)
+- Asked 4 clarifying questions, all answered upfront
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Models/DTOs/Skills/UpdateUserSkillsRequest.cs` - Created: Simple wrapper with List<int> SkillIds
+- `backend/src/VolunteerPortal.API/Services/Interfaces/ISkillService.cs` - Created: Interface with 3 methods (GetAllSkills, GetUserSkills, UpdateUserSkills)
+- `backend/src/VolunteerPortal.API/Services/SkillService.cs` - Created: Service with validation, complete replace logic, duplicate handling
+- `backend/src/VolunteerPortal.API/Controllers/SkillsController.cs` - Created: 3 REST endpoints (GET /api/skills, GET/PUT /api/skills/me)
+- `backend/src/VolunteerPortal.API/Program.cs` - Modified: Registered ISkillService in DI
+- `backend/tests/VolunteerPortal.Tests/Services/SkillServiceTests.cs` - Created: 10 comprehensive unit tests
+
+### Generated Code Summary
+- GET /api/skills [AllowAnonymous]: Returns all skills ordered by name
+- GET /api/skills/me [Authorize]: Returns current user's skills from JWT claims
+- PUT /api/skills/me [Authorize]: Complete replace with validation and deduplication
+- UpdateUserSkillsAsync: Validates IDs, removes old skills, adds new ones (complete replace)
+- Error handling: ArgumentException with specific invalid skill IDs listed
+
+### Result
+ Success - Build succeeded, 10/10 tests passing
+
+### AI Generation Percentage
+Estimate: ~92%
+
+### Learnings/Notes
+- Detailed clarification questions upfront saved rework time
+- EF Core tracking issue with duplicates required Distinct() in service
+- FluentAssertions syntax: BeGreaterThanOrEqualTo (not BeGreaterOrEqualTo)
+- Complete replace pattern: Remove all  validate  add new
+
+---
+
+## [2026-02-04 18:58] - SKL-002: User Skill Selection in Profile (Frontend)
+
+### Prompt
+Implement SKL-002 story from user story file. Ask if something unclear. You can also use workflow log to check what was done before if you need
+
+### Context
+- SKL-001 backend complete, implementing frontend profile page
+- User clarifications: B) Save button, B) Basic profile info + skills, collapsible categories, add Profile link to nav
+- Profile link already existed in Header dropdown menu
+
+### Files Added/Modified
+- `frontend/src/services/skillService.ts` - Modified: Replaced mock with real API calls (getSkills, getUserSkills, updateUserSkills)
+- `frontend/src/hooks/useSkills.ts` - Created: Query hooks (useSkills, useUserSkills, useUpdateUserSkills) with React Query
+- `frontend/src/components/skills/SkillSelector.tsx` - Created: Multi-select with accordion categories, select/deselect all per category, skill badges
+- `frontend/src/pages/user/ProfilePage.tsx` - Created: Profile page with read-only info (name, email, role) and skill management
+- `frontend/src/routes/index.tsx` - Modified: Added /profile route with authentication guard
+
+### Generated Code Summary
+- SkillSelector: Category grouping with expand/collapse, select all per category, badges with remove buttons
+- ProfilePage: Basic profile info display, skill selector, save/cancel buttons, unsaved changes warning, success message
+- Hooks: Standard React Query patterns with proper cache invalidation
+- Save behavior: Batched updates with save button (not immediate on change)
+
+### Result
+ Success - Frontend builds, 184/185 tests passing (1 pre-existing failure)
+
+### AI Generation Percentage
+Estimate: ~93%
+
+### Learnings/Notes
+- Accordion UI for categories improves UX with many skills
+- Unsaved changes tracking with useEffect comparing Sets
+- Profile link already existed in dropdown (no nav update needed)
+- Skills use description field as category (backend pattern from FOUND-004)
+
+---
+
+## [2026-02-04 19:04] - SKL-003: Event Skill Requirements in Form
+
+### Prompt
+Implement SKL-003 story from user story file. Ask if something unclear. You can also use workflow log to check what was done before if you need
+
+### Context
+- SKL-001 and SKL-002 complete
+- Discovered SKL-003 already fully implemented in previous phase (likely FOUND-004 or EVT phase)
+
+### Files Already Implemented
+- `backend/src/VolunteerPortal.API/Models/DTOs/Events/CreateEventRequest.cs` - Has RequiredSkillIds property
+- `backend/src/VolunteerPortal.API/Models/DTOs/Events/UpdateEventRequest.cs` - Has RequiredSkillIds property  
+- `backend/src/VolunteerPortal.API/Services/EventService.cs` - Handles EventSkills in Create and Update methods
+- `frontend/src/components/events/forms/EventForm.tsx` - Full skill selector UI with dropdown, badges, and toggle
+- `frontend/src/hooks/useCreateEvent.ts` - Maps requiredSkills to requiredSkillIds
+- `frontend/src/pages/user/EditEventPage.tsx` - Extracts skill IDs and passes to update API
+
+### Verification Results
+- Backend EventService tests: 23/23 passing
+- Frontend EventForm: Skill selector fully functional with dropdown UI, selected badges, category display
+- API integration: Both create and update endpoints properly save EventSkill associations
+
+### Result
+ Already Complete - No changes needed
+
+### AI Generation Percentage
+Estimate: 0% (discovery and verification only)
+
+### Learnings/Notes
+- Important to check workflow log and existing codebase before implementing
+- Skills infrastructure (FOUND-004) included event-skill relationships from the start
+- EventForm was created with full skill selection UI already built in
+- No missing functionality - all acceptance criteria met
+
+---
+
+## [2026-02-04 19:12] - SKL-004: Skill Badges on Events
+
+### Prompt
+Implement SKL-004 story from user story file. Ask if something unclear. You can also use workflow log to check what was done before if you need
+
+### Context
+- SKL-001, SKL-002, SKL-003 complete
+- EventCard and EventDetailsPage already showed skills, but without color coding
+- Changed max visible skills from 8 to 3 per requirements
+
+### Files Added/Modified
+- `frontend/src/utils/skillColors.ts` - Created: Category-to-color mapping utility (12 categories, each with bg/text/border/hover colors)
+- `frontend/src/components/skills/SkillBadge.tsx` - Created: SkillBadge component with tooltip, SkillBadgeList component for +N more indicator
+- `frontend/src/components/events/EventCard.tsx` - Modified: Use SkillBadgeList with max 3 skills and tooltips
+- `frontend/src/pages/public/EventDetailsPage.tsx` - Modified: Use SkillBadge with medium size and tooltips
+- `frontend/src/__tests__/components/events/EventCard.test.tsx` - Modified: Updated test from 8 to 3 skills
+
+### Generated Code Summary
+- skillColors.ts: Maps 12 categories to Tailwind color variants (red, purple, blue, indigo, orange, amber, green, pink, cyan, violet, slate, rose)
+- SkillBadge: Single badge with size variants (sm/md/lg), hover tooltip showing category, optional click/remove handlers
+- SkillBadgeList: Shows up to N skills with "+X more" indicator, tooltips on "+N more" show all hidden skills
+- EventCard: Shows max 3 skills with category colors and tooltips
+- EventDetailsPage: Shows all skills with medium badges and category tooltips
+
+### Result
+ Success - All EventCard tests passing (18/18), frontend builds successfully
+
+### AI Generation Percentage
+Estimate: ~95%
+
+### Learnings/Notes
+- Color-coded badges improve visual scanning of skill requirements
+- Tooltip on "+N more" badge shows full list without cluttering UI
+- Changed from 8 to 3 max visible skills per acceptance criteria
+- Category colors use Tailwind's 50/700 shade pattern for accessibility
+
+---
+
+## [2026-02-05 00:30] - Backend Integration Test Fixes
+
+### Prompt
+"Could you fix these errors which appeared? Also fix all ui tests and fix integration tests of backend part"
+
+### Context
+- SKL-005 implementation complete with all tests passing
+- 32 backend integration tests failing with "JWT Secret is not configured"
+- Previous tests used inline WebApplicationFactory configuration which didn't work for JWT settings
+- Program.cs reads JWT config at startup, before WebApplicationFactory callbacks execute
+
+### Files Added/Modified
+- `backend/tests/VolunteerPortal.Tests/Integration/CustomWebApplicationFactory.cs` - Created: Shared test factory with InMemoryDatabaseRoot and JWT env vars
+- `backend/tests/VolunteerPortal.Tests/appsettings.Testing.json` - Created: Test JWT configuration (not used, replaced by env vars)
+- `backend/tests/VolunteerPortal.Tests/Integration/AuthControllerIntegrationTests.cs` - Modified: Use CustomWebApplicationFactory
+- `backend/tests/VolunteerPortal.Tests/Integration/EventsControllerIntegrationTests.cs` - Modified: Use CustomWebApplicationFactory, real JWT tokens
+- `backend/tests/VolunteerPortal.Tests/VolunteerPortal.Tests.csproj` - Modified: Added appsettings.Testing.json copy directive
+- `backend/src/VolunteerPortal.API/Controllers/EventsController.cs` - Modified: GetEventById null check (NoContentNotFound)
+- `backend/src/VolunteerPortal.API/Controllers/AuthController.cs` - Modified: JWT claim type lookup (ClaimTypes.NameIdentifier fallback)
+
+### Generated Code Summary
+- CustomWebApplicationFactory: Sets JWT env vars in constructor before host build, uses shared InMemoryDatabaseRoot
+- EventsController GetEventById: Fixed to check for null and return NotFound instead of relying on KeyNotFoundException
+- AuthController GetMe: Fixed to look for ClaimTypes.NameIdentifier (mapped by JwtBearer middleware) instead of only Sub claim
+- Test classes: Updated to use shared factory, helper methods generate real JWT tokens via login endpoint
+
+### Result
+ Success - All 101 backend tests passing (32 integration + 69 unit tests)
+
+### AI Generation Percentage
+Estimate: ~88%
+
+### Learnings/Notes
+- WebApplicationFactory.ConfigureAppConfiguration runs AFTER host is built, too late for Program.cs startup config
+- Environment variables set in factory constructor execute before host build - correct timing for JWT config
+- ASP.NET Core JwtBearer middleware maps standard JWT 'sub' claim to ClaimTypes.NameIdentifier by default
+- Shared InMemoryDatabaseRoot ensures all tests use same database instance for proper test isolation
+- EventService.GetByIdAsync returns null (not exception), controller must check null explicitly
+
+---

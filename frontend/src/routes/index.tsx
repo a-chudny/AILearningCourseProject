@@ -14,6 +14,7 @@ const EventDetailsPage = lazy(() => import('@/pages/public/EventDetailsPage'))
 const CreateEventPage = lazy(() => import('@/pages/user/CreateEventPage'))
 const EditEventPage = lazy(() => import('@/pages/user/EditEventPage'))
 const MyEventsPage = lazy(() => import('@/pages/user/MyEventsPage'))
+const ProfilePage = lazy(() => import('@/pages/user/ProfilePage'))
 
 // Loading fallback component
 function PageLoader() {
@@ -84,6 +85,16 @@ export function AppRoutes() {
             <RoleGuard allowedRoles={[UserRole.Volunteer, UserRole.Organizer, UserRole.Admin]}>
               <MainLayout>
                 <MyEventsPage />
+              </MainLayout>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <RoleGuard allowedRoles={[UserRole.Volunteer, UserRole.Organizer, UserRole.Admin]}>
+              <MainLayout>
+                <ProfilePage />
               </MainLayout>
             </RoleGuard>
           }

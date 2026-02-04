@@ -1,42 +1,26 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using VolunteerPortal.API.Data;
+using VolunteerPortal.API.Models.DTOs.Auth;
 using VolunteerPortal.API.Models.DTOs.Events;
 using VolunteerPortal.API.Models.Entities;
 using VolunteerPortal.API.Models.Enums;
 
 namespace VolunteerPortal.Tests.Integration;
 
-public class EventsControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+public class EventsControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly CustomWebApplicationFactory _factory;
     private readonly HttpClient _client;
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    public EventsControllerIntegrationTests(WebApplicationFactory<Program> factory)
+    public EventsControllerIntegrationTests(CustomWebApplicationFactory factory)
     {
-        _factory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                var descriptor = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
-
-                if (descriptor != null)
-                {
-                    services.Remove(descriptor);
-                }
-
-                services.AddDbContext<ApplicationDbContext>(options =>
-                {
-                    options.UseInMemoryDatabase("TestDatabase_Events");
-                });
-            });
-        });
-
+        _factory = factory;
+        _factory.EnsureDatabaseCreated();
         _client = _factory.CreateClient();
     }
 
@@ -375,13 +359,17 @@ public class EventsControllerIntegrationTests : IClassFixture<WebApplicationFact
 
     private async Task<string> GetOrganizerTokenAsync()
     {
+        // Create organizer directly in database with known password
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
+        var email = $"organizer{Guid.NewGuid()}@test.com";
+        var password = "Password123";
+
         var organizer = new User
         {
-            Email = $"organizer{Guid.NewGuid()}@test.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123"),
+            Email = email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
             Name = "New Organizer",
             Role = UserRole.Organizer,
             CreatedAt = DateTime.UtcNow,
@@ -391,19 +379,27 @@ public class EventsControllerIntegrationTests : IClassFixture<WebApplicationFact
         context.Users.Add(organizer);
         await context.SaveChangesAsync();
 
-        // Generate JWT token (simplified - in real tests would use auth endpoint)
-        return "mock-organizer-token";
+        // Login to get real JWT token
+        var loginRequest = new LoginRequest { Email = email, Password = password };
+        var response = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
+        var content = await response.Content.ReadAsStringAsync();
+        var authResponse = JsonSerializer.Deserialize<AuthResponse>(content, JsonOptions);
+        return authResponse!.Token;
     }
 
     private async Task<string> GetVolunteerTokenAsync()
     {
+        // Create volunteer directly in database with known password
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
+        var email = $"volunteer{Guid.NewGuid()}@test.com";
+        var password = "Password123";
+
         var volunteer = new User
         {
-            Email = $"volunteer{Guid.NewGuid()}@test.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123"),
+            Email = email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
             Name = "New Volunteer",
             Role = UserRole.Volunteer,
             CreatedAt = DateTime.UtcNow,
@@ -413,7 +409,12 @@ public class EventsControllerIntegrationTests : IClassFixture<WebApplicationFact
         context.Users.Add(volunteer);
         await context.SaveChangesAsync();
 
-        return "mock-volunteer-token";
+        // Login to get real JWT token
+        var loginRequest = new LoginRequest { Email = email, Password = password };
+        var response = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
+        var content = await response.Content.ReadAsStringAsync();
+        var authResponse = JsonSerializer.Deserialize<AuthResponse>(content, JsonOptions);
+        return authResponse!.Token;
     }
 
     private async Task<(int eventId, string token)> CreateEventAsOrganizerAsync()
@@ -421,10 +422,13 @@ public class EventsControllerIntegrationTests : IClassFixture<WebApplicationFact
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
+        var email = $"creator{Guid.NewGuid()}@test.com";
+        var password = "Password123";
+
         var organizer = new User
         {
-            Email = $"creator{Guid.NewGuid()}@test.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123"),
+            Email = email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
             Name = "Event Creator",
             Role = UserRole.Organizer,
             CreatedAt = DateTime.UtcNow,
@@ -451,6 +455,12 @@ public class EventsControllerIntegrationTests : IClassFixture<WebApplicationFact
         context.Events.Add(testEvent);
         await context.SaveChangesAsync();
 
-        return (testEvent.Id, "mock-creator-token");
+        // Login to get real JWT token
+        var loginRequest = new LoginRequest { Email = email, Password = password };
+        var response = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
+        var content = await response.Content.ReadAsStringAsync();
+        var authResponse = JsonSerializer.Deserialize<AuthResponse>(content, JsonOptions);
+
+        return (testEvent.Id, authResponse!.Token);
     }
 }

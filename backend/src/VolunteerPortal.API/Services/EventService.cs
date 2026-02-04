@@ -227,7 +227,7 @@ public class EventService : IEventService
     }
 
     /// <inheritdoc />
-    public async Task<EventListResponse> GetAllAsync(EventQueryParams queryParams)
+    public async Task<EventListResponse> GetAllAsync(EventQueryParams queryParams, int? currentUserId = null)
     {
         // Start with base query
         var query = _context.Events
@@ -262,6 +262,31 @@ public class EventService : IEventService
             query = query.Where(e => 
                 e.Title.ToLower().Contains(searchTerm) || 
                 e.Description.ToLower().Contains(searchTerm));
+        }
+
+        // Filter by skills - match ANY of the specified skills
+        if (queryParams.SkillIds != null && queryParams.SkillIds.Any())
+        {
+            query = query.Where(e => e.EventSkills.Any(es => queryParams.SkillIds.Contains(es.SkillId)));
+        }
+
+        // Filter by user's skills - match ANY of user's skills
+        if (queryParams.MatchMySkills && currentUserId.HasValue)
+        {
+            var userSkillIds = await _context.UserSkills
+                .Where(us => us.UserId == currentUserId.Value)
+                .Select(us => us.SkillId)
+                .ToListAsync();
+
+            if (userSkillIds.Any())
+            {
+                query = query.Where(e => e.EventSkills.Any(es => userSkillIds.Contains(es.SkillId)));
+            }
+            else
+            {
+                // User has no skills, return no events
+                query = query.Where(e => false);
+            }
         }
 
         // Get total count before pagination
