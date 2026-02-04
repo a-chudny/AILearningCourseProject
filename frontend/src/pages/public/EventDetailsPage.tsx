@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useEvent } from '@/hooks/useEvents';
+import { useEvent, useCancelEvent } from '@/hooks/useEvents';
 import { useAuth } from '@/hooks/useAuth';
 import { EventStatus, UserRole } from '@/types/enums';
 import {
@@ -8,8 +8,8 @@ import {
   registerForEvent,
   cancelRegistration,
 } from '@/services/registrationService';
-import { updateEvent } from '@/services/eventService';
 import { toast } from '@/utils/toast';
+import { CancelEventModal } from '@/components/modals/CancelEventModal';
 
 export default function EventDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -18,11 +18,12 @@ export default function EventDetailsPage() {
   const eventId = Number(id);
 
   const { data: event, isLoading, isError, error } = useEvent(eventId);
+  const { mutate: cancelEventMutation, isPending: isCancellingEvent } = useCancelEvent();
 
   const [isRegistered, setIsRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
-  const [showCancelEventDialog, setShowCancelEventDialog] = useState(false);
+  const [showCancelEventModal, setShowCancelEventModal] = useState(false);
 
   // Check registration status when event loads
   useState(() => {
@@ -86,22 +87,18 @@ export default function EventDetailsPage() {
   };
 
   // Handle cancel event (set status to Cancelled)
-  const handleCancelEvent = async () => {
+  const handleCancelEvent = () => {
     if (!event) return;
 
-    try {
-      await updateEvent(event.id, {
-        ...event,
-        requiredSkillIds: event.requiredSkills.map((s) => s.id),
-        status: EventStatus.Cancelled,
-      });
-      setShowCancelEventDialog(false);
-      toast.success('Event cancelled successfully');
-      // Reload page to show updated status
-      window.location.reload();
-    } catch (err) {
-      toast.error('Failed to cancel event. Please try again.');
-    }
+    cancelEventMutation(event.id, {
+      onSuccess: () => {
+        setShowCancelEventModal(false);
+        toast.success('Event cancelled successfully');
+      },
+      onError: () => {
+        toast.error('Failed to cancel event. Please try again.');
+      },
+    });
   };
 
   // Format date and time
@@ -219,6 +216,26 @@ export default function EventDetailsPage() {
 
         {/* Main content */}
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          {/* Cancelled banner */}
+          {isEventCancelled && (
+            <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 flex items-start gap-3">
+              <svg className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              <div>
+                <p className="font-semibold text-amber-900">This event has been cancelled</p>
+                <p className="mt-1 text-sm text-amber-800">
+                  This event is no longer accepting registrations and will not take place as scheduled.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Status badge */}
           {isEventCancelled && (
             <div className="mb-4">
@@ -375,7 +392,7 @@ export default function EventDetailsPage() {
           {/* Action buttons */}
           <div className="mt-8 flex flex-wrap gap-3">
             {/* Register/Cancel registration buttons for volunteers */}
-            {isAuthenticated && user?.role === UserRole.Volunteer && (
+            {isAuthenticated && user?.role === UserRole.Volunteer && !isEventCancelled && (
               <>
                 {isRegistered ? (
                   <button
@@ -445,8 +462,8 @@ export default function EventDetailsPage() {
             {/* Cancel event button for owner/admin */}
             {canEdit && !isEventCancelled && (
               <button
-                onClick={() => setShowCancelEventDialog(true)}
-                className="rounded-lg border border-red-600 bg-white px-6 py-3 font-medium text-red-600 transition-colors hover:bg-red-50"
+                onClick={() => setShowCancelEventModal(true)}
+                className="rounded-lg border border-amber-600 bg-white px-6 py-3 font-medium text-amber-700 transition-colors hover:bg-amber-50"
               >
                 Cancel Event
               </button>
@@ -455,32 +472,14 @@ export default function EventDetailsPage() {
         </div>
       </div>
 
-      {/* Cancel event confirmation dialog */}
-      {showCancelEventDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-900">Cancel Event</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Are you sure you want to cancel this event? This will notify all registered volunteers and prevent new
-              registrations.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={handleCancelEvent}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors hover:bg-red-700"
-              >
-                Yes, Cancel Event
-              </button>
-              <button
-                onClick={() => setShowCancelEventDialog(false)}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50"
-              >
-                No, Keep Event
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Cancel event confirmation modal */}
+      <CancelEventModal
+        isOpen={showCancelEventModal}
+        onClose={() => setShowCancelEventModal(false)}
+        onConfirm={handleCancelEvent}
+        eventTitle={event?.title ?? ''}
+        isLoading={isCancellingEvent}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import {
   createEvent,
   deleteEvent,
   updateEvent,
+  cancelEvent,
   type CreateEventRequest,
   type UpdateEventRequest,
   type EventResponse,
@@ -87,6 +88,22 @@ export function useDeleteEvent() {
     mutationFn: deleteEvent,
     onSuccess: () => {
       // Invalidate all event lists
+      queryClient.invalidateQueries({ queryKey: eventKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Hook for cancelling an event
+ */
+export function useCancelEvent() {
+  const queryClient = useQueryClient();
+
+  return useMutation<EventResponse, Error, number>({
+    mutationFn: cancelEvent,
+    onSuccess: (data) => {
+      // Invalidate the specific event and all lists
+      queryClient.invalidateQueries({ queryKey: eventKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: eventKeys.lists() });
     },
   });

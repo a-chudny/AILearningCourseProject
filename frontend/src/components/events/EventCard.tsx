@@ -45,7 +45,16 @@ export function EventCard({ event }: EventCardProps) {
       to={`/events/${event.id}`}
       className="group block rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-gray-300"
     >
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full relative">
+        {/* Gray overlay for cancelled events */}
+        {isCancelled && (
+          <div className="absolute inset-0 bg-gray-900 bg-opacity-40 rounded-lg z-10 flex items-center justify-center">
+            <div className="bg-white bg-opacity-95 px-6 py-3 rounded-lg shadow-lg">
+              <span className="text-xl font-bold text-gray-800">CANCELLED</span>
+            </div>
+          </div>
+        )}
+
         {/* Event image or placeholder */}
         <div className="relative h-48 overflow-hidden rounded-t-lg bg-gray-100">
           {event.imageUrl ? (

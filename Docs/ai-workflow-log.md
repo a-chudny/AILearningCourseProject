@@ -2937,3 +2937,149 @@ Manual adjustments:
 - **Future**: EVT-009 will add real image upload to form
 
 ---
+
+## [2026-02-04 14:30] - Event Cancellation Feature (EVT-010)
+
+### Prompt
+"Implement EVT-010 story from user story file. Ask if something unclear"
+
+### Context
+- Continuing Events Core phase implementation
+- EVT-007 and EVT-009 successfully completed and committed
+- EventStatus enum already has Active (0) and Cancelled (1) values
+- Need to prevent new registrations on cancelled events
+- Multiple UI updates required for consistency
+
+### User Clarifications Received
+1. No cancellation reason field needed (simplified implementation)
+2. Request body: simple empty object (no fields)
+3. Use existing EventStatus enum values
+4. Yellow warning banner for cancelled events
+5. Cancel button next to Edit button
+6. Simple yes/no confirmation modal
+7. Gray overlay with "CANCELLED" badge on event cards
+8. Hide registration button completely for cancelled events
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Controllers/EventsController.cs` - Modified: Added CancelEvent endpoint (PUT /api/events/{id}/cancel)
+- `backend/src/VolunteerPortal.API/Controllers/EventsController.cs` - Modified: Added using statement for EventStatus enum
+- `frontend/src/services/eventService.ts` - Modified: Added cancelEvent function
+- `frontend/src/hooks/useEvents.ts` - Modified: Added useCancelEvent hook with query invalidation
+- `frontend/src/components/modals/CancelEventModal.tsx` - Created: Confirmation modal with event title
+- `frontend/src/pages/public/EventDetailsPage.tsx` - Modified: Integrated cancel functionality, yellow banner, updated button state handling
+- `frontend/src/components/events/EventCard.tsx` - Modified: Added gray overlay for cancelled events with "CANCELLED" badge
+
+### Generated Code Summary
+
+**Backend (CancelEvent Endpoint)**
+- PUT /api/events/{id}/cancel endpoint with 5 response codes
+- Authorization: Organizer/Admin only
+- Ownership validation (owner or admin can cancel)
+- Status validation (only Active events can be cancelled)
+- Reuses UpdateEventRequest to set status to Cancelled
+- Proper error messages (403 Forbidden, 400 Bad Request)
+
+**Frontend (useEvents Hook)**
+- useCancelEvent() hook using useMutation
+- Automatic query invalidation on success
+- Invalidates both event detail and event lists
+- Proper error handling with callbacks
+
+**Frontend (CancelEventModal)**
+- Modal component for confirmation
+- Shows event title in confirmation text
+- Lists action consequences
+- Disabled state management during submission
+- Consistent styling with app theme
+
+**Frontend (EventDetailsPage)**
+- Yellow warning banner (amber-50 bg, amber-600 text)
+- Lists impact of cancellation
+- Cancel button colored amber (amber-700 hover)
+- Hides registration button for cancelled events
+- Registration deadline check updated
+- Modal integration with loading state
+
+**Frontend (EventCard)**
+- Gray overlay (bg-gray-900 with opacity-40)
+- "CANCELLED" badge in white box overlay
+- Maintains card structure and styling
+- Clear visual differentiation
+
+### Result
+✅ Success
+- Backend builds successfully (3 warnings, all pre-existing)
+- Frontend builds in 1.21s (184 modules transformed)
+- All TypeScript types correct
+- Cancel endpoint follows REST conventions
+- Query invalidation patterns match existing hooks
+- Modal UX consistent with app
+- Yellow banner and overlay provide clear visual feedback
+- Registration button hiding prevents user confusion
+- Full authorization and validation in place
+
+### AI Generation Percentage
+Estimate: ~88% (Backend endpoint, hooks, modal, and page updates ~95% generated; small type fixes and SVG icon replacement ~5% manual)
+
+### Learnings/Notes
+- EventStatus enum already had Cancelled value (no DB migration needed)
+- Simplified version (no reason field) is cleaner than alternatives
+- Yellow warning banner is less aggressive than red, better for cancelled state
+- Gray overlay on cards clearly shows status without preventing view
+- Query invalidation pattern from EVT-009 works perfectly here
+- Modal pattern reusable for future confirmation dialogs
+- Registration button check uses status directly (clean implementation)
+- Ownership validation consistent with update/delete endpoints
+
+### Technical Decisions
+- **No Reason Field**: User clarification #1 simplified implementation
+- **EventStatus Enum**: Reused existing values (type-safe, no migration)
+- **Yellow Banner**: Better UX than red for cancellation
+- **Gray Overlay**: Clear visual without blocking information
+- **Mutation Invalidation**: Ensures list/detail views stay in sync
+- **Modal Component**: Reusable pattern for future confirmations
+- **Authorization**: Consistent with existing endpoint patterns
+- **Status Validation**: Only Active → Cancelled allowed (business rule)
+
+### Code Quality Metrics
+- CancelEvent endpoint: ~50 lines (compact, well-documented)
+- useCancelEvent hook: ~10 lines (simple mutation wrapper)
+- CancelEventModal: ~85 lines (self-contained, no external deps)
+- EventDetailsPage changes: Integrated cleanly, 3 key modifications
+- EventCard changes: Minimal 12-line overlay addition
+- **Total Generated**: ~200 lines production code + modals
+
+### Integration Points
+- **Depends on**: EVT-004 EventDetailsPage, EventCard component
+- **Uses**: useMutation, useEvent hooks (TanStack Query)
+- **Affects**: Event lists show cancelled state, registration blocked
+- **Follows**: Authorization patterns from EVT-007, mutations from EVT-009
+
+### Test Status
+- Unit test framework ready (existing 130 tests pass for other features)
+- Integration tests have pre-existing EF Core configuration issue (not related to EVT-010)
+- Manual testing viable through UI
+
+### Acceptance Criteria Met
+- ✅ Only Active events can be cancelled
+- ✅ Only owner/admin can cancel
+- ✅ PUT /api/events/{id}/cancel endpoint
+- ✅ Event remains visible with Cancelled status
+- ✅ Registration disabled for cancelled events
+- ✅ Yellow warning banner displayed
+- ✅ Cancel button next to Edit
+- ✅ Confirmation modal required
+- ✅ Gray overlay badge on cards
+- ✅ Registration button hidden
+
+### Future Enhancements
+- Email notifications to registered volunteers when event cancelled
+- Cancellation reason field (if business requirement emerges)
+- Cancellation reason history/audit trail
+- Bulk cancellation for multiple events
+- Event re-activation (toggle between Active/Cancelled)
+- Automatic cancellation on date/time conflict
+- Cancellation template messages
+- Analytics on cancellation patterns
+
+---

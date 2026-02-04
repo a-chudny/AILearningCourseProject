@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using VolunteerPortal.API.Models.DTOs.Events;
+using VolunteerPortal.API.Models.Enums;
 using VolunteerPortal.API.Services.Interfaces;
 
 namespace VolunteerPortal.API.Controllers;
@@ -275,6 +276,64 @@ public class EventsController : ControllerBase
                 RegistrationDeadline = existingEvent.RegistrationDeadline,
                 RequiredSkillIds = existingEvent.RequiredSkills.Select(s => s.Id).ToList(),
                 Status = existingEvent.Status
+            };
+
+            var updatedEvent = await _eventService.UpdateAsync(id, updateRequest, userId);
+            return Ok(updatedEvent);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Cancel an event
+    /// </summary>
+    /// <param name="id">Event ID</param>
+    /// <returns>Updated event with cancelled status</returns>
+    [HttpPut("{id}/cancel")]
+    [Authorize(Roles = "Organizer,Admin")]
+    [ProducesResponseType(typeof(EventResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<EventResponse>> CancelEvent(int id)
+    {
+        try
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            
+            // Verify event exists and user has permission
+            var existingEvent = await _eventService.GetByIdAsync(id);
+            var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+            
+            if (existingEvent.OrganizerId != userId && userRole != "Admin")
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, 
+                    new { message = "You don't have permission to cancel this event." });
+            }
+
+            // Validate event is Active
+            if (existingEvent.Status != EventStatus.Active)
+            {
+                return BadRequest(new { message = "Only active events can be cancelled." });
+            }
+
+            // Update event to Cancelled status
+            var updateRequest = new UpdateEventRequest
+            {
+                Title = existingEvent.Title,
+                Description = existingEvent.Description,
+                Location = existingEvent.Location,
+                StartTime = existingEvent.StartTime,
+                DurationMinutes = existingEvent.DurationMinutes,
+                Capacity = existingEvent.Capacity,
+                ImageUrl = existingEvent.ImageUrl,
+                RegistrationDeadline = existingEvent.RegistrationDeadline,
+                RequiredSkillIds = existingEvent.RequiredSkills.Select(s => s.Id).ToList(),
+                Status = EventStatus.Cancelled
             };
 
             var updatedEvent = await _eventService.UpdateAsync(id, updateRequest, userId);

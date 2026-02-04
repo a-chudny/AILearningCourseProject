@@ -97,3 +97,11 @@ export async function updateEvent(id: number, data: UpdateEventRequest): Promise
 export async function deleteEvent(id: number): Promise<void> {
   await api.delete(`/events/${id}`);
 }
+
+/**
+ * Cancel an event (Owner/Admin only)
+ */
+export async function cancelEvent(id: number): Promise<EventResponse> {
+  const response = await api.put<EventResponse>(`/events/${id}/cancel`);
+  return response.data;
+}
