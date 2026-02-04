@@ -3422,3 +3422,42 @@ Estimate: ~88%
 - Conditional rendering: Nearly full hidden when cancelled or full
 
 ---
+
+## [2026-02-04 18:44] - SKL-001: Skills API Endpoints (Backend)
+
+### Prompt
+Implement SKL-001 story from user story file. Ask if something unclear. You can also use workflow log to check what was done before if you need
+
+### Context
+- Starting Phase 5 (Skills Feature), Phase 4 (Registrations) merged to main
+- Skills infrastructure already exists: 15 seeded skills, Skill entity, UserSkill join table (from FOUND-004)
+- Asked 4 clarifying questions, all answered upfront
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Models/DTOs/Skills/UpdateUserSkillsRequest.cs` - Created: Simple wrapper with List<int> SkillIds
+- `backend/src/VolunteerPortal.API/Services/Interfaces/ISkillService.cs` - Created: Interface with 3 methods (GetAllSkills, GetUserSkills, UpdateUserSkills)
+- `backend/src/VolunteerPortal.API/Services/SkillService.cs` - Created: Service with validation, complete replace logic, duplicate handling
+- `backend/src/VolunteerPortal.API/Controllers/SkillsController.cs` - Created: 3 REST endpoints (GET /api/skills, GET/PUT /api/skills/me)
+- `backend/src/VolunteerPortal.API/Program.cs` - Modified: Registered ISkillService in DI
+- `backend/tests/VolunteerPortal.Tests/Services/SkillServiceTests.cs` - Created: 10 comprehensive unit tests
+
+### Generated Code Summary
+- GET /api/skills [AllowAnonymous]: Returns all skills ordered by name
+- GET /api/skills/me [Authorize]: Returns current user's skills from JWT claims
+- PUT /api/skills/me [Authorize]: Complete replace with validation and deduplication
+- UpdateUserSkillsAsync: Validates IDs, removes old skills, adds new ones (complete replace)
+- Error handling: ArgumentException with specific invalid skill IDs listed
+
+### Result
+ Success - Build succeeded, 10/10 tests passing
+
+### AI Generation Percentage
+Estimate: ~92%
+
+### Learnings/Notes
+- Detailed clarification questions upfront saved rework time
+- EF Core tracking issue with duplicates required Distinct() in service
+- FluentAssertions syntax: BeGreaterThanOrEqualTo (not BeGreaterOrEqualTo)
+- Complete replace pattern: Remove all  validate  add new
+
+---
