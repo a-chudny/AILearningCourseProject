@@ -1973,3 +1973,305 @@ Breakdown:
 
 ---
 
+## [2026-02-04 14:15] - EVT-004: Event Details Page
+
+### Prompt
+"Implement EVT-004 story from user story file. Ask if something unclear"
+
+Clarifying questions answered:
+1. Registration API: Doesn't exist yet - use placeholder functions
+2. "Already registered" check: Use best practice (checkUserRegistration function with isRegistered flag)
+3. Edit button behavior: Use best practice (navigate to `/events/:id/edit`)
+4. Cancel Event confirmation: Yes, show confirmation dialog
+5. Map link: Yes, clickable Google Maps link
+6. Registration deadline: Yes, show "Registration closed" message and disable button
+7. Image display: 15-10% of screen height, same gradient for missing images
+8. Skills descriptions: Show on hover
+
+### Context
+- Building on EVT-003 (Event List Page) and EVT-002 (Event API)
+- Backend event API exists, but registration API not yet implemented
+- Need placeholder registration service for future REG stories
+- Frontend React 19.2 with TypeScript, TanStack Query, React Router
+- Following patterns from EventListPage for loading/error states
+- Complete event details with role-based actions (Guest/Volunteer/Organizer/Admin)
+
+### Files Added/Modified
+- `frontend/src/services/registrationService.ts` - Created: Placeholder registration service (72 lines)
+  - checkUserRegistration() - Returns mock data (always not registered)
+  - registerForEvent() - Returns mock RegistrationResponse
+  - cancelRegistration() - Returns void promise
+  - Full TypeScript interfaces: RegistrationResponse, CreateRegistrationRequest
+  - @placeholder JSDoc comments for all functions
+  - TODO comments for actual API implementation
+- `frontend/src/pages/public/EventDetailsPage.tsx` - Created: Event details page (508 lines)
+  - useParams to get event ID from URL
+  - useEvent hook for fetching event data
+  - useAuth for authentication state and user role
+  - Loading, error, and success states
+  - Event image (15vh height) with gradient fallback
+  - Full event information: title, date/time, duration, location, capacity, deadline, organizer
+  - Google Maps clickable link for location
+  - Required skills with hover descriptions (tooltip on group-hover)
+  - Registration functionality (register/cancel registration)
+  - Role-based actions:
+    - Guest: Prompt to login/register
+    - Volunteer: Register button (disabled if cancelled/past/full/deadline)
+    - Owner/Admin: Edit button + Cancel Event button
+  - Cancel Event confirmation dialog
+  - "Already registered" indicator with green badge
+  - Registration eligibility checks (role, status, deadline, capacity)
+  - Duration formatting (hours + minutes)
+  - Date/time formatting (long format)
+  - Capacity display with spots remaining
+  - Status badges (Event Cancelled, Full, Registration Closed)
+- `frontend/src/routes/index.tsx` - Modified: Added EventDetailsPage route at `/events/:id`
+- `frontend/src/__tests__/pages/public/EventDetailsPage.test.tsx` - Created: 13 tests (267 lines)
+  - Loading state test
+  - Error/not found state test
+  - Event details rendering test
+  - Image display test
+  - Required skills display test
+  - Login prompt for guests test
+  - Register button for volunteers test
+  - Edit/Cancel buttons for owner test
+  - Cancelled badge test
+  - Full indicator test
+  - Registration closed test
+  - Google Maps link test
+  - Duration formatting test
+
+### Generated Code Summary
+
+**Registration Service (72 lines - Placeholder)**:
+- Mock implementations for all registration operations
+- Returns realistic data structures matching future API
+- Properly typed with TypeScript interfaces
+- Ready to swap with real API calls when backend is implemented
+- checkUserRegistration always returns `isRegistered: false`
+- registerForEvent generates random ID and returns Confirmed status
+- cancelRegistration returns resolved promise
+
+**EventDetailsPage Component (508 lines)**:
+- Comprehensive event display with all fields from backend
+- State management: isRegistered, isRegistering, isCancelling, showCancelEventDialog
+- Computed values: isOwner, isAdmin, canEdit, canRegister
+- Eligibility checks: cancelled, past event, deadline, capacity
+- Event handlers: handleRegister, handleCancelRegistration, handleCancelEvent
+- Helper functions: formatDate, formatTime, formatDuration, getMapLink
+- Three main states: loading (spinner), error (with back button), success (full details)
+- Image banner: 15vh height (min 150px), object-cover, gradient fallback
+- Info grid: 2-column responsive layout for date/time/location/capacity
+- Skills grid: 2-column responsive, hover tooltips with descriptions
+- Action buttons: Conditional rendering based on auth state and role
+- Confirmation dialog: Modal overlay with Yes/No buttons for cancel event
+
+**UI/UX Features**:
+- Back to Events link at top
+- Event image/banner (15% of viewport height)
+- Status badges (Event Cancelled, Full, Registration Closed)
+- Icon-based information display (calendar, clock, location, users)
+- Google Maps link opens in new tab
+- Skill tooltips appear on hover (invisible → visible transition)
+- Register button shows eligibility messages when disabled
+- "Already registered" green badge with checkmark icon
+- Confirmation dialog for destructive action (cancel event)
+- Responsive layout with max-width-4xl container
+- Smooth transitions and hover effects
+
+**Route Configuration**:
+- Added `/events/:id` route with lazy loading
+- EventDetailsPage imports and configures properly
+- Route parameter extraction with useParams<{ id: string }>()
+
+**Test Coverage (13 tests)**:
+- Loading state rendering
+- Error state with "Event not found" heading
+- Full event details display
+- Image rendering
+- Skills display
+- Guest login prompt
+- Volunteer register button
+- Owner edit and cancel buttons
+- Cancelled event badge
+- Full event indicator
+- Registration deadline message
+- Google Maps link attributes
+- Duration formatting (3 hours)
+
+### Result
+✅ Success
+- All 88 frontend tests passing (13 new + 75 existing)
+- Frontend builds successfully with TypeScript strict mode
+- Build output: 1.05s, EventDetailsPage bundle 14.15 kB (4.09 kB gzipped)
+- Event details page fully functional with all states
+- Placeholder registration service ready for future API integration
+- Role-based access control working correctly
+- Beautiful, responsive UI with hover interactions
+
+### AI Generation Percentage
+Estimate: ~95% (AI generated ~847 lines total, manual fixes ~42 lines)
+
+Breakdown:
+- registrationService.ts: 72 lines - 95% AI (fixed unused imports/params)
+- EventDetailsPage.tsx: 508 lines - 100% AI
+- routes/index.tsx: 2 lines added - 100% AI
+- EventDetailsPage.test.tsx: 267 lines - 98% AI (fixed getByText → getByRole for duplicate text)
+- Total: ~847 lines generated, ~42 lines manual adjustments
+
+### Learnings/Notes
+
+**Placeholder Service Pattern**:
+- Created registration service with @placeholder JSDoc tags
+- Mock functions return realistic data structures
+- TODO comments mark where real API calls will go
+- Allows frontend development to proceed without backend
+- Easy to swap mock with real implementation (just uncomment API calls)
+- Maintains type safety throughout with proper interfaces
+
+**Role-Based UI Rendering**:
+- Computed `isOwner` and `isAdmin` from user and event data
+- `canEdit` combines owner and admin permissions
+- `canRegister` checks multiple conditions (role, status, deadline, capacity, registered)
+- Different button sets for each user role (Guest/Volunteer/Organizer/Admin)
+- Clean separation of concerns for authorization logic
+
+**Registration Eligibility Logic**:
+- isEventCancelled: Check status
+- isEventInPast: Compare startTime with now
+- isRegistrationClosed: Compare deadline with now
+- isFull: registrationCount >= capacity
+- canRegister: Combines all checks + role check
+- Helpful error messages show why button is disabled
+
+**Google Maps Integration**:
+- getMapLink() function creates search URL with encoded location
+- Opens in new tab with rel="noopener noreferrer"
+- Location text becomes clickable link
+- Simple integration without API key requirements
+
+**Skill Tooltip Pattern**:
+- group class on parent div
+- invisible opacity-0 on tooltip div
+- group-hover:visible group-hover:opacity-100 for show/hide
+- absolute positioning relative to parent
+- z-10 to appear above other content
+- 300px width, white background, shadow for visibility
+- Prevents layout shifts (invisible vs display:none)
+
+**Confirmation Dialog Pattern**:
+- showCancelEventDialog state boolean
+- Fixed positioning with z-50 for modal overlay
+- Semi-transparent black background (bg-black bg-opacity-50)
+- Centered modal with max-width and white background
+- Two-button layout: destructive action (red) + cancel (gray)
+- onClick handlers for both actions
+- Clear messaging explaining consequences
+
+**Date/Time Formatting**:
+- toLocaleDateString with weekday, month, day, year
+- toLocaleTimeString with hour, minute, 2-digit format
+- Duration formatting: "3 hours", "45 minutes", "2 hours 30 minutes"
+- Consistent formatting across the application
+- User-friendly readable formats
+
+**Image Display Strategy**:
+- 15vh height with 150px minimum
+- object-cover maintains aspect ratio
+- Gradient fallback matches EventCard pattern
+- Same blue-500 to blue-600 gradient
+- Calendar SVG icon for consistency
+- Responsive and accessible
+
+**TypeScript Type Safety**:
+- Proper typing for all service functions
+- Interface for route params: { id: string }
+- Union types for conditional rendering
+- Optional chaining for safety (event?.property)
+- Type inference from useParams, useAuth, useEvent
+
+**Test Strategy Observations**:
+- Mocked both eventService and registrationService
+- Mocked toast utility to prevent DOM manipulation
+- Created multiple test users (volunteer, organizer) for role tests
+- Used window.history.pushState to simulate route params
+- BrowserRouter with Routes wrapper for proper routing context
+- QueryClient with retry: false for faster tests
+- Used getByRole for elements with duplicate text
+
+**Performance Considerations**:
+- Lazy loading with React.lazy() for code splitting
+- EventDetailsPage bundle only 14.15 kB (4.09 kB gzipped)
+- React Query caching reduces API calls
+- 5-minute stale time for event data
+- No unnecessary re-renders with computed values
+
+**Accessibility Features**:
+- Semantic HTML (h1, h2, p, a, button)
+- ARIA roles for modal dialog
+- Descriptive link text ("Back to Events" vs "Click here")
+- Icon + text combinations for clarity
+- Keyboard navigable (all buttons and links)
+- Focus states on interactive elements
+- Alt text for images
+
+**UX Enhancements**:
+- Loading state prevents flash of empty content
+- Error state with actionable "Back to Events" button
+- Disabled button states with explanatory text
+- Smooth transitions on hover
+- Color-coded status badges (red for cancelled, orange for full)
+- Progress indicators (registering, cancelling)
+- Confirmation before destructive actions
+- Visual feedback for "already registered" state
+
+**Code Organization**:
+- Helper functions at component level (formatDate, formatTime, etc.)
+- Computed values derived once, used multiple times
+- Clear separation: state → computed → handlers → render
+- Conditional rendering blocks organized by role
+- Reusable patterns from EventCard (gradient, icons)
+
+### Technical Highlights
+1. **Placeholder Service Pattern**: Mock implementations with TODO comments for easy API swap
+2. **Role-Based Rendering**: Different UI for Guest/Volunteer/Organizer/Admin
+3. **Registration Eligibility**: Multi-condition check with helpful error messages
+4. **Google Maps Integration**: Simple URL-based integration without API key
+5. **Skill Hover Tooltips**: Group-hover pattern with smooth transitions
+6. **Confirmation Dialog**: Modal with overlay for destructive actions
+7. **Date/Time Formatting**: Locale-aware formatting with Intl API
+8. **Responsive Image**: 15vh with gradient fallback matching EventCard
+9. **TypeScript Safety**: Proper typing for route params and all functions
+10. **Test Coverage**: 13 comprehensive tests covering all major features
+
+### Design Decisions
+- **15vh image height**: Large enough to be impactful, small enough to not dominate
+- **Gradient fallback**: More appealing than gray box, matches EventCard
+- **Hover tooltips**: Progressive disclosure, keeps UI clean
+- **Confirmation dialog**: Prevents accidental event cancellation
+- **Google Maps link**: External link without requiring API setup
+- **Registration deadline check**: Client-side check for immediate feedback
+- **Placeholder service**: Unblocks frontend work while backend in progress
+- **Role-based actions**: Clear separation of what each role can do
+- **Disabled button messages**: Explain why action isn't available
+- **Back button at top**: Easy navigation back to list
+
+### Future Enhancements (Not Implemented)
+- Real registration API integration (when REG stories implemented)
+- Edit event page/modal
+- Event sharing functionality
+- Add to calendar button (iCal, Google Calendar)
+- Print event details
+- Event image upload/crop functionality
+- Map embed instead of external link
+- Related events recommendations
+- Volunteer list for organizers
+- Event history/past attendance
+- QR code for event check-in
+- Social media share buttons
+- Weather forecast for event date
+- Driving directions integration
+- Event reminders/notifications
+
+---
+
