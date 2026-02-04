@@ -81,9 +81,11 @@ export function AppRoutes() {
         <Route
           path="/my-events"
           element={
-            <MainLayout>
-              <MyEventsPage />
-            </MainLayout>
+            <RoleGuard allowedRoles={[UserRole.Volunteer, UserRole.Organizer, UserRole.Admin]}>
+              <MainLayout>
+                <MyEventsPage />
+              </MainLayout>
+            </RoleGuard>
           }
         />
 

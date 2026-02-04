@@ -3345,3 +3345,42 @@ Estimate: ~88% (AI generated ~280 component lines + ~180 service lines + ~380 te
 - Rich confirmation modal significantly improves UX vs generic "Are you sure?" dialogs
 
 ---
+## [2026-02-04 18:00] - REG-003 My Events Page
+
+### Prompt
+"Implement REG-003 story from user story file" - user provided 5 UX preferences: 1) Separate sections, 2) Info text only, 3) Modal with event details, 4) Upcoming: nearest first, 5) Cancelled shown in separate section
+
+### Context
+- Phase 4 (Registrations) continuation after REG-002
+- Backend already returns event summary in RegistrationResponse
+- Need to create user dashboard for managing registrations
+- User provided clear UX decisions for grouping and display
+
+### Files Added/Modified
+- `frontend/src/services/registrationService.ts` - Modified: Added EventSummary interface matching backend DTO
+- `frontend/src/hooks/useRegistrations.ts` - Created: useMyRegistrations hook (React Query), useCancelRegistration mutation with cache invalidation
+- `frontend/src/components/registrations/RegistrationCard.tsx` - Created: Card component displaying registration with event summary, conditional cancel button
+- `frontend/src/components/modals/CancelRegistrationModal.tsx` - Created: Confirmation modal showing event details before cancellation
+- `frontend/src/pages/user/MyEventsPage.tsx` - Created: Main page with upcoming/past/cancelled sections, empty states, sorting logic
+- `frontend/src/routes/index.tsx` - Modified: Protected /my-events route with RoleGuard (Volunteer, Organizer, Admin)
+- Tests: Created 28 tests (RegistrationCard: 9, CancelRegistrationModal: 9, MyEventsPage: 10)
+
+### Generated Code Summary
+- My Events dashboard with upcoming/past/cancelled sections, smart sorting (nearest first for upcoming, recent first for past)
+- RegistrationCard: Reusable component with event summary, status badges, conditional cancel button, links to event details
+- CancelRegistrationModal: Rich confirmation dialog with full event details and warning message
+- useRegistrations: React Query hooks for fetching and cancelling with automatic cache invalidation
+
+### Result
+ Success - 9 files created/modified, 28/28 tests passing, TypeScript clean
+
+### AI Generation Percentage
+Estimate: ~90% (AI generated ~920 lines, ~100 lines manual test adjustments)
+
+### Learnings/Notes
+- useMemo for grouping/sorting prevents unnecessary recalculations
+- Query invalidation pattern: invalidate both registrations and events lists for consistency
+- EventSummary DTO includes all needed data (no extra API calls)
+- Separate sections better UX than tabs for seeing all at once
+
+---

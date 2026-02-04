@@ -1,4 +1,18 @@
 import { api, getErrorMessage } from './api';
+import { EventStatus } from '@/types/enums';
+
+/**
+ * Event summary included in registration response
+ */
+export interface EventSummary {
+  id: number;
+  title: string;
+  location: string;
+  startTime: string;
+  durationMinutes: number;
+  status: EventStatus;
+  imageUrl?: string;
+}
 
 /**
  * Registration response from backend API
@@ -9,7 +23,7 @@ export interface RegistrationResponse {
   userId: number;
   status: string; // RegistrationStatus
   registeredAt: string; // ISO 8601 date-time
-  notes?: string;
+  event: EventSummary;
 }
 
 /**
