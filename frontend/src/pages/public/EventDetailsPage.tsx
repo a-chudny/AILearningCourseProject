@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useEvent, useCancelEvent } from '@/hooks/useEvents';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,6 +10,7 @@ import {
 } from '@/services/registrationService';
 import { toast } from '@/utils/toast';
 import { CancelEventModal } from '@/components/modals/CancelEventModal';
+import { RegistrationConfirmModal } from '@/components/modals/RegistrationConfirmModal';
 
 export default function EventDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -17,22 +18,23 @@ export default function EventDetailsPage() {
   const { user, isAuthenticated } = useAuth();
   const eventId = Number(id);
 
-  const { data: event, isLoading, isError, error } = useEvent(eventId);
+  const { data: event, isLoading, isError, error, refetch } = useEvent(eventId);
   const { mutate: cancelEventMutation, isPending: isCancellingEvent } = useCancelEvent();
 
   const [isRegistered, setIsRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelEventModal, setShowCancelEventModal] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
 
   // Check registration status when event loads
-  useState(() => {
+  useEffect(() => {
     if (event && isAuthenticated) {
       checkUserRegistration(event.id).then((result) => {
         setIsRegistered(result.isRegistered);
       });
     }
-  });
+  }, [event, isAuthenticated]);
 
   // Calculate if user is event owner or admin
   const isOwner = user && event && user.id === event.organizerId;
@@ -54,7 +56,7 @@ export default function EventDetailsPage() {
     !isRegistrationClosed &&
     !isFull;
 
-  // Handle registration
+  // Handle registration confirmation
   const handleRegister = async () => {
     if (!event) return;
 
@@ -62,9 +64,15 @@ export default function EventDetailsPage() {
     try {
       await registerForEvent({ eventId: event.id });
       setIsRegistered(true);
-      toast.success('Successfully registered for event!');
+      setShowRegistrationModal(false);
+      
+      // Refetch event to update registration count
+      await refetch();
+      
+      toast.success(`Successfully registered for ${event.title}!`);
     } catch (err) {
-      toast.error('Failed to register for event. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to register for event. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsRegistering(false);
     }
@@ -78,9 +86,14 @@ export default function EventDetailsPage() {
     try {
       await cancelRegistration(event.id);
       setIsRegistered(false);
+      
+      // Refetch event to update registration count
+      await refetch();
+      
       toast.success('Registration cancelled successfully');
     } catch (err) {
-      toast.error('Failed to cancel registration. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to cancel registration. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsCancelling(false);
     }
@@ -395,21 +408,30 @@ export default function EventDetailsPage() {
             {isAuthenticated && user?.role === UserRole.Volunteer && !isEventCancelled && (
               <>
                 {isRegistered ? (
-                  <button
-                    onClick={handleCancelRegistration}
-                    disabled={isCancelling}
-                    className="rounded-lg border border-red-600 bg-white px-6 py-3 font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isCancelling ? 'Cancelling...' : 'Cancel Registration'}
-                  </button>
+                  <>
+                    {/* Already registered indicator */}
+                    <div className="flex items-center gap-2 rounded-lg bg-green-50 px-4 py-3 text-green-800">
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="font-medium">You are registered for this event</span>
+                    </div>
+                    <button
+                      onClick={handleCancelRegistration}
+                      disabled={isCancelling}
+                      className="rounded-lg border border-red-600 bg-white px-6 py-3 font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isCancelling ? 'Cancelling...' : 'Cancel Registration'}
+                    </button>
+                  </>
                 ) : (
                   <>
                     <button
-                      onClick={handleRegister}
-                      disabled={!canRegister || isRegistering}
+                      onClick={() => setShowRegistrationModal(true)}
+                      disabled={!canRegister}
                       className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
                     >
-                      {isRegistering ? 'Registering...' : 'Register for Event'}
+                      Register for Event
                     </button>
                     {!canRegister && !isEventCancelled && !isRegistered && (
                       <p className="flex items-center text-sm text-gray-600">
@@ -421,16 +443,6 @@ export default function EventDetailsPage() {
                   </>
                 )}
               </>
-            )}
-
-            {/* Already registered indicator */}
-            {isRegistered && (
-              <div className="flex items-center gap-2 rounded-lg bg-green-50 px-4 py-3 text-green-800">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="font-medium">You are registered for this event</span>
-              </div>
             )}
 
             {/* Prompt to login for guests */}
@@ -480,6 +492,17 @@ export default function EventDetailsPage() {
         eventTitle={event?.title ?? ''}
         isLoading={isCancellingEvent}
       />
+
+      {/* Registration confirmation modal */}
+      {event && (
+        <RegistrationConfirmModal
+          event={event}
+          isOpen={showRegistrationModal}
+          onClose={() => setShowRegistrationModal(false)}
+          onConfirm={handleRegister}
+          isLoading={isRegistering}
+        />
+      )}
     </div>
   );
 }

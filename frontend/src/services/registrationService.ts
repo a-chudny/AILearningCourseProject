@@ -1,4 +1,4 @@
-// import { api } from './api'; // TODO: Uncomment when registration API is implemented
+import { api, getErrorMessage } from './api';
 
 /**
  * Registration response from backend API
@@ -21,51 +21,59 @@ export interface CreateRegistrationRequest {
 }
 
 /**
- * Check if current user is registered for an event
- * @placeholder - Returns mock data until registration API is implemented
+ * Get all registrations for the current user
  */
-export async function checkUserRegistration(_eventId: number): Promise<{
+export async function getMyRegistrations(): Promise<RegistrationResponse[]> {
+  const response = await api.get<RegistrationResponse[]>('/users/me/registrations');
+  return response.data;
+}
+
+/**
+ * Check if current user is registered for an event
+ */
+export async function checkUserRegistration(eventId: number): Promise<{
   isRegistered: boolean;
   registration?: RegistrationResponse;
 }> {
-  // TODO: Replace with actual API call when registration endpoints are implemented
-  // const response = await api.get<RegistrationResponse>(`/registrations/check/${eventId}`);
-  
-  // Mock implementation - always returns not registered
-  return {
-    isRegistered: false,
-    registration: undefined,
-  };
+  try {
+    const registrations = await getMyRegistrations();
+    const registration = registrations.find(r => r.eventId === eventId);
+    
+    return {
+      isRegistered: !!registration,
+      registration,
+    };
+  } catch (error) {
+    // If not authenticated or error, return false
+    return {
+      isRegistered: false,
+      registration: undefined,
+    };
+  }
 }
 
 /**
  * Register current user for an event
- * @placeholder - Returns mock data until registration API is implemented
  */
 export async function registerForEvent(data: CreateRegistrationRequest): Promise<RegistrationResponse> {
-  // TODO: Replace with actual API call when registration endpoints are implemented
-  // const response = await api.post<RegistrationResponse>('/registrations', data);
-  // return response.data;
-  
-  // Mock implementation
-  return {
-    id: Math.floor(Math.random() * 1000),
-    eventId: data.eventId,
-    userId: 1, // Mock user ID
-    status: 'Confirmed',
-    registeredAt: new Date().toISOString(),
-    notes: data.notes,
-  };
+  try {
+    const response = await api.post<RegistrationResponse>(
+      `/events/${data.eventId}/register`,
+      { notes: data.notes }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 }
 
 /**
  * Cancel user's registration for an event
- * @placeholder - Returns void until registration API is implemented
  */
-export async function cancelRegistration(_eventId: number): Promise<void> {
-  // TODO: Replace with actual API call when registration endpoints are implemented
-  // await api.delete(`/registrations/${eventId}`);
-  
-  // Mock implementation - just return
-  return Promise.resolve();
+export async function cancelRegistration(eventId: number): Promise<void> {
+  try {
+    await api.delete(`/events/${eventId}/register`);
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 }
