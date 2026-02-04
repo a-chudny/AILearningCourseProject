@@ -2716,3 +2716,224 @@ Manual adjustments:
 - Waitlist when at capacity
 
 ---
+
+## [2026-02-04 15:45] - EVT-007: Edit Event Page Implementation
+
+### Prompt
+"Implement EVT-007 story from user story file. Ask if something unclear"
+
+User provided answers to 8 clarifying questions:
+1. Ownership Validation: B - Redirect to 404 page
+2. Loading States: B - Show skeleton form (loading placeholders)
+3. Success Handling: A - Redirect to event details page with success message
+4. Error Handling: A - Redirect to 404 page
+5. Cancel Button: B - Navigate back in history (history.back)
+6. Form Validation Changes: B - Allow current event date if it's already in the past (locked field)
+7. Unsaved Changes Warning: C - Custom modal confirmation
+8. Image Handling: C - Keep upload field, show current image preview, allow replacement
+
+### Context
+- Building on EVT-006 (Create Event Page) which created reusable EventForm
+- Need to reuse EventForm component with initial data population
+- Requires ownership validation (owner or admin only)
+- Past event dates should be locked but visible
+- Unsaved changes modal to prevent accidental data loss
+- Existing useUpdateEvent hook already available in useEvents.ts
+
+### Files Added/Modified
+- `frontend/src/pages/user/EditEventPage.tsx` - Created: Edit event page (260 lines)
+  - UnsavedChangesModal component for confirmation
+  - FormSkeleton loading component with pulse animation
+  - Ownership validation (redirects non-owners to 404)
+  - Event data fetching with useEvent hook
+  - eventToFormData converter (handles date/time splitting)
+  - handleSubmit with date/time combination logic
+  - handleCancel with unsaved changes check
+  - Custom modal for unsaved changes confirmation
+  - Redirects to event details on success
+  - Skeleton loading while fetching event
+- `frontend/src/components/events/forms/EventForm.tsx` - Modified: Enhanced for edit mode (910 lines)
+  - Added `onChange?: () => void` prop for change tracking
+  - Added `isEditMode?: boolean` prop for edit-specific behavior
+  - Added `existingEventDate?: string` prop for past date handling
+  - Modified `getMinDate()` to allow past dates for existing past events
+  - Added `isEventDateInPast()` helper function
+  - Updated date validation to allow locked past event dates
+  - Disabled date field for past events with visual indicator
+  - Added `onChange?.()` calls to all form handlers (8 locations)
+  - Changed handlers: handleChange, handleNumberChange, handleDurationChange, handleCustomDurationChange, handleImageChange, handleRemoveImage, toggleSkill, removeSkill
+  - Added "(Past event - locked)" label to date field when in past
+  - Added gray background styling for disabled past date field
+- `frontend/src/routes/index.tsx` - Modified: Added edit route
+  - Imported EditEventPage component
+  - Added `/events/:id/edit` route with RoleGuard (Organizer/Admin)
+  - Protected with MainLayout wrapper
+  - Lazy loaded for code splitting
+- `frontend/src/__tests__/pages/user/EditEventPage.test.tsx` - Created: Comprehensive tests (8 tests, ~250 lines)
+  - Renders loading skeleton while fetching event
+  - Renders edit form when event is loaded for owner
+  - Redirects to 404 if event not found
+  - Redirects to 404 if user is not owner or admin
+  - Allows admin to edit event even if not owner
+  - Populates form with event data
+  - Shows unsaved changes modal when appropriate
+  - Renders in a white card layout
+
+### Generated Code Summary
+- EditEventPage: 260 lines (complete edit page with modals and validation)
+- EventForm enhancements: +57 lines of modifications (onChange tracking, edit mode support)
+- Routes update: +12 lines
+- Tests: 8 tests (~250 lines)
+- **Total: ~330 lines of production code + ~250 lines of tests**
+
+### Result
+ Success
+- All 130 frontend tests passing (19 test files)
+- Build successful in 1.18s
+- Edit Event page accessible at /events/:id/edit (Owner/Admin only)
+- Form pre-populates with existing event data
+- Ownership validation works correctly (redirects to 404)
+- Admin can edit any event
+- Past event dates are locked but visible
+- Unsaved changes modal prevents accidental data loss
+- Cancel button navigates back in history
+- Success redirects to event details page
+- Skeleton loading provides good UX
+- Image preview shows existing image URL
+- All form validations work in edit mode
+- Real-time validation tracks changes
+- Code splitting: EditEventPage chunk is 4.40 kB (1.69 kB gzipped)
+
+### AI Generation Percentage
+Estimate: ~93% (AI generated ~520 lines, manual adjustments ~40 lines)
+
+Manual adjustments:
+- Fixed TypeScript circular type reference (changed to EventResponse type)
+- Added missing `updatedAt` field to test mock users (3 locations)
+- Removed unused BrowserRouter import from test
+- Changed skeleton test assertion from text to DOM query
+
+### Learnings/Notes
+- **Form Reusability Pattern**: EventForm designed with flexibility for both create and edit modes
+- **Ownership Validation**: Check organizerId against user.id, allow Admin role override
+- **Past Event Handling**: Lock date field visually and functionally for past events
+- **Unsaved Changes Modal**: Custom modal instead of browser beforeunload for better UX
+- **onChange Tracking**: Propagate changes up from reusable form to parent page
+- **Skeleton Loading**: Better UX than spinner, shows page structure during load
+- **Date/Time Splitting**: ISO datetime split into separate date and time inputs
+- **Duration Preset Detection**: Check if minutes match presets to populate select correctly
+- **Image Preview**: Show existing imageUrl in preview, allow replacement (mock upload)
+- **404 Redirect**: Consistent error handling for not found and unauthorized
+- **Admin Privilege**: Admin users can edit any event regardless of ownership
+- **Type Safety**: Use EventResponse type to avoid circular references
+- **Navigation State**: Pass success message through router state
+- **History Navigation**: Use navigate(-1) for true back button behavior
+- **Lazy Loading**: Route-level code splitting keeps initial bundle small
+
+### Features Implemented
+**EditEventPage Component**:
+- Event data fetching with loading state
+- Ownership validation (owner or admin only)
+- Redirect to 404 for unauthorized or not found
+- EventForm integration with initial data
+- Unsaved changes tracking
+- Custom confirmation modal for unsaved changes
+- Success redirect to event details
+- Error handling for fetch and submit
+- Skeleton loading component
+- White card layout consistent with create page
+- Container with max-width and padding
+- Page title and description
+
+**EventForm Enhancements**:
+- `onChange` callback prop for change tracking
+- `isEditMode` prop for edit-specific behavior
+- `existingEventDate` prop for past date handling
+- Past event date detection and locking
+- Visual indicator "(Past event - locked)"
+- Disabled styling for locked date field
+- All handlers call onChange when provided
+- Validation works correctly in edit mode
+- Image preview from existing URL
+
+**Route Configuration**:
+- `/events/:id/edit` protected route
+- RoleGuard ensures Organizer/Admin only
+- Lazy loaded for code splitting
+- MainLayout wrapper applied
+
+**UnsavedChangesModal**:
+- Modal overlay with backdrop
+- Clear warning message
+- "Stay on Page" and "Leave Page" buttons
+- Conditional rendering based on isOpen
+- Z-index 50 for proper stacking
+- Responsive padding for mobile
+
+**FormSkeleton**:
+- Animated pulse loading state
+- Mimics form structure
+- Gray placeholders for inputs
+- Responsive grid layout
+- Better UX than spinner
+
+### Design Decisions
+- **Reuse EventForm**: DRY principle, single source of truth for validation
+- **Ownership at Page Level**: Component handles auth, not form
+- **Custom Modal**: Better UX than browser confirm dialog
+- **Skeleton Loading**: Shows structure during load, better perceived performance
+- **Lock Past Dates**: Prevent editing past event dates (business rule)
+- **onChange Callback**: Track changes without lifting all state
+- **isEditMode Flag**: Clean way to enable edit-specific behavior
+- **404 for Unauthorized**: Consistent with "event not found" UX
+- **Admin Override**: Admins can edit any event (admin privilege)
+- **History Navigation**: True back button behavior with navigate(-1)
+- **Image Preview**: Show existing image, allow replacement (EVT-009 will handle upload)
+- **Success to Details**: User sees updated event immediately
+- **Type Safety**: Explicit EventResponse type avoids circular refs
+- **Lazy Loading**: Route-level splitting optimizes initial load
+- **Mock Image**: Form ready for real upload when EVT-009 implements API
+
+### Validation Rules (Edit Mode)
+- **All Create Validations**: Same as create mode
+- **Past Event Dates**: Allowed if event already in past (field locked)
+- **Future Event Dates**: Must still be in future (normal validation)
+- **Ownership**: Must be owner or admin (page-level check)
+- **Unsaved Changes**: Modal warns before navigation
+
+### Technical Highlights
+1. **Reusable Form with Modes**: Single EventForm serves create and edit
+2. **Ownership Validation**: Secure page-level auth check
+3. **Past Date Locking**: Business rule enforced with UX clarity
+4. **Unsaved Changes Detection**: onChange prop tracks modifications
+5. **Custom Modal**: Better UX than browser dialogs
+6. **Skeleton Loading**: Structured loading state
+7. **Date/Time Conversion**: Bidirectional ISO  separate fields
+8. **Duration Detection**: Smart preset selection based on minutes
+9. **Image Preview**: URL display for existing images
+10. **Admin Privilege**: Role-based access control
+11. **404 Redirects**: Consistent error handling
+12. **Success Navigation**: Router state messaging
+13. **Type Safety**: Proper TypeScript throughout
+14. **Code Splitting**: Lazy loaded pages
+15. **Test Coverage**: 8 comprehensive tests
+
+### Future Enhancements (Not Implemented)
+- Real-time autosave drafts
+- Event history/audit log
+- Bulk edit multiple events
+- Duplicate event feature
+- Event templates from existing events
+- Compare changes before save
+- Undo/redo functionality
+- Conflict resolution for concurrent edits
+- Event versioning
+- Draft vs published states
+
+### Integration Notes
+- **Depends on**: EVT-006 EventForm component
+- **Uses**: useEvent, useUpdateEvent hooks (already existed)
+- **Blocks**: None (standalone feature)
+- **Future**: EVT-009 will add real image upload to form
+
+---

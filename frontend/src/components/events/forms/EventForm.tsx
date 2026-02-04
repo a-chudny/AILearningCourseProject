@@ -36,6 +36,9 @@ interface EventFormProps {
   onCancel: () => void
   submitLabel?: string
   isLoading?: boolean
+  onChange?: () => void
+  isEditMode?: boolean
+  existingEventDate?: string
 }
 
 const DURATION_PRESETS = [
@@ -52,6 +55,9 @@ export function EventForm({
   onCancel,
   submitLabel = 'Create Event',
   isLoading = false,
+  onChange,
+  isEditMode = false,
+  existingEventDate,
 }: EventFormProps) {
   const [availableSkills, setAvailableSkills] = useState<Skill[]>([])
   const [isLoadingSkills, setIsLoadingSkills] = useState(true)
@@ -92,8 +98,18 @@ export function EventForm({
     loadSkills()
   }, [])
 
-  // Get minimum date for date picker (today)
+  // Get minimum date for date picker (today or existing event date if in past)
   const getMinDate = () => {
+    if (isEditMode && existingEventDate) {
+      const existingDate = new Date(existingEventDate)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      // If event is in the past, allow current date (locked field)
+      if (existingDate < today) {
+        return existingDate.toISOString().split('T')[0]
+      }
+    }
     const today = new Date()
     return today.toISOString().split('T')[0]
   }
@@ -101,6 +117,15 @@ export function EventForm({
   // Get maximum deadline date (event date)
   const getMaxDeadlineDate = () => {
     return formData.date || getMinDate()
+  }
+
+  // Check if event date is in the past (for edit mode)
+  const isEventDateInPast = () => {
+    if (!isEditMode || !existingEventDate) return false
+    const existingDate = new Date(existingEventDate)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return existingDate < today
   }
 
   // Validate single field
@@ -126,6 +151,18 @@ export function EventForm({
         const selectedDate = new Date(value)
         const today = new Date()
         today.setHours(0, 0, 0, 0)
+        
+        // In edit mode, allow existing past event dates (field will be locked)
+        if (isEditMode && existingEventDate) {
+          const existingDate = new Date(existingEventDate)
+          existingDate.setHours(0, 0, 0, 0)
+          
+          // If existing event is in the past, date field is locked at that value
+          if (existingDate < today) {
+            break // Allow the existing past date
+          }
+        }
+        
         if (selectedDate < today) return 'Event date must be in the future'
         break
       
@@ -175,6 +212,9 @@ export function EventForm({
         [name]: error,
       }))
     }
+    
+    // Notify parent of changes
+    onChange?.()
   }
 
   // Handle number input change
@@ -194,6 +234,9 @@ export function EventForm({
         [name]: error,
       }))
     }
+    
+    // Notify parent of changes
+    onChange?.()
   }
 
   // Handle duration preset change
@@ -221,6 +264,9 @@ export function EventForm({
         durationMinutes: error,
       }))
     }
+    
+    // Notify parent of changes
+    onChange?.()
   }
 
   // Handle custom duration input
@@ -241,6 +287,9 @@ export function EventForm({
         durationMinutes: error,
       }))
     }
+    
+    // Notify parent of changes
+    onChange?.()
   }
 
   // Handle image file selection
@@ -274,6 +323,8 @@ export function EventForm({
           imageFile: file,
           imagePreview: reader.result as string,
         }))
+        // Notify parent of changes
+        onChange?.()
       }
       reader.readAsDataURL(file)
       
@@ -291,6 +342,8 @@ export function EventForm({
       imageFile: null,
       imagePreview: '',
     }))
+    // Notify parent of changes
+    onChange?.()
   }
 
   // Toggle skill selection
@@ -304,6 +357,8 @@ export function EventForm({
           : [...prev.requiredSkills, skill],
       }
     })
+    // Notify parent of changes
+    onChange?.()
   }
 
   // Remove skill chip
@@ -312,6 +367,8 @@ export function EventForm({
       ...prev,
       requiredSkills: prev.requiredSkills.filter(s => s.id !== skillId),
     }))
+    // Notify parent of changes
+    onChange?.()
   }
 
   // Handle blur for touched state
@@ -484,6 +541,9 @@ export function EventForm({
         <div>
           <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
             Event Date <span className="text-red-500">*</span>
+            {isEventDateInPast() && (
+              <span className="ml-2 text-xs text-gray-500">(Past event - locked)</span>
+            )}
           </label>
           <input
             type="date"
@@ -495,8 +555,8 @@ export function EventForm({
             min={getMinDate()}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.date && touched.date ? 'border-red-500' : 'border-gray-300'
-            }`}
-            disabled={isLoading}
+            } ${isEventDateInPast() ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+            disabled={isLoading || isEventDateInPast()}
           />
           {errors.date && touched.date && (
             <p className="mt-1 text-sm text-red-600">{errors.date}</p>
