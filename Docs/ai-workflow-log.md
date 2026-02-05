@@ -3878,3 +3878,69 @@ Estimate: ~92%
 - Query params pattern: includePastEvents=true, includeDeleted=true gives admin full visibility
 
 ---
+## [2026-02-05 10:30] - RPT-001: CSV Export Service (Backend)
+
+### Prompt
+"Implement RPT-001 story from user story file"
+
+### Clarifying Questions
+- **Q1: ClosedXML or CsvHelper?**  A: ClosedXML (Excel files)
+- **Q2: Column selection method?**  A: Property names (string[])
+- **Q3: Date format?**  A: Excel-friendly (2026-02-05 14:30:00)
+- **Q4: Null value handling?**  A: Empty string ""
+- **Q5: File naming convention?**  A: With timestamp (entityname_2026-02-05_143000.xlsx)
+- **Q6: Return type?**  A: Byte array sufficient (no streaming needed)
+
+### Context
+- Starting Phase 7 (Reports)
+- Admin features (Phase 6) completed and merged to main
+- Need generic export service for exporting data to Excel format
+- Service will be consumed by event and user export endpoints
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Services/Interfaces/IExportService.cs` - Created: Export service interface with generic method
+- `backendsrc/VolunteerPortal.API/Services/ExcelExportService.cs` - Created: Excel export implementation using ClosedXML
+- `backendsrc/VolunteerPortal.API/Program.cs` - Modified: Registered IExportService in DI container
+- `backend/src/VolunteerPortal.API/VolunteerPortal.API.csproj` - Modified: Added ClosedXML 0.105.0 package
+- `backend/tests/VolunteerPortal.Tests/Services/ExcelExportServiceTests.cs` - Created: 13 comprehensive unit tests
+
+### Generated Code Summary
+- IExportService interface with generic ExportToExcelAsync<T> method accepting data, sheetName, and optional columns filter
+- GetContentDisposition helper for timestamped filename generation (entityname_YYYY-MM-DD_HHmmss.xlsx)
+- ExcelExportService implementation:
+  - Reflection-based property reading for generic type support
+  - Column filtering by property names (case-insensitive)
+  - Excel-friendly date formatting (yyyy-MM-dd HH:mm:ss)
+  - Null values rendered as empty cells
+  - Styled headers (bold, gray background)
+  - Auto-fit columns for readability
+  - Empty data handling (headers only)
+- 13 unit tests covering:
+  - Valid data export
+  - Empty data export
+  - Null/empty input validation
+  - Null value handling
+  - Column filtering (exact, case-insensitive, invalid names)
+  - Filename generation format
+  - DateTime formatting
+  - Large dataset (1000 rows)
+
+### Result
+ Success - All 13 tests passing, backend builds successfully
+
+### AI Generation Percentage
+Estimate: ~94%
+
+### Learnings/Notes
+- ClosedXML provides excellent API for Excel manipulation without Microsoft Office dependencies
+- Generic method with reflection enables exporting any DTO without type-specific code
+- Case-insensitive property matching improves API usability (consumers can use "id" or "Id")
+- DateTime.ToString() for dates ensures Excel displays them as text (no Excel date conversion issues)
+- Auto-fit columns improves UX but may not be suitable for very large datasets (performance consideration)
+- GetPropertiesToExport helper method with property filtering provides flexibility for selective column export
+- Byte array return type sufficient for typical use cases; streaming could be added later if needed for very large exports
+- Styled headers improve readability and provide professional appearance
+- ClosedXML transitive dependencies: DocumentFormat.OpenXml, ExcelNumberFormat, SixLabors.Fonts, RBush.Signed
+- Test coverage includes edge cases (empty data, null values, invalid columns) ensuring robustness
+
+---
