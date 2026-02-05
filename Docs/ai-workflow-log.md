@@ -3613,3 +3613,47 @@ Estimate: ~88%
 - EventService.GetByIdAsync returns null (not exception), controller must check null explicitly
 
 ---
+
+## [2026-02-05 14:15] - Swagger UI 500 Error Fix and File Upload Configuration
+
+### Prompt
+"When I run backend app i got swagger error. Could you fix it?"
+
+### Context
+- Backend running but Swagger UI showing 500 error
+- Initial investigation found CS8602 null dereference warnings in EventsController
+- After fixing nulls, discovered SwaggerGeneratorException for IFormFile parameters
+- Swashbuckle.AspNetCore 7.3.2 cannot automatically handle [FromForm] IFormFile
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Controllers/EventsController.cs` - Modified: Added null checks in UploadEventImage (line 193), DeleteEventImage (line 262), CancelEvent (line 320); removed [FromForm] attribute, added [Consumes]
+- `backend/src/VolunteerPortal.API/Swagger/FileUploadOperationFilter.cs` - Created: Custom IOperationFilter for file upload parameter handling (60 lines)
+- `backend/src/VolunteerPortal.API/Program.cs` - Modified: Added FileUploadOperationFilter registration and using statement
+
+### Generated Code Summary
+- Fixed three null dereference warnings by adding explicit null checks after GetByIdAsync calls
+- Created FileUploadOperationFilter to map IFormFile parameters to OpenAPI multipart/form-data schema with binary format
+- Replaced incompatible [FromForm] attribute with [Consumes("multipart/form-data")] on UploadEventImage endpoint
+- Registered custom operation filter in Swagger configuration
+
+### Result
+✅ Success
+- Backend builds with 0 warnings, 0 errors
+- Backend runs successfully on http://localhost:5000
+- Swagger UI loads without errors at /swagger/index.html
+- swagger.json generates successfully (200 OK response)
+- Image upload endpoint properly documented with file upload support
+
+### AI Generation Percentage
+Estimate: ~95%
+
+### Learnings/Notes
+- Swashbuckle 7.x has known issue with [FromForm] IFormFile - cannot auto-generate OpenAPI schema
+- Custom IOperationFilter is standard solution for file upload endpoints in Swagger
+- [Consumes("multipart/form-data")] without [FromForm] works better with Swashbuckle
+- Null checks required after GetByIdAsync since it returns null for non-existent entities
+- Clean builds (zero warnings) essential for Swagger generator stability
+- FileUploadOperationFilter detects IFormFile parameters and creates proper multipart/form-data schema
+- Operation filter removes auto-generated query parameters and replaces with RequestBody
+
+---
