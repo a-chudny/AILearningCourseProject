@@ -39,7 +39,7 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <Link
       to={`/events/${event.id}`}
-      className="group block rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-gray-300"
+      className="group block rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-gray-300 hover:-translate-y-1 min-h-[400px]"
     >
       <div className="flex flex-col h-full relative">
         {/* Gray overlay for cancelled events */}

@@ -12,6 +12,7 @@ import { toast } from '@/utils/toast';
 import { CancelEventModal } from '@/components/modals/CancelEventModal';
 import { RegistrationConfirmModal } from '@/components/modals/RegistrationConfirmModal';
 import { SkillBadge } from '@/components/skills/SkillBadge';
+import { EventDetailsSkeleton } from '@/components/skeletons/EventSkeletons';
 
 export default function EventDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -150,10 +151,9 @@ export default function EventDetailsPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
-          <p className="text-gray-600">Loading event details...</p>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="mx-auto max-w-4xl px-4">
+          <EventDetailsSkeleton />
         </div>
       </div>
     );
@@ -184,7 +184,7 @@ export default function EventDetailsPage() {
             </p>
             <Link
               to="/events"
-              className="mt-6 inline-block rounded-lg bg-red-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              className="mt-6 inline-block rounded-lg bg-red-600 px-6 py-3 min-h-[44px] min-w-[44px] text-center text-sm font-medium text-white transition-all hover:bg-red-700 hover:shadow-md active:scale-95"
             >
               Back to Events
             </Link>

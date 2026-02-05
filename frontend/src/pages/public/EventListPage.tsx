@@ -4,6 +4,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { EventCard } from '@/components/events/EventCard';
 import { Pagination } from '@/components/events/Pagination';
 import { EventFilters } from '@/components/events/EventFilters';
+import { EventCardSkeleton } from '@/components/skeletons/EventSkeletons';
 import type { EventQueryParams } from '@/types/api';
 
 export default function EventListPage() {
@@ -165,9 +166,10 @@ export default function EventListPage() {
 
         {/* Loading state */}
         {isLoading && (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
-            <p className="mt-4 text-gray-600">Loading events...</p>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: queryParams.pageSize || 20 }, (_, i) => (
+              <EventCardSkeleton key={i} />
+            ))}
           </div>
         )}
 
@@ -193,7 +195,7 @@ export default function EventListPage() {
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              className="mt-4 rounded-lg bg-red-600 px-6 py-3 min-h-[44px] min-w-[44px] text-sm font-medium text-white transition-all hover:bg-red-700 hover:shadow-md active:scale-95"
             >
               Retry
             </button>
@@ -228,7 +230,7 @@ export default function EventListPage() {
         {/* Events grid */}
         {!isLoading && !isError && data && data.events.length > 0 && (
           <>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {data.events.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
