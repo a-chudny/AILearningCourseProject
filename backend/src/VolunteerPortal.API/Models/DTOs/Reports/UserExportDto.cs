@@ -1,0 +1,14 @@
+namespace VolunteerPortal.API.Models.DTOs.Reports;
+
+/// <summary>
+/// DTO for exporting user data to Excel
+/// </summary>
+public class UserExportDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
+    public string Skills { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+}

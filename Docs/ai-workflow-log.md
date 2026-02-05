@@ -4022,3 +4022,75 @@ Estimate: ~92%
 - Auto-reset of button states after timeout prevents stale success/error messages
 
 ---
+
+## [2026-02-06 14:45] - RPT-003: Export API Endpoints Implementation
+
+### Prompt
+"Implement RPT-003 story from user story file"
+
+### Clarifying Questions (if any)
+- **Q1: Should date filters apply to event date or registration date?**  A: Registration date (RegisteredAt)
+- **Q2: Should exported data include soft-deleted records?**  A: No, only active records
+- **Q3: Should skills summary show volunteer count, event count, or both?**  A: Both VolunteerCount and EventCount
+- **Q4: Should user skills be exported as separate rows or comma-separated?**  A: Comma-separated string
+- **Q5: Should registration export include all statuses or only confirmed?**  A: Only Confirmed registrations
+
+### Context
+- Completed RPT-001 (Excel Export Service) and RPT-002 (Admin Reports Page)
+- Backend has IExportService/ExcelExportService for generic Excel export
+- Frontend has AdminReportsPage calling export endpoints
+- Entities: User, Event, Registration, Skill, UserSkill, EventSkill
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Models/DTOs/Reports/UserExportDto.cs` - Created: DTO for user export (Id, Name, Email, Role, Skills, CreatedAt)
+- `backend/src/VolunteerPortal.API/Models/DTOs/Reports/EventExportDto.cs` - Created: DTO for event export (Id, Title, StartTime, Location, Capacity, RegistrationCount, Status, OrganizerName, OrganizerEmail, CreatedAt)
+- `backend/src/VolunteerPortal.API/Models/DTOs/Reports/RegistrationExportDto.cs` - Created: DTO for registration export (Id, EventTitle, EventDate, VolunteerName, VolunteerEmail, Status, RegisteredAt)
+- `backend/src/VolunteerPortal.API/Models/DTOs/Reports/SkillsSummaryDto.cs` - Created: DTO for skills summary (Id, SkillName, Description, VolunteerCount, EventCount)
+- `backend/src/VolunteerPortal.API/Services/Interfaces/IReportService.cs` - Created: Interface with 4 export methods
+- `backend/src/VolunteerPortal.API/Services/ReportService.cs` - Created: Implementation querying DB with proper filters
+- `backend/src/VolunteerPortal.API/Controllers/ReportsController.cs` - Created: 4 admin-only endpoints returning Excel files
+- `backend/src/VolunteerPortal.API/Program.cs` - Modified: Registered IReportService in DI
+- `backend/tests/VolunteerPortal.Tests/Services/ReportServiceTests.cs` - Created: 12 unit tests
+
+### Generated Code Summary
+- 4 Export DTOs with appropriate properties for each report type
+- IReportService interface with async methods for each export
+- ReportService implementation with:
+  - Active-only filtering (!IsDeleted)
+  - UserSkills joined as comma-separated string
+  - Confirmed-only registration counts
+  - Date filters on RegisteredAt field
+  - Include navigation properties for related data
+- ReportsController with:
+  - [Authorize(Roles = "Admin")] at controller level
+  - 4 GET endpoints: users/export, events/export, registrations/export, skills/export
+  - registrations endpoint accepts optional startDate/endDate query params
+  - Proper Content-Disposition headers for Excel download
+- 12 unit tests covering:
+  - Active-only filtering (users, events)
+  - Skills as comma-separated string
+  - Role as string output
+  - Confirmed-only registration counts
+  - Organizer details in event export
+  - Date filter application on RegisteredAt
+  - Deleted user/event exclusion
+  - Skill counts for active users/events only
+
+### Result
+ Success - Backend build succeeded, all 12 tests passing
+
+### AI Generation Percentage
+Estimate: ~94%
+
+### Learnings/Notes
+- Clarifying questions upfront ensured correct implementation on first attempt
+- Using records for DTOs provides clean immutable data transfer objects
+- Include/ThenInclude pattern in EF Core for eager loading related data
+- String.Join pattern for comma-separated values clean and efficient
+- Controller inherits IExportService and IReportService for separation of concerns
+- Content-Disposition header set via Response.Headers for proper file download
+- InMemoryDatabase in tests simplifies testing without real DB connection
+- Tests verify both positive cases and filtering behavior
+- Date filter uses inclusive start and exclusive end-of-day for endDate
+
+---
