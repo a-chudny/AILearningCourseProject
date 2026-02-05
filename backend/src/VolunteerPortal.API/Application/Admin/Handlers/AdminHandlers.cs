@@ -68,7 +68,8 @@ public sealed class GetUsersHandler : IRequestHandler<GetUsersQuery, PagedResult
         var page = Math.Max(1, request.Page);
         var pageSize = Math.Clamp(request.PageSize, 1, 50);
 
-        var query = _context.Users.AsQueryable();
+        // Start with IgnoreQueryFilters to allow access to soft-deleted users when needed
+        var query = _context.Users.IgnoreQueryFilters().AsQueryable();
 
         // Filter by status
         query = request.Status?.ToLowerInvariant() switch
@@ -135,7 +136,10 @@ public sealed class UpdateUserRoleHandler : IRequestHandler<UpdateUserRoleComman
         if (request.UserId == request.CurrentUserId)
             throw new InvalidOperationException("You cannot change your own role");
 
-        var user = await _context.Users.FindAsync([request.UserId], cancellationToken)
+        // Use IgnoreQueryFilters to find soft-deleted users and return proper error message
+        var user = await _context.Users
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken)
             ?? throw new KeyNotFoundException("User not found");
 
         if (user.IsDeleted)
@@ -183,7 +187,10 @@ public sealed class DeleteUserHandler : IRequestHandler<DeleteUserCommand, Delet
         if (request.UserId == request.CurrentUserId)
             throw new InvalidOperationException("You cannot delete your own account");
 
-        var user = await _context.Users.FindAsync([request.UserId], cancellationToken)
+        // Use IgnoreQueryFilters to find soft-deleted users and return proper error message
+        var user = await _context.Users
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken)
             ?? throw new KeyNotFoundException("User not found");
 
         if (user.IsDeleted)

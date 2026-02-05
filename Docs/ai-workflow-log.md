@@ -4596,3 +4596,79 @@ Estimate: ~95%
 - Created test utilities pattern (createWrapper) for QueryClient setup reusability
 
 ---
+
+## [2026-02-06 09:30] - TST-003: End-to-End API Integration Tests
+
+### Prompt
+"Implement TST-003 story from user story file. Ask if something unclear."
+
+### Context
+- TST-001 (Backend Unit Tests) completed: 259 tests, 51.1% coverage
+- TST-002 (Frontend Component Tests) completed: 334 tests, 71.21% coverage
+- Existing integration tests found: AuthControllerIntegrationTests (18 tests), EventsControllerIntegrationTests (17 tests)
+- Test database: InMemory with shared InMemoryDatabaseRoot via CustomWebApplicationFactory
+- Global query filters on User and Event entities for soft-delete
+
+### Files Added/Modified
+**New Integration Test Files:**
+- `tests/VolunteerPortal.Tests/Integration/RegistrationsControllerIntegrationTests.cs` - Created: 18 tests for registration flow
+- `tests/VolunteerPortal.Tests/Integration/AdminControllerIntegrationTests.cs` - Created: 23 tests for admin operations
+- `tests/VolunteerPortal.Tests/Integration/SkillsControllerIntegrationTests.cs` - Created: 12 tests for skills management
+- `tests/VolunteerPortal.Tests/Integration/IntegrationTestHelpers.cs` - Created: Shared helper methods
+
+**Production Bug Fix:**
+- `src/VolunteerPortal.API/Application/Admin/Handlers/AdminHandlers.cs` - Modified: Added IgnoreQueryFilters() to 3 handlers (GetUsersHandler, UpdateUserRoleHandler, DeleteUserHandler) to properly handle soft-deleted users
+
+### Generated Code Summary
+**RegistrationsControllerIntegrationTests (18 tests):**
+- RegisterForEvent: success, unauthorized, duplicate, capacity full, cancelled event
+- CancelRegistration: success, not registered, unauthorized
+- GetUserRegistrations: success, unauthorized, empty list
+- GetEventRegistrations: organizer access, unauthorized, non-existent event
+- Complete registration flow test
+
+**AdminControllerIntegrationTests (23 tests):**
+- GetStats: admin access, organizer forbidden, volunteer forbidden, unauthorized
+- GetUsers: pagination, search filter, includeDeleted flag, non-admin forbidden
+- UpdateUserRole: success, own role prevented, deleted user, non-existent user, organizer forbidden
+- DeleteUser: success, own account prevented, already deleted, non-existent, forbidden
+- Complete admin flow test
+
+**SkillsControllerIntegrationTests (12 tests):**
+- GetAllSkills: public access, returns seeded skills
+- GetMySkills: authenticated access, unauthorized, empty initial
+- UpdateMySkills: add skills, replace skills, clear skills, invalid skill IDs
+- Complete skill management flow test
+
+**IntegrationTestHelpers.cs:**
+- Helper methods for user creation, authentication, event seeding, registration management
+- Reduces code duplication across test files
+
+### Result
+✅ Success
+
+**Test Count: 259 → 307 tests (+48 new integration tests)**
+
+**Integration Test Coverage:**
+- ✅ Auth flow tests (pre-existing: 18 tests)
+- ✅ Event CRUD tests (pre-existing: 17 tests)
+- ✅ Registration flow tests (new: 18 tests)
+- ✅ Admin operations tests (new: 23 tests)
+- ✅ Skills management tests (new: 12 tests)
+
+**Production Bug Fixed:**
+- Admin handlers couldn't see soft-deleted users due to global query filters
+- Fixed by adding `IgnoreQueryFilters()` to user queries in admin handlers
+- Enables proper error messages ("User already deleted") instead of "User not found"
+
+### AI Generation Percentage
+Estimate: ~94%
+
+### Learnings/Notes
+- Global query filters can cause subtle bugs - admin functions need IgnoreQueryFilters() to handle deleted entities
+- ExceptionMiddleware maps InvalidOperationException to 409 Conflict only when message contains "already"
+- InMemory database with shared root enables test isolation while maintaining schema consistency
+- Integration tests discovered production bug in admin handlers - validates importance of E2E testing
+- Skill entity uses `Description` (not `Category`) and UserSkill uses `AddedAt` (not `CreatedAt`) - schema knowledge critical
+
+---
