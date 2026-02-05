@@ -67,8 +67,10 @@ builder.Services.AddAuthorization();
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IExportService, ExcelExportService>();
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 
 // Add controllers with FluentValidation

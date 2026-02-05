@@ -1439,31 +1439,31 @@ As an admin, I want to view and manage all events, so that I can moderate platfo
 
 # Phase 7: Reports & Export
 
-## RPT-001: CSV Export Service
+## RPT-001: Excel Export Service
 
-**Title**: Implement CSV Export Service
+**Title**: Implement Excel Export Service
 
 **User Story**:
-As a developer, I want a reusable CSV export service, so that admins can download data in Excel-compatible format.
+As a developer, I want a reusable Excel export service, so that admins can download data in Excel format.
 
 **Acceptance Criteria**:
-- [ ] Generic CSV generation from data collections
-- [ ] Proper handling of special characters (commas, quotes)
-- [ ] DateTime formatting
-- [ ] UTF-8 encoding with BOM for Excel compatibility
-- [ ] Memory-efficient streaming for large datasets
+- [x] Generic Excel generation from data collections
+- [x] Proper handling of special characters
+- [x] DateTime formatting (Excel-friendly format)
+- [x] Column filtering by property names
+- [x] Styled headers with auto-fit columns
 
 **Technical Tasks**:
-1. Install `CsvHelper` NuGet package (or use ClosedXML for Excel)
+1. Install `ClosedXML` NuGet package for Excel generation
 2. Create `IExportService` interface:
    ```csharp
-   Task<byte[]> ExportToCsvAsync<T>(IEnumerable<T> data, string[] columns);
+   Task<byte[]> ExportToExcelAsync<T>(IEnumerable<T> data, string sheetName, string[]? columns = null);
    ```
-3. Implement `CsvExportService`:
-   - Configure CSV formatting
-   - Handle null values
-   - Format dates consistently
-4. Add proper content-disposition headers helper
+3. Implement `ExcelExportService`:
+   - Configure Excel formatting
+   - Handle null values as empty cells
+   - Format dates consistently (yyyy-MM-dd HH:mm:ss)
+4. Add `GetContentDisposition` helper for timestamped filenames
 5. Add unit tests with sample data
 
 **Dependencies**: FOUND-001
@@ -1514,7 +1514,7 @@ As an admin, I want a reports page where I can export platform data, so that I c
 **Title**: Create Export Endpoints for Admin Reports
 
 **User Story**:
-As an admin, I want API endpoints that return CSV files, so that I can download platform data.
+As an admin, I want API endpoints that return Excel files, so that I can download platform data.
 
 **Acceptance Criteria**:
 - [ ] `GET /api/reports/users/export` - Export all users
@@ -1526,7 +1526,7 @@ As an admin, I want API endpoints that return CSV files, so that I can download 
 
 **Technical Tasks**:
 1. Create `ReportsController` with endpoints
-2. Create report DTOs for CSV structure:
+2. Create report DTOs for Excel export:
    - `UserExportDto` (Id, Name, Email, Role, Skills, CreatedAt)
    - `EventExportDto` (Id, Title, Date, Location, Capacity, Registrations, Organizer)
    - `RegistrationExportDto` (EventTitle, VolunteerName, VolunteerEmail, Status, RegisteredAt)
@@ -1535,8 +1535,8 @@ As an admin, I want API endpoints that return CSV files, so that I can download 
 4. Implement `ReportService`:
    - Query data with includes
    - Map to export DTOs
-   - Use `CsvExportService` to generate CSV
-5. Return `FileContentResult` with proper headers
+   - Use `ExcelExportService` to generate Excel files
+5. Return `FileContentResult` with proper headers (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)
 6. Add integration tests
 
 **Dependencies**: RPT-001

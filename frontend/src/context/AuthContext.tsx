@@ -78,17 +78,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Note: Navigation is handled by the calling component to support return URLs
    */
   const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true);
     try {
       const response = await authService.login(email, password);
+      // Set auth state - use a callback to ensure state is updated
       setToken(response.token);
       setUser(response.user);
+      
+      // Small delay to ensure React processes the state updates
+      // This prevents navigation happening before state propagates
+      await new Promise(resolve => setTimeout(resolve, 0));
       // Note: No automatic navigation - let calling component handle redirect
     } catch (error) {
       // Re-throw error to be handled by the component
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 

@@ -53,7 +53,7 @@ The Volunteer Event Portal provides a centralized platform that:
 - **JWT Authentication** for secure API access
 - **xUnit** for unit testing
 - **FluentValidation** for request validation
-- **ClosedXML** for CSV export
+- **ClosedXML** for Excel export
 
 ### Frontend
 - **React 19+** with TypeScript (strict mode)
@@ -139,13 +139,13 @@ The Volunteer Event Portal provides a centralized platform that:
 | SKL-06 | Event list shows skill requirements | Medium |
 | SKL-07 | Volunteers see skill match indicator on events | Low |
 
-### Admin Reports (CSV Export)
+### Admin Reports (Excel Export)
 
 | ID | Requirement | Priority |
 |----|-------------|----------|
-| RPT-01 | Admins can export list of all events to CSV | Medium |
-| RPT-02 | Admins can export all registrations to CSV | Medium |
-| RPT-03 | Admins can export volunteer skills summary to CSV | Low |
+| RPT-01 | Admins can export list of all events to Excel | Medium |
+| RPT-02 | Admins can export all registrations to Excel | Medium |
+| RPT-03 | Admins can export volunteer skills summary to Excel | Low |
 | RPT-04 | Exported files include relevant metadata (date, filters) | Low |
 
 ---
@@ -216,7 +216,7 @@ The Volunteer Event Portal provides a centralized platform that:
 | `RoleGuard` | Route guard for role-based access |
 | `SkillBadge` | Display skill tag with styling |
 | `SkillSelector` | Multi-select component for skills |
-| `ExportButton` | Button to trigger CSV export |
+| `ExportButton` | Button to trigger Excel export |
 
 ### State Management
 
@@ -273,10 +273,10 @@ The Volunteer Event Portal provides a centralized platform that:
 #### Reports (Admin)
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| GET | `/api/reports/users/export` | Export users to CSV | Admin |
-| GET | `/api/reports/events/export` | Export events to CSV | Admin |
-| GET | `/api/reports/registrations/export` | Export registrations to CSV | Admin |
-| GET | `/api/reports/skills/export` | Export skills summary to CSV | Admin |
+| GET | `/api/reports/users/export` | Export users to Excel | Admin |
+| GET | `/api/reports/events/export` | Export events to Excel | Admin |
+| GET | `/api/reports/registrations/export` | Export registrations to Excel | Admin |
+| GET | `/api/reports/skills/export` | Export skills summary to Excel | Admin |
 
 ### Database Schema
 
@@ -427,7 +427,7 @@ public enum EventStatus
 - API response time < 500ms for standard operations
 - Frontend initial load < 3 seconds
 - Pagination for lists (10-20 items per page)
-- CSV exports handled efficiently for up to 10,000 records
+- Excel exports handled efficiently for up to 10,000 records
 
 ### Security
 - Password hashing with BCrypt
@@ -454,7 +454,7 @@ public enum EventStatus
 | Services | All business logic methods |
 | Validators | Validation rule tests |
 | Controllers | Request/response handling |
-| Export Service | CSV generation tests |
+| Export Service | Excel generation tests |
 
 ### Frontend Unit Tests
 | Area | Test Coverage |
@@ -476,7 +476,7 @@ backend/
 │       ├── Endpoints/             # Minimal API endpoints (optional)
 │       ├── Middleware/            # Custom middleware
 │       ├── Services/              # Business logic
-│       │   └── Reports/           # CSV export services
+│       │   └── Reports/           # Excel export services
 │       ├── Repositories/          # Data access
 │       ├── Models/
 │       │   ├── Entities/          # EF entities
@@ -564,8 +564,8 @@ frontend/
 - [ ] Role-based access control
 
 ### Phase 7: Reports & Export
-- [ ] CSV export service (ClosedXML)
-- [ ] Admin reports page
+- [x] Excel export service (ClosedXML)
+- [x] Admin reports page
 - [ ] Export endpoints for users, events, registrations
 - [ ] Skills summary export
 
@@ -585,7 +585,7 @@ frontend/
 - [ ] CRUD operations for events
 - [ ] Event registration flow working
 - [ ] Skill preferences for users and events
-- [ ] Admin CSV export functionality
+- [ ] Admin Excel export functionality
 - [ ] Backend test coverage >70%
 - [ ] Frontend test coverage >70%
 - [ ] ~90% of code AI-generated (tracked in workflow log)

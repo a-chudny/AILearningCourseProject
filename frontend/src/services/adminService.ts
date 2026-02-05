@@ -121,3 +121,56 @@ export async function getEventRegistrations(eventId: number): Promise<any[]> {
   const response = await api.get(`/events/${eventId}/registrations`);
   return response.data;
 }
+
+/**
+ * Export filters for registrations
+ */
+export interface RegistrationExportFilters {
+  startDate?: string; // ISO date string
+  endDate?: string; // ISO date string
+}
+
+/**
+ * Export all users to CSV
+ * Requires Admin role authentication
+ */
+export async function exportUsers(): Promise<Blob> {
+  const response = await api.get('/reports/users/export', {
+    responseType: 'blob',
+  });
+  return response.data;
+}
+
+/**
+ * Export all events to CSV
+ * Requires Admin role authentication
+ */
+export async function exportEvents(): Promise<Blob> {
+  const response = await api.get('/reports/events/export', {
+    responseType: 'blob',
+  });
+  return response.data;
+}
+
+/**
+ * Export all registrations to CSV with optional date filters
+ * Requires Admin role authentication
+ */
+export async function exportRegistrations(filters?: RegistrationExportFilters): Promise<Blob> {
+  const response = await api.get('/reports/registrations/export', {
+    params: filters,
+    responseType: 'blob',
+  });
+  return response.data;
+}
+
+/**
+ * Export skills summary to CSV
+ * Requires Admin role authentication
+ */
+export async function exportSkillsSummary(): Promise<Blob> {
+  const response = await api.get('/reports/skills/export', {
+    responseType: 'blob',
+  });
+  return response.data;
+}

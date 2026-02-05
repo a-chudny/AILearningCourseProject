@@ -39,9 +39,9 @@ public class AdminController : ControllerBase
     {
         try
         {
-            // Get first and last day of current month
+            // Get first and last day of current month (UTC)
             var now = DateTime.UtcNow;
-            var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
+            var firstDayOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
             var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
             // Total users (excluding soft-deleted)

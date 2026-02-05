@@ -3878,3 +3878,291 @@ Estimate: ~92%
 - Query params pattern: includePastEvents=true, includeDeleted=true gives admin full visibility
 
 ---
+## [2026-02-05 10:30] - RPT-001: CSV Export Service (Backend)
+
+### Prompt
+"Implement RPT-001 story from user story file"
+
+### Clarifying Questions
+- **Q1: ClosedXML or CsvHelper?**  A: ClosedXML (Excel files)
+- **Q2: Column selection method?**  A: Property names (string[])
+- **Q3: Date format?**  A: Excel-friendly (2026-02-05 14:30:00)
+- **Q4: Null value handling?**  A: Empty string ""
+- **Q5: File naming convention?**  A: With timestamp (entityname_2026-02-05_143000.xlsx)
+- **Q6: Return type?**  A: Byte array sufficient (no streaming needed)
+
+### Context
+- Starting Phase 7 (Reports)
+- Admin features (Phase 6) completed and merged to main
+- Need generic export service for exporting data to Excel format
+- Service will be consumed by event and user export endpoints
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Services/Interfaces/IExportService.cs` - Created: Export service interface with generic method
+- `backendsrc/VolunteerPortal.API/Services/ExcelExportService.cs` - Created: Excel export implementation using ClosedXML
+- `backendsrc/VolunteerPortal.API/Program.cs` - Modified: Registered IExportService in DI container
+- `backend/src/VolunteerPortal.API/VolunteerPortal.API.csproj` - Modified: Added ClosedXML 0.105.0 package
+- `backend/tests/VolunteerPortal.Tests/Services/ExcelExportServiceTests.cs` - Created: 13 comprehensive unit tests
+
+### Generated Code Summary
+- IExportService interface with generic ExportToExcelAsync<T> method accepting data, sheetName, and optional columns filter
+- GetContentDisposition helper for timestamped filename generation (entityname_YYYY-MM-DD_HHmmss.xlsx)
+- ExcelExportService implementation:
+  - Reflection-based property reading for generic type support
+  - Column filtering by property names (case-insensitive)
+  - Excel-friendly date formatting (yyyy-MM-dd HH:mm:ss)
+  - Null values rendered as empty cells
+  - Styled headers (bold, gray background)
+  - Auto-fit columns for readability
+  - Empty data handling (headers only)
+- 13 unit tests covering:
+  - Valid data export
+  - Empty data export
+  - Null/empty input validation
+  - Null value handling
+  - Column filtering (exact, case-insensitive, invalid names)
+  - Filename generation format
+  - DateTime formatting
+  - Large dataset (1000 rows)
+
+### Result
+ Success - All 13 tests passing, backend builds successfully
+
+### AI Generation Percentage
+Estimate: ~94%
+
+### Learnings/Notes
+- ClosedXML provides excellent API for Excel manipulation without Microsoft Office dependencies
+- Generic method with reflection enables exporting any DTO without type-specific code
+- Case-insensitive property matching improves API usability (consumers can use "id" or "Id")
+- DateTime.ToString() for dates ensures Excel displays them as text (no Excel date conversion issues)
+- Auto-fit columns improves UX but may not be suitable for very large datasets (performance consideration)
+- GetPropertiesToExport helper method with property filtering provides flexibility for selective column export
+- Byte array return type sufficient for typical use cases; streaming could be added later if needed for very large exports
+- Styled headers improve readability and provide professional appearance
+- ClosedXML transitive dependencies: DocumentFormat.OpenXml, ExcelNumberFormat, SixLabors.Fonts, RBush.Signed
+- Test coverage includes edge cases (empty data, null values, invalid columns) ensuring robustness
+
+---
+
+## [2026-02-05 11:00] - RPT-002: Admin Reports Page (Frontend)
+
+### Prompt
+"Implement RPT-002 story from user story file. Ask if something unclear."
+
+### Clarifying Questions
+- **Q1: Export file format?**  A: CSV
+- **Q2: Export sections layout?**  A: Similar to dashboard (cards)
+- **Q3: Date filters for registrations?**  A: Yes, should be included
+- **Q4: Export button states?**  A: All (loading, success, error)
+- **Q5: Frontend only or with backend?**  A: Only frontend part
+- **Q6: Page description?**  A: Yes
+
+### Context
+- RPT-001 (Export Service) completed
+- Building Phase 7 (Reports) frontend
+- Need admin reports page with export functionality
+- API endpoints will be implemented in RPT-003
+- Using placeholder API service functions for now
+
+### Files Added/Modified
+- `frontend/src/pages/admin/AdminReportsPage.tsx` - Created: Reports page with 4 export cards
+- `frontend/src/services/adminService.ts` - Modified: Added export API functions (exportUsers, exportEvents, exportRegistrations, exportSkillsSummary)
+- `frontend/src/routes/index.tsx` - Modified: Added /admin/reports route with lazy loading
+- `frontend/src/__tests__/pages/admin/AdminReportsPage.test.tsx` - Created: 13 component tests
+
+### Generated Code Summary
+- AdminReportsPage component:
+  - Card-based layout matching dashboard design
+  - 4 export sections: Users, Events, Registrations (with date filters), Skills Summary
+  - Descriptive text for each export explaining contents
+  - Date range filters for registrations (optional start/end date)
+  - Clear filters button
+  - Information section explaining export format and behavior
+- ExportButton component:
+  - Three states: idle (Export CSV), loading (spinner), success (Downloaded!), error (Failed)
+  - Auto-reset to idle after 3s (success) or 5s (error)
+  - Disabled during loading
+- downloadBlob helper:
+  - Creates temporary download link
+  - Triggers browser download
+  - Cleans up object URL
+  - Timestamped filenames (entityname_YYYY-MM-DDTHH-mm-ss.csv)
+- Export API functions (placeholder):
+  - exportUsers(), exportEvents(), exportSkillsSummary() - no parameters
+  - exportRegistrations(filters) - accepts optional startDate/endDate
+  - All return Promise<Blob> with responseType: 'blob'
+- 13 comprehensive tests:
+  - Page rendering (header, cards, descriptions, filters, info section)
+  - Export button clicks and API calls
+  - Button state transitions (loading  success/error)
+  - Date filter inputs and state management
+  - Clear filters functionality
+  - Date filters passed to exportRegistrations
+
+### Result
+ Success - All 13 tests passing, no TypeScript errors, route configured
+
+### AI Generation Percentage
+Estimate: ~92%
+
+### Learnings/Notes
+- Card-based layout pattern from AdminDashboard provides consistent UX across admin pages
+- ExportButton component with state management (idle/loading/success/error) provides excellent user feedback
+- downloadBlob helper with window.URL.createObjectURL enables client-side file downloads from API blob responses
+- Timestamped filenames using ISO format with character replacement ensures unique, sortable filenames
+- Date filters as optional parameters enables both filtered and unfiltered exports without separate endpoints
+- Heroicons library provides consistent iconography (UserGroupIcon, CalendarDaysIcon, etc.)
+- AdminLayout sidebar already included Reports link from ADM-001 implementation
+- Blob responseType in axios automatically handles binary data from backend
+- Clear filters button only shown when filters are active (conditional rendering)
+- Information section educates users about export format and behavior
+- Test coverage includes user interactions (clicks, typing, state changes) and API integration
+- React state management with filters object enables flexible multi-parameter filtering
+- Auto-reset of button states after timeout prevents stale success/error messages
+
+---
+
+## [2026-02-06 14:45] - RPT-003: Export API Endpoints Implementation
+
+### Prompt
+"Implement RPT-003 story from user story file"
+
+### Clarifying Questions (if any)
+- **Q1: Should date filters apply to event date or registration date?**  A: Registration date (RegisteredAt)
+- **Q2: Should exported data include soft-deleted records?**  A: No, only active records
+- **Q3: Should skills summary show volunteer count, event count, or both?**  A: Both VolunteerCount and EventCount
+- **Q4: Should user skills be exported as separate rows or comma-separated?**  A: Comma-separated string
+- **Q5: Should registration export include all statuses or only confirmed?**  A: Only Confirmed registrations
+
+### Context
+- Completed RPT-001 (Excel Export Service) and RPT-002 (Admin Reports Page)
+- Backend has IExportService/ExcelExportService for generic Excel export
+- Frontend has AdminReportsPage calling export endpoints
+- Entities: User, Event, Registration, Skill, UserSkill, EventSkill
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Models/DTOs/Reports/UserExportDto.cs` - Created: DTO for user export (Id, Name, Email, Role, Skills, CreatedAt)
+- `backend/src/VolunteerPortal.API/Models/DTOs/Reports/EventExportDto.cs` - Created: DTO for event export (Id, Title, StartTime, Location, Capacity, RegistrationCount, Status, OrganizerName, OrganizerEmail, CreatedAt)
+- `backend/src/VolunteerPortal.API/Models/DTOs/Reports/RegistrationExportDto.cs` - Created: DTO for registration export (Id, EventTitle, EventDate, VolunteerName, VolunteerEmail, Status, RegisteredAt)
+- `backend/src/VolunteerPortal.API/Models/DTOs/Reports/SkillsSummaryDto.cs` - Created: DTO for skills summary (Id, SkillName, Description, VolunteerCount, EventCount)
+- `backend/src/VolunteerPortal.API/Services/Interfaces/IReportService.cs` - Created: Interface with 4 export methods
+- `backend/src/VolunteerPortal.API/Services/ReportService.cs` - Created: Implementation querying DB with proper filters
+- `backend/src/VolunteerPortal.API/Controllers/ReportsController.cs` - Created: 4 admin-only endpoints returning Excel files
+- `backend/src/VolunteerPortal.API/Program.cs` - Modified: Registered IReportService in DI
+- `backend/tests/VolunteerPortal.Tests/Services/ReportServiceTests.cs` - Created: 12 unit tests
+
+### Generated Code Summary
+- 4 Export DTOs with appropriate properties for each report type
+- IReportService interface with async methods for each export
+- ReportService implementation with:
+  - Active-only filtering (!IsDeleted)
+  - UserSkills joined as comma-separated string
+  - Confirmed-only registration counts
+  - Date filters on RegisteredAt field
+  - Include navigation properties for related data
+- ReportsController with:
+  - [Authorize(Roles = "Admin")] at controller level
+  - 4 GET endpoints: users/export, events/export, registrations/export, skills/export
+  - registrations endpoint accepts optional startDate/endDate query params
+  - Proper Content-Disposition headers for Excel download
+- 12 unit tests covering:
+  - Active-only filtering (users, events)
+  - Skills as comma-separated string
+  - Role as string output
+  - Confirmed-only registration counts
+  - Organizer details in event export
+  - Date filter application on RegisteredAt
+  - Deleted user/event exclusion
+  - Skill counts for active users/events only
+
+### Result
+ Success - Backend build succeeded, all 12 tests passing
+
+### AI Generation Percentage
+Estimate: ~94%
+
+### Learnings/Notes
+- Clarifying questions upfront ensured correct implementation on first attempt
+- Using records for DTOs provides clean immutable data transfer objects
+- Include/ThenInclude pattern in EF Core for eager loading related data
+- String.Join pattern for comma-separated values clean and efficient
+- Controller inherits IExportService and IReportService for separation of concerns
+- Content-Disposition header set via Response.Headers for proper file download
+- InMemoryDatabase in tests simplifies testing without real DB connection
+- Tests verify both positive cases and filtering behavior
+- Date filter uses inclusive start and exclusive end-of-day for endDate
+
+---
+
+## [2026-02-05 14:30-15:15] - Post-RPT-003 UI/UX Bug Fixes
+
+### Prompts
+1. "Few more fixes needed: (1) Input text almost invisible everywhere due to font color, not only login page (2) Admin dashboard page got 500 error from backend endpoint admin/stats"
+2. "Few more fixes: (1) Dropdown menu in Header closes before user can click Profile/My Events/Logout (2) Admin Events page content doesn't fit properly on 15.1" screen at 2560x1600 resolution"
+3. "Few more fixes: (1) On login page after entering wrong credentials, could be displayed some user friendly message, instead of 401 error text? (2) After successful login site redirect to main page, but it looks like the user still unlogged until refresh the page"
+4. "First issue was fixed, but immediate login still doesn't work"
+5. "No. it has not fixed, Now I'm getting 200 status code from backend, but nothing happened (no redirection to main page)"
+6. "Still no redirect to main page after successful login"
+
+### Context
+- RPT-003 completed and committed
+- User testing revealed 6 distinct UI/UX bugs
+- Issues spanned backend (DateTime), frontend styling (text visibility), and UX (navigation, error messages)
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Controllers/AdminController.cs` - Fixed: DateTime UTC issue (DateTimeKind.Utc)
+- `frontend/src/pages/auth/LoginPage.tsx` - Fixed: Input colors, error messages, navigation with window.location.href
+- `frontend/src/pages/auth/RegisterPage.tsx` - Fixed: Added text-gray-900 bg-white to all inputs
+- `frontend/src/components/events/EventFilters.tsx` - Fixed: Search input and select text colors
+- `frontend/src/components/events/forms/EventForm.tsx` - Fixed: All 10 form inputs text/bg colors
+- `frontend/src/pages/admin/AdminUsersPage.tsx` - Fixed: Search and filter text colors
+- `frontend/src/pages/admin/AdminEventsPage.tsx` - Fixed: Input colors and table layout with proportional widths
+- `frontend/src/pages/admin/AdminReportsPage.tsx` - Fixed: Date input text colors
+- `frontend/src/components/layout/Header.tsx` - Fixed: Dropdown gap with pb-2 and top-full positioning
+- `frontend/src/context/AuthContext.tsx` - Fixed: Auth state timing
+
+### Issues Fixed
+**1. Input Text Visibility (All Forms)**
+- Problem: Input/select text nearly invisible (no explicit color)
+- Solution: Added `text-gray-900 bg-white` to all form inputs across 8 files
+
+**2. Admin Dashboard 500 Error**
+- Problem: `System.ArgumentException: Cannot write DateTime with Kind=Unspecified to PostgreSQL`
+- Solution: Changed to `new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc)` in AdminController
+
+**3. Header Dropdown Closes Prematurely**
+- Problem: `mt-2` margin created gap, triggering `onMouseLeave` when moving to menu
+- Solution: Button `pb-2` + dropdown `top-full` creates continuous hover area
+
+**4. Admin Events Table Layout (2560x1600)**
+- Problem: Table using `min-w-full` with no column width distribution
+- Solution: Changed to `w-full` with proportional widths (w-1/4, w-1/6, w-1/5, w-24, w-40), added `break-words` to Title
+
+**5. Login Error Messages**
+- Problem: Raw "Request failed with status code 401" shown to users
+- Solution: Check `error.response?.status === 401` → show "Invalid email or password. Please check your credentials and try again."
+
+**6. Login Redirect Auth State**
+- Problem: After login, header shows logged-out state until refresh
+- Root Cause: React state batching + multiple navigation triggers causing timing issues
+- Solution Evolution: Tried useEffect-only navigation → setTimeout(0) delay → Final: `window.location.href = from` for full page reload ensuring localStorage token loads
+
+### Result
+✅ All 6 issues resolved - Application fully functional with proper UX
+
+### AI Generation Percentage
+Estimate: ~78% (debugging iterations required for auth state navigation)
+
+### Learnings/Notes
+- PostgreSQL requires explicit DateTimeKind.Utc for timestamp with time zone columns
+- Tailwind needs explicit `text-color` and `bg-color` - no defaults
+- CSS margin breaks hover interactions - use padding for continuous areas
+- Table `w-full` with proportional column widths better than `min-w-full`
+- User error messages should never expose technical details (HTTP codes)
+- window.location.href more reliable than SPA navigation for auth state transitions
+- Multiple navigation triggers (useEffect + manual) cause race conditions
+- React state batching can delay derived computed values (isAuthenticated)
+- Full page reload guarantees localStorage → Context initialization flow
+
+---

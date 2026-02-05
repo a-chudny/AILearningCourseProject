@@ -13,7 +13,7 @@ interface FormErrors {
 export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { login, isAuthenticated } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -26,10 +26,10 @@ export default function LoginPage() {
 
   // Redirect authenticated users away from login page
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
+    if (isAuthenticated) {
       navigate(from, { replace: true })
     }
-  }, [isAuthenticated, authLoading, navigate, from])
+  }, [isAuthenticated, navigate, from])
 
   // Validation functions
   const validateEmail = (value: string): string | undefined => {
@@ -90,25 +90,24 @@ export default function LoginPage() {
 
     try {
       await login(email, password)
-      // Navigation happens automatically via useEffect when isAuthenticated changes
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Invalid email or password'
+      // Navigate directly after successful login
+      // Using window.location for a full page reload to ensure all state is fresh
+      window.location.href = from
+    } catch (error: any) {
+      let errorMessage = 'An error occurred. Please try again.'
+      
+      // Handle 401 Unauthorized (invalid credentials)
+      if (error.response?.status === 401) {
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.'
+      }
+      // Handle other errors
+      else if (error.message) {
+        errorMessage = error.message
+      }
+      
       setErrors({ general: errorMessage })
-    } finally {
       setIsSubmitting(false)
     }
-  }
-
-  // Show loading state while checking authentication
-  if (authLoading) {
-    return (
-      <AuthLayout>
-        <div className="flex flex-col items-center gap-4 py-8">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </AuthLayout>
-    )
   }
 
   return (
@@ -177,7 +176,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => handleBlur('email')}
-                  className={`block w-full appearance-none rounded-md border px-3 py-2 placeholder-gray-400 shadow-sm focus:outline-none sm:text-sm ${
+                  className={`block w-full appearance-none rounded-md border px-3 py-2 placeholder-gray-400 shadow-sm focus:outline-none sm:text-sm bg-white text-gray-900 ${
                     touched.email && errors.email
                       ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
                       : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
@@ -212,7 +211,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onBlur={() => handleBlur('password')}
-                  className={`block w-full appearance-none rounded-md border px-3 py-2 placeholder-gray-400 shadow-sm focus:outline-none sm:text-sm ${
+                  className={`block w-full appearance-none rounded-md border px-3 py-2 placeholder-gray-400 shadow-sm focus:outline-none sm:text-sm bg-white text-gray-900 ${
                     touched.password && errors.password
                       ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
                       : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
