@@ -4672,3 +4672,51 @@ Estimate: ~94%
 - Skill entity uses `Description` (not `Category`) and UserSkill uses `AddedAt` (not `CreatedAt`) - schema knowledge critical
 
 ---
+
+## [2026-02-06 12:00] - DataSeeder Enhancement for Development
+
+### Prompt
+"Update dataseeder for initial setup: 1 admin, 2 organizers, 4 volunteers (2 with skills, 2 without), 4 events (1 past, 1 in 3 days, 1 in 5 days, 1 in 7 days), 2 events with skills requirement, 2 events with images, realistic descriptions with Tbilisi locations, some volunteers registered on events."
+
+### Context
+- DataSeeder existed but had minimal test data (1 admin, 1 organizer, 1 volunteer, no events)
+- Need realistic demo data for development environment
+- Events need dynamic dates relative to current date
+- Images sourced from Unsplash (free)
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Data/DataSeeder.cs` - Expanded: Full seed data for all entities
+- `backend/src/VolunteerPortal.API/wwwroot/uploads/events/community-cleanup.jpg` - Added: Event image (65KB)
+- `backend/src/VolunteerPortal.API/wwwroot/uploads/events/food-distribution.jpg` - Added: Event image (93KB)
+
+### Generated Code Summary
+**Users (7 total):**
+- 1 Admin: admin@portal.com (Admin123!)
+- 2 Organizers: Nino Beridze, Giorgi Tsiklauri (Organizer123!)
+- 4 Volunteers: Mariam (with 3 skills), Davit (with 3 skills), Luka, Ana (Volunteer123!)
+
+**Events (4 total in Tbilisi):**
+- Vake Park Community Cleanup (past event, 5 days ago) - with image
+- Dezerter Bazaar Food Distribution (3 days from now, requires Cooking) - with image  
+- Youth First Aid Training Workshop (5 days from now, requires First Aid)
+- Elderly Care Home Visit (7 days from now, no skills)
+
+**Skills & Registrations:**
+- 6 UserSkills seeded (Mariam: First Aid, Cooking, Event Setup; Davit: Driving, Photography, Event Setup)
+- 2 EventSkills seeded (Food Distribution requires Cooking, First Aid Workshop requires First Aid)
+- 2 Registrations seeded (Mariam → Food Distribution, Davit → Elderly Visit)
+
+### Result
+✅ Success - Comprehensive demo data with realistic Georgian locations and event descriptions
+
+### AI Generation Percentage
+Estimate: ~97%
+
+### Learnings/Notes
+- Event dates use `DateTime.UtcNow.Date.AddDays()` for dynamic seeding relative to current date
+- Idempotent seeding with `AnyAsync()` checks prevents duplicate data
+- Tbilisi locations add realism: Vake Park, Dezerter Bazaar, Youth Palace, Senior Care Center
+- Event descriptions include specific details (food types, activities, partnerships)
+- Image files stored in wwwroot/uploads/events/ for static file serving
+
+---
