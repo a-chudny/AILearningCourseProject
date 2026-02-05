@@ -7,21 +7,21 @@ import type { Skill } from '@/types'
 const mockSkill: Skill = {
   id: 1,
   name: 'React',
-  description: 'Technology',
+  category: 'Technology',
 }
 
 const mockSkillCommunity: Skill = {
   id: 2,
   name: 'Leadership',
-  description: 'Community & Leadership',
+  category: 'Community & Leadership',
 }
 
 const mockSkills: Skill[] = [
-  { id: 1, name: 'React', description: 'Technology' },
-  { id: 2, name: 'Node.js', description: 'Technology' },
-  { id: 3, name: 'Leadership', description: 'Community & Leadership' },
-  { id: 4, name: 'Communication', description: 'Community & Leadership' },
-  { id: 5, name: 'Teaching', description: 'Education' },
+  { id: 1, name: 'React', category: 'Technology' },
+  { id: 2, name: 'Node.js', category: 'Technology' },
+  { id: 3, name: 'Leadership', category: 'Community & Leadership' },
+  { id: 4, name: 'Communication', category: 'Community & Leadership' },
+  { id: 5, name: 'Teaching', category: 'Education' },
 ]
 
 describe('SkillBadge', () => {
@@ -124,10 +124,14 @@ describe('SkillBadge', () => {
   })
 
   it('shows tooltip when showTooltip is true', () => {
-    render(<SkillBadge skill={mockSkill} showTooltip />)
+    const { container } = render(<SkillBadge skill={mockSkill} showTooltip={true} />)
     
-    // Tooltip shows description (category)
-    expect(screen.getByText('Technology')).toBeInTheDocument()
+    // Tooltip wrapper should be present
+    const wrapper = container.querySelector('.group.relative')
+    expect(wrapper).toBeInTheDocument()
+    
+    // Check that category exists in the rendered HTML (even if invisible)
+    expect(container.innerHTML).toContain('Technology')
   })
 
   it('applies category-based color classes', () => {

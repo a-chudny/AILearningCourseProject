@@ -96,6 +96,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Register function
+   * Sets auth state and navigates to home page after successful registration
+   * Uses window.location.href like login for reliable full page refresh
    */
   const register = useCallback(async (data: RegisterRequest) => {
     setIsLoading(true);
@@ -103,15 +105,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await authService.register(data);
       setToken(response.token);
       setUser(response.user);
-      // Navigate to home page after successful registration
-      navigate('/');
+      // Use window.location.href for full page reload like login does
+      // This ensures all state is fresh and components re-render properly
+      window.location.href = '/';
     } catch (error) {
       // Re-throw error to be handled by the component
       throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [navigate]);
+  }, []);
 
   /**
    * Logout function

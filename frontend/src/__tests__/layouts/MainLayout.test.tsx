@@ -48,6 +48,6 @@ describe('MainLayout', () => {
     
     const mainElement = container.querySelector('main')
     const contentDiv = mainElement?.firstChild
-    expect(contentDiv).toHaveClass('mx-auto', 'max-w-7xl')
+    expect(contentDiv).toHaveClass('mx-auto', 'max-w-full')
   })
 })

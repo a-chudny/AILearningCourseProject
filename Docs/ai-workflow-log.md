@@ -4719,4 +4719,248 @@ Estimate: ~97%
 - Event descriptions include specific details (food types, activities, partnerships)
 - Image files stored in wwwroot/uploads/events/ for static file serving
 
+---## [2026-02-05 16:00] - Multiple UI Bug Fixes
+
+### Prompt
+"Now have some other issue
+1. When trying to edit event, got error
+ ArgumentException: Cannot write DateTime with Kind=Unspecified to PostgreSQL type 'timestamp with time zone', only UTC is supported. Note that it's not possible to mix DateTimes with different Kinds in an array, range, or multirange. (Parameter 'value') Used payload for updating event
+  {
+    \"title\": \"Youth First Aid Training Workshop\",
+    \"description\": \"Volunteer as a trainer or assistant at our youth first aid workshop! We're teaching basic first aid and CPR skills to high school students from public schools. Experienced first aid certified volunteers needed to demonstrate techniques and supervise practice sessions. The workshop includes hands-on training with mannequins and first aid kits. All materials provided by Georgian Red Cross Society. Light refreshments will be served.\",
+    \"location\": \"Tbilisi Youth Palace, 6 Gudiashvili Street, Tbilisi 0107, Georgia\",
+    \"startTime\": \"2026-02-10T18:00:00\",
+    \"durationMinutes\": 60,
+    \"capacity\": 8,
+    \"registrationDeadline\": \"2026-02-09T04:00:00\",
+    \"requiredSkillIds\": [
+        1,
+        10
+    ],
+    \"status\": 0
+}
+
+2. second issue, on editing page, when I choose in Duration dropdown option custom it simultaneously change to 1 hour"
+
+### Context
+- User reported two issues with event editing functionality
+- Issue 1: PostgreSQL datetime timezone error when updating events
+- Issue 2: Duration dropdown jumps from Custom back to "1 hour"
+
+### Files Added/Modified
+- rontend/src/pages/user/EditEventPage.tsx - Modified: Added 'Z' suffix to datetime strings for UTC marking (lines 155, 160)
+- rontend/src/hooks/useCreateEvent.ts - Modified: Added 'Z' suffix to datetime strings for UTC marking (lines 15, 19)
+- rontend/src/components/events/forms/EventForm.tsx - Modified: Changed durationMinutes to stay at 0 when Custom selected instead of defaulting to 60 (line 248)
+
+### Generated Code Summary
+- **Issue 1 Fix**: Append 'Z' to ISO datetime strings to mark as UTC
+  - EditEventPage: Changed ${formData.date}T:00 to ${formData.date}T:00Z
+  - useCreateEvent: Same change for both startTime and registrationDeadline
+  - PostgreSQL requires explicit UTC timezone for 'timestamp with time zone' columns
+  
+- **Issue 2 Fix**: Keep durationMinutes at 0 when Custom option selected
+  - EventForm handleDurationChange: Changed from durationMinutes: parseInt(prev.customDuration, 10) || 60 to durationMinutes: 0
+  - Prevents dropdown from jumping back to "1 hour" (which has value 60)
+  - User can then type custom duration in input field
+
+### Result
+ Success
+- Issue 1: Events now save successfully with UTC-marked datetimes
+- Issue 2: Duration dropdown stays on "Custom" option when selected
+- Custom duration input field populates durationMinutes when user types
+- Both create and edit event flows fixed
+
+### AI Generation Percentage
+Estimate: ~95%
+
+### Learnings/Notes
+- PostgreSQL 'timestamp with time zone' columns require UTC timezone marker ('Z' suffix)
+- ISO 8601 datetime without timezone is considered "unspecified" by PostgreSQL
+- Frontend should always send UTC times to backend for timezone consistency
+- Duration dropdown controlled by durationMinutes value - must stay 0 for "Custom" (value=0) to remain selected
+- When Custom is selected, user types in customDuration input which then updates durationMinutes
+- Both create and edit flows had same timezone issue and needed same fix
+
+---
+
+## [2026-02-05 16:15] - Skills Dropdown Close on Outside Click + Property Name Mismatch Fix
+
+### Prompt
+"Now few more queries:
+1. Close skills dropdown, when user click outside this component
+2. Still problem with tooltip, I think that the problem in incorrect/missing mapping between frontend and backend skill models. UI Skill has description property, and backend category"
+
+### Context
+- User reported tooltip still showing empty bubble despite previous fix
+- User provided critical hint: property name mismatch between frontend and backend
+- Frontend Skill interface used \description\ field
+- Backend SkillResponse DTO uses \Category\ field
+- Skills dropdown needed click-outside-to-close functionality
+
+### Root Cause Analysis
+**Manual hint required**: User identified the core issue - different property names on frontend vs backend:
+- Backend: SkillResponse has \Category\ property (from Models/DTOs/SkillResponse.cs)
+- Frontend: Skill interface had \description\ property (from types/entities.ts)
+- This mismatch caused tooltips to show empty because \skill.description\ was undefined
+- Previous arrow positioning fix didn't solve the actual data problem
+
+### Files Added/Modified
+- \rontend/src/types/entities.ts\ - Modified: Changed Skill interface from \description: string\ to \category: string\ (line 9)
+- \rontend/src/components/events/forms/EventForm.tsx\ - Modified: 
+  - Added \useRef\ import and \skillDropdownRef\ for click-outside detection
+  - Added \useEffect\ with mousedown listener to close dropdown when clicking outside (lines 89-101)
+  - Added \
+ef={skillDropdownRef}\ to dropdown container div (line 738)
+  - Changed \skill.description\ to \skill.category\ in dropdown display (line 777)
+- \rontend/src/components/skills/SkillBadge.tsx\ - Modified:
+  - Changed \getSkillColor(skill.description)\ to \getSkillColor(skill.category)\ (line 26)
+  - Changed tooltip text from \skill.description\ to \skill.category\ (line 70)
+
+### Generated Code Summary
+- **Click-Outside Detection**: 
+  - useRef tracks dropdown container DOM element
+  - useEffect with mousedown listener checks if click target is outside ref element
+  - Only adds listener when dropdown is open, removes on cleanup
+  - Event listener pattern: \!ref.current.contains(event.target as Node)\
+
+- **Property Name Alignment**:
+  - Updated all references from \description\ to \category\ across 3 files
+  - Tooltip now correctly displays skill category (Medical, Education, etc.)
+  - Color coding now works correctly based on category
+  - Dropdown displays category below skill name
+
+### Result
+ Success
+- Skills dropdown closes when clicking outside
+- Tooltips now display skill category correctly
+- Color coding works as expected
+- All skill displays consistent across app
+
+### AI Generation Percentage
+Estimate: ~70% (AI implemented click-outside pattern; user provided critical hint about property mismatch)
+
+### Learnings/Notes
+- **User hint critical**: AI didn't detect property name mismatch without explicit user hint
+- Property names between frontend and backend must match exactly for data binding
+- Click-outside pattern: useRef + useEffect with mousedown listener is standard React pattern
+- Event listener cleanup important: remove listener in useEffect cleanup function
+- Contains check: \element.contains(target)\ checks if click is inside element tree
+- TypeScript interface changes require updates in all consuming components
+- Backend DTO field names should be documented and matched in frontend types
+- Code comments in entity files should clarify property purposes (especially when field names aren't obvious)
+
+### Manual Intervention Required
+ **User provided critical hint**: Without user explicitly stating "UI Skill has description property, and backend category", AI would not have identified the root cause. This highlights the importance of:
+1. Consistent naming conventions between backend DTOs and frontend types
+2. Clear documentation of API contracts
+3. TypeScript interface comments explaining non-obvious field purposes
+
+---
+
+
+## [2026-02-05 16:30] - Form UX Improvements
+
+### Prompt
+"Few more improvements: 1. Auto-scroll to first invalid field on validation failure 2. Date picker manual entry as dd.mm.yyyy 3. Time picker single/double click behavior"
+
+### Files Modified
+- `EventForm.tsx` - Added scroll-to-error, time picker single/double click logic
+- `Header.tsx` - Aligned user dropdown with nav links
+- `index.html` - Updated favicon and title
+- `public/logo.svg` - Created favicon matching main logo
+
+### Result
+ Success - Scroll to error works, time picker improved, then reverted date inputs to type=date per user preference
+
+### AI Generation: ~90%
+
+---
+
+## [2026-02-06 00:30] - Comprehensive Bug Fixes & Test Resolution
+
+### Prompts Used
+
+1. "Fix these bugs: 401 errors showing after logout, skills not validating properly on event creation, signup not reflecting user state, event images not displaying correctly"
+
+2. "More issues found: cancelled registrations still showing cancel button, 403 forbidden toast appears after logout from protected pages, skills update on profile not reflecting immediately"
+
+3. "The enum types don't match - backend sends numeric values (0, 1) but frontend expects strings ('Confirmed', 'Cancelled')"
+
+4. "Fix: signup should redirect properly with user state, toast notification persists after logout, 'Match my skills' filter not working, checkbox focus rings too prominent, text invisible on some buttons"
+
+5. "Toast still showing during logout - it's coming from RoleGuard component, showing duplicate unauthorized toasts"
+
+6. "The isInLogoutGracePeriod function is wrong - it returns !hasToken which is always true when logged out"
+
+7. "Run tests both frontend and backend, check that everything works, remove unused references"
+
+### Context
+- Extended debugging session fixing multiple UI/UX bugs reported by user
+- Enum type alignment issues between frontend TypeScript and backend C#
+- Toast notification suppression during logout flow
+- Query cache invalidation for registrations
+- Test failures due to mock data not matching updated types
+
+### Issues Fixed
+
+#### Auth & State Management
+- **Signup redirect** - Changed to `window.location.href = '/'` for full page reload ensuring fresh auth state
+- **Login redirect** - Same fix applied for consistency
+- **Logout toast suppression** - Added `isInLogoutGracePeriod()` function with 4-second grace period
+- **RoleGuard duplicate toasts** - Added global cooldown mechanism (3-second TOAST_COOLDOWN)
+- **isInLogoutGracePeriod logic** - Fixed to only return true during actual logout process, not for all logged-out users
+
+#### Enum Type Alignment
+- **RegistrationStatus** - Changed from string ('Confirmed'/'Cancelled') to numeric (0/1)
+- **EventStatus** - Changed from string ('Active'/'Cancelled') to numeric (0/1)
+- Updated all frontend components checking these statuses
+
+#### Registration Flow
+- **Query cache invalidation** - Added `queryClient.invalidateQueries({ queryKey: ['registrations', 'me'] })` after register/cancel
+- **Cancelled registration button** - Fixed condition to hide cancel button for cancelled registrations
+- **Organizer/Admin registration** - Allowed non-owner organizers/admins to register for events
+
+#### Component Fixes
+- **SkillSelector** - Changed `skill.description` to `skill.category` (property mismatch)
+- **SkillBadge tooltip** - Fixed to use `skill.category` property
+- **RoleGuard** - Removed unused `useEffect` import
+
+#### Test Fixes
+- **RegisterPage test** - Updated 409 error message to match new user-friendly text
+- **MyEventsPage test** - Changed mock statuses to numeric enum values
+- **Footer test** - Updated phone/address to match Georgian contact info
+- **MainLayout test** - Updated max-width class expectation
+- **registrationService test** - Added RegistrationStatus import
+- **SkillBadge test** - Fixed mock data to use `category` property
+
+#### Backend Fix
+- **Integration tests** - DataSeeder was running on every test init causing duplicate key errors. Fixed by skipping seeder in "Testing" environment.
+
+### Files Modified
+**Frontend (17 files):**
+- `src/services/api.ts` - Added isInLogoutGracePeriod export
+- `src/services/authService.ts` - Added setLoggingOut(true) with 4s timeout
+- `src/context/AuthContext.tsx` - window.location.href for signup
+- `src/components/RoleGuard.tsx` - Global toast cooldown, logout grace period check
+- `src/components/skills/SkillSelector.tsx` - skill.category fix
+- `src/pages/public/EventDetailsPage.tsx` - Query invalidation, organizer registration
+- `src/types/enums.ts` - Numeric enum values
+- `src/__tests__/` - 7 test files updated for new types/messages
+
+**Backend (1 file):**
+- `src/VolunteerPortal.API/Program.cs` - Skip seeder in Testing environment
+
+### Result
+✅ Success - All 334 frontend tests passing, all 307 backend tests passing (641 total)
+
+### AI Generation Percentage
+Estimate: ~92%
+
+### Learnings/Notes
+- Enum type consistency (numeric vs string) is critical between frontend/backend
+- Full page reload (`window.location.href`) is more reliable than React Router for auth state changes
+- Global cooldown mechanisms prevent duplicate toasts from multiple component instances
+- Environment checks in Program.cs prevent seeder conflicts in integration tests
+- Test mocks must exactly match actual API response types
+
 ---

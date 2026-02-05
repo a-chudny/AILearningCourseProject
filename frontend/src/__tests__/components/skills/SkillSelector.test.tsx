@@ -5,12 +5,12 @@ import type { Skill } from '@/types'
 
 // Mock skills with different categories
 const mockSkills: Skill[] = [
-  { id: 1, name: 'React', description: 'Technology' },
-  { id: 2, name: 'Node.js', description: 'Technology' },
-  { id: 3, name: 'Python', description: 'Technology' },
-  { id: 4, name: 'Leadership', description: 'Community' },
-  { id: 5, name: 'Communication', description: 'Community' },
-  { id: 6, name: 'Teaching', description: 'Education' },
+  { id: 1, name: 'React', category: 'Technology' },
+  { id: 2, name: 'Node.js', category: 'Technology' },
+  { id: 3, name: 'Python', category: 'Technology' },
+  { id: 4, name: 'Leadership', category: 'Community' },
+  { id: 5, name: 'Communication', category: 'Community' },
+  { id: 6, name: 'Teaching', category: 'Education' },
 ]
 
 describe('SkillSelector', () => {

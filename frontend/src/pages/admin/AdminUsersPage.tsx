@@ -65,7 +65,7 @@ function RoleChangeModal({ user, isOpen, onClose, onConfirm, isLoading }: RoleCh
               id="role-select"
               value={selectedRole}
               onChange={(e) => setSelectedRole(Number(e.target.value))}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value={UserRole.Volunteer}>{UserRoleLabels[UserRole.Volunteer]}</option>
               <option value={UserRole.Organizer}>{UserRoleLabels[UserRole.Organizer]}</option>

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, type FormEvent, type ChangeEvent } from 'react'
+﻿import { useState, useEffect, useRef, type FormEvent, type ChangeEvent } from 'react'
 import type { Skill } from '@/types'
 import { getSkills } from '@/services/skillService'
 import { ImageUpload } from '@/components/ImageUpload'
@@ -63,6 +63,10 @@ export function EventForm({
   const [availableSkills, setAvailableSkills] = useState<Skill[]>([])
   const [isLoadingSkills, setIsLoadingSkills] = useState(true)
   const [isSkillDropdownOpen, setIsSkillDropdownOpen] = useState(false)
+  const skillDropdownRef = useRef<HTMLDivElement>(null)
+  const timeInputRefs = useRef<{ time?: HTMLInputElement; deadlineTime?: HTMLInputElement }>({})
+  const timeClickTimerRef = useRef<{ time?: number; deadlineTime?: number }>({})
+  const [timeInputMode, setTimeInputMode] = useState<{ time: 'picker' | 'manual'; deadlineTime: 'picker' | 'manual' }>({ time: 'picker', deadlineTime: 'picker' })
   
   const [formData, setFormData] = useState<EventFormData>({
     title: '',
@@ -99,26 +103,21 @@ export function EventForm({
     loadSkills()
   }, [])
 
-  // Get minimum date for date picker (today or existing event date if in past)
-  const getMinDate = () => {
-    if (isEditMode && existingEventDate) {
-      const existingDate = new Date(existingEventDate)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      
-      // If event is in the past, allow current date (locked field)
-      if (existingDate < today) {
-        return existingDate.toISOString().split('T')[0]
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (skillDropdownRef.current && !skillDropdownRef.current.contains(event.target as Node)) {
+        setIsSkillDropdownOpen(false)
       }
     }
-    const today = new Date()
-    return today.toISOString().split('T')[0]
-  }
 
-  // Get maximum deadline date (event date)
-  const getMaxDeadlineDate = () => {
-    return formData.date || getMinDate()
-  }
+    if (isSkillDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [isSkillDropdownOpen])
 
   // Check if event date is in the past (for edit mode)
   const isEventDateInPast = () => {
@@ -172,8 +171,15 @@ export function EventForm({
         break
       
       case 'durationMinutes':
-        if (!value || value <= 0) return 'Duration must be greater than 0'
-        if (value > 1440) return 'Duration cannot exceed 24 hours (1440 minutes)'
+        // When duration is 0, it means Custom is selected - check customDuration instead
+        if (value === 0) {
+          const customValue = parseInt(formData.customDuration, 10)
+          if (!customValue || customValue <= 0) return 'Duration must be greater than 0'
+          if (customValue > 1440) return 'Duration cannot exceed 24 hours (1440 minutes)'
+        } else {
+          if (!value || value <= 0) return 'Duration must be greater than 0'
+          if (value > 1440) return 'Duration cannot exceed 24 hours (1440 minutes)'
+        }
         break
       
       case 'capacity':
@@ -183,17 +189,74 @@ export function EventForm({
     }
 
     // Validate registration deadline if provided
-    if (formData.registrationDeadlineDate && formData.date) {
-      const deadline = new Date(`${formData.registrationDeadlineDate}T${formData.registrationDeadlineTime || '00:00'}`)
-      const eventDate = new Date(`${formData.date}T${formData.time || '00:00'}`)
-      if (deadline >= eventDate) {
+    if (formData.registrationDeadlineDate) {
+      // Require time when date is provided
+      if (!formData.registrationDeadlineTime) {
         if (name === 'registrationDeadlineDate' || name === 'registrationDeadlineTime') {
-          return 'Registration deadline must be before event start time'
+          return 'Registration deadline time is required'
+        }
+      }
+      
+      // Check if deadline is before event start
+      if (formData.date && formData.registrationDeadlineTime) {
+        const deadline = new Date(`${formData.registrationDeadlineDate}T${formData.registrationDeadlineTime}`)
+        const eventDate = new Date(`${formData.date}T${formData.time || '00:00'}`)
+        if (deadline >= eventDate) {
+          if (name === 'registrationDeadlineDate' || name === 'registrationDeadlineTime') {
+            return 'Registration deadline must be before event start time'
+          }
         }
       }
     }
 
     return undefined
+  }
+
+  // Handle time input click - single click opens picker, double click allows manual entry
+  const handleTimeInputClick = (field: 'time' | 'deadlineTime', e: React.MouseEvent<HTMLInputElement>) => {
+    const input = timeInputRefs.current[field]
+    if (!input) return
+
+    // If already in manual mode, just let the click pass through
+    if (timeInputMode[field] === 'manual') {
+      return
+    }
+
+    if (timeClickTimerRef.current[field]) {
+      // Double click detected - switch to manual entry mode
+      clearTimeout(timeClickTimerRef.current[field]!)
+      timeClickTimerRef.current[field] = undefined
+      setTimeInputMode(prev => ({ ...prev, [field]: 'manual' }))
+      // Focus and select all text for easy replacement
+      setTimeout(() => {
+        input.focus()
+        input.select()
+      }, 0)
+    } else {
+      // First click - start timer and open picker
+      e.preventDefault()
+      timeClickTimerRef.current[field] = window.setTimeout(() => {
+        timeClickTimerRef.current[field] = undefined
+        // Single click confirmed - open picker
+        if ('showPicker' in HTMLInputElement.prototype) {
+          try {
+            (input as any).showPicker()
+          } catch {
+            input.focus()
+          }
+        } else {
+          input.focus()
+        }
+      }, 250)
+    }
+  }
+
+  // Reset time input mode on blur
+  const handleTimeInputBlur = (field: 'time' | 'deadlineTime') => {
+    // Reset to picker mode after a delay (allows for picker interaction)
+    setTimeout(() => {
+      setTimeInputMode(prev => ({ ...prev, [field]: 'picker' }))
+    }, 100)
   }
 
   // Handle input change with real-time validation
@@ -245,10 +308,10 @@ export function EventForm({
     const value = parseInt(e.target.value, 10)
     
     if (value === 0) {
-      // Custom duration selected
+      // Custom duration selected - keep durationMinutes at 0 so dropdown stays on Custom
       setFormData(prev => ({
         ...prev,
-        durationMinutes: parseInt(prev.customDuration, 10) || 60,
+        durationMinutes: 0,
       }))
     } else {
       setFormData(prev => ({
@@ -426,6 +489,16 @@ export function EventForm({
 
     // Validate form
     if (!validateForm()) {
+      // Scroll to first invalid field
+      const firstErrorField = Object.keys(errors).find(key => errors[key as keyof typeof errors])
+      if (firstErrorField) {
+        const element = document.getElementById(firstErrorField) || 
+                       document.querySelector(`[name="${firstErrorField}"]`)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          element.focus()
+        }
+      }
       return
     }
 
@@ -510,7 +583,6 @@ export function EventForm({
             value={formData.date}
             onChange={handleChange}
             onBlur={handleBlur}
-            min={getMinDate()}
             className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.date && touched.date ? 'border-red-500' : 'border-gray-300'
             } ${isEventDateInPast() ? 'bg-gray-100 cursor-not-allowed' : ''}`}
@@ -532,7 +604,9 @@ export function EventForm({
             name="time"
             value={formData.time}
             onChange={handleChange}
-            onBlur={handleBlur}
+            onBlur={(e) => { handleBlur(e); handleTimeInputBlur('time') }}
+            onClick={(e) => handleTimeInputClick('time', e)}
+            ref={(el) => { if (el) timeInputRefs.current.time = el }}
             className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.time && touched.time ? 'border-red-500' : 'border-gray-300'
             }`}
@@ -541,6 +615,7 @@ export function EventForm({
           {errors.time && touched.time && (
             <p className="mt-1 text-sm text-red-600">{errors.time}</p>
           )}
+          <p className="mt-1 text-xs text-gray-500">Single click: time picker, Double click: manual entry</p>
         </div>
       </div>
 
@@ -649,8 +724,6 @@ export function EventForm({
             value={formData.registrationDeadlineDate}
             onChange={handleChange}
             onBlur={handleBlur}
-            min={getMinDate()}
-            max={getMaxDeadlineDate()}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
           />
@@ -659,7 +732,9 @@ export function EventForm({
             name="registrationDeadlineTime"
             value={formData.registrationDeadlineTime}
             onChange={handleChange}
-            onBlur={handleBlur}
+            onBlur={(e) => { handleBlur(e); handleTimeInputBlur('deadlineTime') }}
+            onClick={(e) => handleTimeInputClick('deadlineTime', e)}
+            ref={(el) => { if (el) timeInputRefs.current.deadlineTime = el }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading || !formData.registrationDeadlineDate}
           />
@@ -667,7 +742,8 @@ export function EventForm({
         {errors.registrationDeadline && (
           <p className="mt-1 text-sm text-red-600">{errors.registrationDeadline}</p>
         )}
-        <p className="mt-1 text-sm text-gray-500">Last date and time for volunteers to register</p>
+        <p className="mt-1 text-sm text-gray-500">Last date and time for volunteers to register (must be before event start)</p>
+        <p className="mt-1 text-xs text-gray-500">Time: Single click for picker, Double click for manual entry</p>
       </div>
 
       {/* Event Image Upload (Optional) */}
@@ -729,7 +805,7 @@ export function EventForm({
         )}
 
         {/* Skills dropdown */}
-        <div className="relative">
+        <div className="relative" ref={skillDropdownRef}>
           <button
             type="button"
             onClick={() => setIsSkillDropdownOpen(!isSkillDropdownOpen)}
@@ -765,7 +841,7 @@ export function EventForm({
                   >
                     <div>
                       <div className="font-medium text-gray-900">{skill.name}</div>
-                      <div className="text-xs text-gray-500">{skill.description}</div>
+                      <div className="text-xs text-gray-500">{skill.category}</div>
                     </div>
                     {isSelected && (
                       <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

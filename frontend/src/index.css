@@ -145,6 +145,29 @@ a:active {
   }
 }
 
+/* Fix: Remove focus ring from checkboxes - use checked state instead */
+input[type="checkbox"] {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+input[type="checkbox"]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  ring: none !important;
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: none !important;
+}
+
+/* Fix: Ensure dropdown/select placeholder text is visible */
+button[disabled] span,
+select option:disabled,
+.placeholder-text {
+  color: #6b7280 !important; /* gray-500 for better visibility */
+}
+
 /* POL-002: Mobile-optimized touch areas */
 @media (max-width: 640px) {
   button,

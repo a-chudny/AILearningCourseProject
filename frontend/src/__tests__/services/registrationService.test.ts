@@ -6,6 +6,7 @@ import {
   getMyRegistrations 
 } from '@/services/registrationService';
 import { api } from '@/services/api';
+import { RegistrationStatus } from '@/types/enums';
 
 // Mock the api module
 vi.mock('@/services/api', () => ({
@@ -57,7 +58,7 @@ describe('registrationService', () => {
           id: 1,
           eventId: 10,
           userId: 5,
-          status: 'Confirmed',
+          status: RegistrationStatus.Confirmed,
           registeredAt: '2026-02-01T10:00:00Z',
         },
       ];
@@ -76,7 +77,7 @@ describe('registrationService', () => {
           id: 1,
           eventId: 10,
           userId: 5,
-          status: 'Confirmed',
+          status: RegistrationStatus.Confirmed,
           registeredAt: '2026-02-01T10:00:00Z',
         },
       ];

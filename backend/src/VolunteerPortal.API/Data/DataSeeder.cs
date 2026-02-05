@@ -276,7 +276,7 @@ public class DataSeeder
                 StartTime = today.AddDays(5).AddHours(14), // 2:00 PM, 5 days from now
                 DurationMinutes = 180, // 3 hours
                 Capacity = 8,
-                ImageUrl = null, // No image
+                ImageUrl = "/uploads/events/aid-help.jpg",
                 RegistrationDeadline = today.AddDays(4),
                 Status = EventStatus.Active,
                 OrganizerId = giorgi.Id,

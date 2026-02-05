@@ -5,6 +5,30 @@ import toast from 'react-hot-toast'
 // API base URL - uses Vite proxy in development
 const API_BASE_URL = '/api'
 
+// Flag to track intentional logout to suppress error toasts
+let isLoggingOut = false;
+// Track when logout started to suppress errors for a grace period
+let logoutTimestamp = 0;
+
+export function setLoggingOut(value: boolean) {
+  isLoggingOut = value;
+  if (value) {
+    logoutTimestamp = Date.now();
+  } else {
+    // Reset timestamp when explicitly setting to false
+    logoutTimestamp = 0;
+  }
+}
+
+// Check if we're in the logout grace period (within 3 seconds of logout)
+export function isInLogoutGracePeriod(): boolean {
+  if (isLoggingOut) return true;
+  // Also suppress toasts for 3 seconds after logout flag was set
+  if (logoutTimestamp > 0 && (Date.now() - logoutTimestamp) < 3000) return true;
+  // Otherwise, not in logout grace period
+  return false;
+}
+
 // Create axios instance with default configuration
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -48,16 +72,33 @@ api.interceptors.response.use(
 
     // Handle specific status codes
     if (status === 401) {
-      // Handle unauthorized - token is invalid or expired
-      localStorage.removeItem('auth_token')
-      
-      // Only redirect if not already on login page to avoid infinite loops
-      if (!window.location.pathname.includes('/login')) {
-        toast.error('Your session has expired. Please log in again.')
-        window.location.href = '/login'
+      // Skip toast if logging out intentionally or in grace period
+      if (isInLogoutGracePeriod()) {
+        return Promise.reject(error)
       }
+      // Check if this was an intentional logout (token already removed)
+      const hasToken = localStorage.getItem('auth_token')
+      if (hasToken) {
+        // Token is invalid or expired - clean up and redirect
+        localStorage.removeItem('auth_token')
+        
+        // Only redirect and show toast if not already on login page
+        if (!window.location.pathname.includes('/login')) {
+          toast.error('Your session has expired. Please log in again.')
+          window.location.href = '/login'
+        }
+      }
+      // If no token, this is likely a request made during/after logout - silently ignore
     } else if (status === 403) {
-      toast.error('You do not have permission to perform this action.')
+      // Skip toast if logging out intentionally or in grace period
+      if (isInLogoutGracePeriod()) {
+        return Promise.reject(error)
+      }
+      // Only show permission error if user is actually logged in
+      const hasToken = localStorage.getItem('auth_token')
+      if (hasToken) {
+        toast.error('You do not have permission to perform this action.')
+      }
     } else if (status === 404) {
       // Don't show toast for 404 - let components handle it
     } else if (status >= 500) {

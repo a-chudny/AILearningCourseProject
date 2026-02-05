@@ -7,6 +7,7 @@ import { UserRole } from '@/types'
 import type { Skill } from '@/types'
 import type { UpdateEventRequest, EventResponse } from '@/services/eventService'
 import { uploadEventImage, deleteEventImage } from '@/services/imageService'
+import { getImageUrl } from '@/utils/imageUrl'
 
 /**
  * Modal component for unsaved changes confirmation
@@ -136,7 +137,7 @@ export default function EditEventPage() {
       durationMinutes: matchingPreset ? eventData.durationMinutes : 0,
       customDuration: matchingPreset ? '' : eventData.durationMinutes.toString(),
       capacity: eventData.capacity,
-      imagePreview: eventData.imageUrl || '',
+      imagePreview: getImageUrl(eventData.imageUrl) || '',
       registrationDeadlineDate: deadlineDate,
       registrationDeadlineTime: deadlineTime,
       requiredSkills: eventData.requiredSkills,
@@ -150,13 +151,13 @@ export default function EditEventPage() {
     if (!event) return
 
     try {
-      // Combine date and time into ISO 8601 format
-      const startTime = `${formData.date}T${formData.time}:00`
+      // Combine date and time into ISO 8601 format with UTC timezone marker
+      const startTime = `${formData.date}T${formData.time}:00Z`
       
       // Combine registration deadline if provided
       let registrationDeadline: string | undefined
       if (formData.registrationDeadlineDate && formData.registrationDeadlineTime) {
-        registrationDeadline = `${formData.registrationDeadlineDate}T${formData.registrationDeadlineTime}:00`
+        registrationDeadline = `${formData.registrationDeadlineDate}T${formData.registrationDeadlineTime}:00Z`
       }
 
       // Get duration in minutes

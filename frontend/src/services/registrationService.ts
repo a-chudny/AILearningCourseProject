@@ -1,5 +1,5 @@
 import { api, getErrorMessage } from './api';
-import { EventStatus } from '@/types/enums';
+import { EventStatus, RegistrationStatus } from '@/types/enums';
 
 /**
  * Event summary included in registration response
@@ -21,7 +21,7 @@ export interface RegistrationResponse {
   id: number;
   eventId: number;
   userId: number;
-  status: string; // RegistrationStatus
+  status: RegistrationStatus;
   registeredAt: string; // ISO 8601 date-time
   event: EventSummary;
 }
@@ -44,6 +44,7 @@ export async function getMyRegistrations(): Promise<RegistrationResponse[]> {
 
 /**
  * Check if current user is registered for an event
+ * Only returns isRegistered: true for CONFIRMED registrations (not cancelled)
  */
 export async function checkUserRegistration(eventId: number): Promise<{
   isRegistered: boolean;
@@ -51,7 +52,10 @@ export async function checkUserRegistration(eventId: number): Promise<{
 }> {
   try {
     const registrations = await getMyRegistrations();
-    const registration = registrations.find(r => r.eventId === eventId);
+    // Only consider confirmed registrations (status = 0), not cancelled ones
+    const registration = registrations.find(
+      r => r.eventId === eventId && r.status === RegistrationStatus.Confirmed
+    );
     
     return {
       isRegistered: !!registration,

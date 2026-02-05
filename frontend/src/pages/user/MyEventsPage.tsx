@@ -4,6 +4,7 @@ import { useMyRegistrations, useCancelRegistration } from '@/hooks/useRegistrati
 import { RegistrationCard } from '@/components/registrations/RegistrationCard';
 import { CancelRegistrationModal } from '@/components/modals/CancelRegistrationModal';
 import { RegistrationCardSkeleton } from '@/components/skeletons/EventSkeletons';
+import { RegistrationStatus } from '@/types/enums';
 import type { RegistrationResponse, EventSummary } from '@/services/registrationService';
 
 export default function MyEventsPage() {
@@ -32,7 +33,7 @@ export default function MyEventsPage() {
     registrations.forEach((reg) => {
       const eventDate = new Date(reg.event.startTime);
 
-      if (reg.status === 'Cancelled') {
+      if (reg.status === RegistrationStatus.Cancelled) {
         cancelled.push(reg);
       } else if (eventDate >= now) {
         upcomingConfirmed.push(reg);

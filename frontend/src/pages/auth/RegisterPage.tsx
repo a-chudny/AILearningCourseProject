@@ -211,10 +211,20 @@ export default function RegisterPage() {
 
     try {
       await register({ name: name.trim(), email: email.trim(), password })
-      // Navigation happens automatically via useEffect when isAuthenticated changes
+      // Navigation happens via useEffect when isAuthenticated becomes true
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Registration failed. Please try again.'
+      let errorMessage = 'Registration failed. Please try again.'
+      
+      // Handle specific error cases
+      if (error instanceof Error) {
+        // Check for 409 Conflict (email already exists)
+        if (error.message.includes('409') || error.message.toLowerCase().includes('already')) {
+          errorMessage = 'This email address is already registered. Please use a different email or sign in.'
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
       setErrors({ general: errorMessage })
     } finally {
       setIsSubmitting(false)

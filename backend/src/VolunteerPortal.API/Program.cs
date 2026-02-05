@@ -128,7 +128,7 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "Bearer"
                 }
             },
-            Array.Empty<string>()
+            []
         }
     });
 });
@@ -139,9 +139,10 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
-// Seed data on application startup (idempotent)
-using (var scope = app.Services.CreateScope())
+// Seed data on application startup (idempotent) - skip in Testing environment
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var seeder = new DataSeeder(context);
     await seeder.SeedAsync();
