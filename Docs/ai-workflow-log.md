@@ -4522,3 +4522,77 @@ Estimate: ~96%
 - 133 new tests written with high AI generation rate demonstrates effective prompting for test code
 
 ---
+
+## [2026-02-05 18:30] - TST-002: Frontend Component Tests Implementation
+
+### Prompt
+"Continue implementation of TST-002 story from user story file - Frontend Component Tests with >70% component coverage target"
+
+### Clarifying Questions
+- **Q1: Fix existing failing tests first?** → A: Yes, fix first
+- **Q2: Coverage tool preference?** → A: Built-in Vitest v8 coverage
+- **Q3: Coverage threshold enforcement?** → A: Just report metrics, no threshold
+- **Q4: Which components to test?** → A: All (skeletons, forms, hooks)
+- **Q5: Test file structure?** → A: Mirror existing __tests__ structure
+
+### Context
+- TST-001 (Backend Unit Tests) completed with 259 tests, 51.1% coverage
+- Initial state: 242 frontend tests with 4 failing (caused by POL-002 skeleton loader changes)
+- Original component coverage: 53.57% (target >70%)
+- Test framework: Vitest 4.0.18 with React Testing Library
+
+### Files Added/Modified
+**Fixed Tests (POL-002 compatibility):**
+- `__tests__/pages/user/MyEventsPage.test.tsx` - Loading test updated for skeleton loaders
+- `__tests__/pages/public/EventListPage.test.tsx` - Loading test updated for skeleton loaders
+- `__tests__/pages/public/EventDetailsPage.test.tsx` - Loading test updated for skeleton loaders
+- `__tests__/components/ErrorBoundary.test.tsx` - Used getAllByText for multiple error matches
+
+**New Test Files:**
+- `__tests__/components/skeletons/EventSkeletons.test.tsx` - 17 tests for EventCardSkeleton, EventDetailsSkeleton, RegistrationCardSkeleton
+- `__tests__/components/skills/SkillBadge.test.tsx` - 20 tests for SkillBadge and SkillBadgeList
+- `__tests__/components/skills/SkillSelector.test.tsx` - 13 tests for SkillSelector with category grouping
+- `__tests__/components/ImageUpload.test.tsx` - 13 tests for drag-drop, validation, upload states
+- `__tests__/hooks/useSkills.test.tsx` - 8 tests for useSkills, useUserSkills, useUpdateUserSkills
+- `__tests__/hooks/useEvents.test.tsx` - 15 tests for all event hooks with mutations
+- `__tests__/hooks/useRegistrations.test.tsx` - 6 tests for registration hooks
+
+### Generated Code Summary
+- Fixed 4 failing tests by updating expectations for skeleton loader classes (`.animate-pulse`)
+- Created comprehensive skeleton component tests verifying structure, classes, placeholders
+- Created SkillBadge tests covering sizes, click handlers, keyboard accessibility, tooltips, remove functionality
+- Created SkillSelector tests for category grouping, selection state, Select All/Clear functionality
+- Created ImageUpload tests for file validation, drag-drop states, error handling, upload states
+- Created hook tests using React Query mocking patterns with proper QueryClientProvider wrapper
+
+### Result
+✅ Success
+
+**Test Count: 242 → 334 tests (+92 new tests)**
+
+**Coverage Results (Before → After):**
+- Overall: 65.94% → 71.21% statements, 67.64% → 73.05% lines
+- Components: 53.57% → 91.66% statements, 54.21% → 92.77% lines ✅ (Target >70%)
+- Hooks: 59.42% → 89.85% lines
+- Skeletons: 0% → 100%
+- Skills components: 0% → 97.36%
+
+**Acceptance Criteria Met:**
+- ✅ Test coverage >70% for components (achieved 91.66%)
+- ✅ All user interactions tested
+- ✅ Loading and error states tested
+- ✅ Form validation tested
+
+### AI Generation Percentage
+Estimate: ~95%
+
+### Learnings/Notes
+- POL-002 breaking tests highlighted importance of updating tests when UI patterns change
+- React Query mutations receive extra context parameter - tests need `expect.anything()` for context arg
+- Some hooks wrap service calls (arrow function), others pass directly - affects test assertions
+- SkillSelector categories are alphabetically sorted - tests must account for ordering
+- Drag-drop testing requires proper DataTransfer mock object structure
+- waitFor() needed for async state updates in tests
+- Created test utilities pattern (createWrapper) for QueryClient setup reusability
+
+---

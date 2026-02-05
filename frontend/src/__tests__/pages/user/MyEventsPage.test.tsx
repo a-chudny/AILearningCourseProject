@@ -87,9 +87,11 @@ describe('MyEventsPage', () => {
       () => new Promise(() => {}) // Never resolves
     );
 
-    renderWithProviders(<MyEventsPage />);
+    const { container } = renderWithProviders(<MyEventsPage />);
 
-    expect(screen.getByText('Loading your events...')).toBeInTheDocument();
+    // POL-002: Loading state now uses skeleton loaders instead of text
+    const skeletons = container.querySelectorAll('.animate-pulse');
+    expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('renders empty state when no registrations', async () => {

@@ -136,7 +136,7 @@ describe('ErrorBoundary', () => {
   })
 
   it('shows error details in development mode', () => {
-    // Set DEV mode (Vite handles this via import.meta.env.DEV)
+    // Vitest sets import.meta.env.DEV = true by default in test mode
     render(
       <TestWrapper>
         <ErrorBoundary>
@@ -146,7 +146,10 @@ describe('ErrorBoundary', () => {
     )
 
     // In dev mode, error details should be visible
-    expect(screen.getByText(/Test error message/)).toBeInTheDocument()
+    // The error is thrown twice due to React's error boundary behavior
+    // so we use getAllByText to handle multiple matches
+    const errorElements = screen.getAllByText(/Error.*Test error message/)
+    expect(errorElements.length).toBeGreaterThan(0)
   })
 
   it('Go Home link navigates to root', () => {
