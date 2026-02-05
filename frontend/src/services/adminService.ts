@@ -91,3 +91,33 @@ export async function deleteUser(userId: number): Promise<{ message: string }> {
   const response = await api.delete<{ message: string }>(`/admin/users/${userId}`);
   return response.data;
 }
+
+/**
+ * Query parameters for admin events list
+ */
+export interface AdminEventsQueryParams {
+  page?: number;
+  pageSize?: number;
+  searchTerm?: string;
+  includePastEvents?: boolean;
+  includeDeleted?: boolean;
+  status?: number | null; // 0 = Active, 1 = Cancelled
+}
+
+/**
+ * Get paginated list of events for admin management
+ * Requires Admin role authentication
+ */
+export async function getAdminEvents(params?: AdminEventsQueryParams): Promise<any> {
+  const response = await api.get('/events', { params });
+  return response.data;
+}
+
+/**
+ * Get registrations for a specific event
+ * Requires Admin or Organizer role authentication
+ */
+export async function getEventRegistrations(eventId: number): Promise<any[]> {
+  const response = await api.get(`/events/${eventId}/registrations`);
+  return response.data;
+}

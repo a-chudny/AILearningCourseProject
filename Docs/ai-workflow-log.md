@@ -3817,3 +3817,64 @@ Estimate: ~94%
 - Visual indicators for deleted users (bg-red-50, line-through, gray text) improve UX
 
 ---
+
+## [2026-02-05 13:05] - ADM-004: Admin Event Management
+
+### Prompt
+"Implement ADM-004 story from user story file. Ask if something unclear. You can also use workflow log to check what was done before if you need"
+
+### Clarifying Questions
+- **Q1: Event Table Visual Style - match User Management page?** → A: Yes
+- **Q2: Soft Delete vs Cancel - actions disabled for soft-deleted?** → A: Disabled
+- **Q3: View Registrations Action - modal/expand/navigate?** → A: A (Modal showing registration list)
+- **Q4: Search Behavior - instant or button-triggered?** → A: Yes, instant (debounced)
+- **Q5: Default Filters - all/upcoming/all including deleted?** → A: All (all events including past, excluding deleted)
+- **Q6: Organizer Display - name or email?** → A: Yes (show organizer name)
+- **Q7: Date Display - start only/start+duration/start→end?** → A: C (Start date/time → End date/time)
+- **Q8: Pagination - 10 per page like User Management?** → A: Yes
+
+### Context
+- Building on ADM-001 (Admin Layout) and ADM-003 (User Management patterns)
+- EventQueryParams already supports includePastEvents and includeDeleted
+- GET /api/events and DELETE /api/events/{id} endpoints already exist
+- GET /api/events/{id}/registrations endpoint exists for viewing registrations
+- Cancel event endpoint PUT /api/events/{id}/cancel already exists
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Models/DTOs/Events/EventResponse.cs` - Modified: Added IsDeleted property
+- `backend/src/VolunteerPortal.API/Services/EventService.cs` - Modified: Map IsDeleted field in MapToResponse
+- `frontend/src/services/adminService.ts` - Extended: Added AdminEventsQueryParams, getAdminEvents, getEventRegistrations functions
+- `frontend/src/hooks/useAdminEvents.ts` - Created: useAdminEvents, useEventRegistrations, useSoftDeleteEvent, useCancelEventMutation hooks
+- `frontend/src/pages/admin/AdminEventsPage.tsx` - Created: Full event management page with table, modals, search, filters
+- `frontend/src/routes/index.tsx` - Modified: Added /admin/events route
+
+### Generated Code Summary
+- Backend: Added IsDeleted to EventResponse DTO for admin visibility
+- AdminEventsPage with event table showing: Title, Organizer Name, Start→End time, Registrations count, Status badges
+- Three modals: DeleteConfirmModal (soft delete), CancelConfirmModal (cancel event), RegistrationsModal (view registrations list)
+- Instant search with 300ms debounce on event title
+- Status filter: All/Active/Cancelled
+- Default query: includePastEvents=true, includeDeleted=true (shows all events)
+- Action buttons: Edit (navigate to /events/:id/edit), View Registrations (modal), Cancel Event (confirmation), Soft Delete (confirmation)
+- Deleted events: Red background row with "Deleted" badge, actions disabled
+- Cancelled events: Amber "Cancelled" badge, cancel action disabled
+- RegistrationsModal: Table showing Name, Email, Phone, Status, Registered date
+- Pagination controls matching User Management page (10 per page)
+- useEventRegistrations hook with enabled condition based on eventId
+
+### Result
+✅ Success - TypeScript compiles without errors, backend builds successfully
+
+### AI Generation Percentage
+Estimate: ~92%
+
+### Learnings/Notes
+- EventResponse.IsDeleted enables admin to see soft-deleted events in listings
+- Reusing existing endpoints (GET /events, DELETE /events/{id}, PUT /events/{id}/cancel, GET /events/{id}/registrations) eliminated need for admin-specific event endpoints
+- RegistrationsModal uses enabled condition in useQuery to prevent fetching when modal closed
+- Date range display (Start → End) calculated from startTime + durationMinutes for better clarity
+- Actions disabled for soft-deleted events prevents inconsistent state (can't edit/cancel deleted events)
+- Modal pattern from ADM-003 (User Management) reused for consistency
+- Query params pattern: includePastEvents=true, includeDeleted=true gives admin full visibility
+
+---
