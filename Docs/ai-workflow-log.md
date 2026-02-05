@@ -3762,3 +3762,58 @@ Estimate: ~95%
 - useAdminStats hook with 2-minute staleTime balances data freshness with API load
 
 ---
+
+## [2026-02-05 12:35] - ADM-003: Admin User Management
+
+### Prompt
+"Implement ADM-003 story from user story file. Ask if something unclear."
+
+### Clarifying Questions
+- **Q1: Table styling - same as dashboard (white cards, rounded borders)?** → A: Yes
+- **Q2: Role change restrictions - can admin change another admin's role?** → A: Yes
+- **Q3: Search behavior - instant (on typing) or button-triggered?** → A: Instant
+- **Q4: Soft delete notification - toast or inline message?** → A: Toast notification
+- **Q5: Default sort order?** → A: By created date (newest first)
+
+### Context
+- Building on ADM-001 AdminLayout and ADM-002 Dashboard
+- Need full user management with table, search, filters, role changes, soft delete
+- Following existing hook/service patterns from previous implementations
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Models/DTOs/Admin/AdminUserResponse.cs` - Created: DTO with id, name, email, role, roleName, isDeleted, createdAt, updatedAt
+- `backend/src/VolunteerPortal.API/Models/DTOs/Admin/AdminUserListResponse.cs` - Created: Paginated response wrapper
+- `backend/src/VolunteerPortal.API/Models/DTOs/Admin/UpdateUserRoleRequest.cs` - Created: Request DTO with role validation (0-2 range)
+- `backend/src/VolunteerPortal.API/Controllers/AdminController.cs` - Extended: Added 3 endpoints (GET users, PUT role, DELETE user)
+- `frontend/src/services/adminService.ts` - Extended: Added 4 interfaces and 3 API functions
+- `frontend/src/hooks/useAdminUsers.ts` - Created: useAdminUsers, useUpdateUserRole, useSoftDeleteUser hooks
+- `frontend/src/pages/admin/AdminUsersPage.tsx` - Created: Full page with table, search, filters, modals
+- `frontend/src/routes/index.tsx` - Modified: Added /admin/users route
+- `frontend/src/__tests__/pages/admin/AdminUsersPage.test.tsx` - Created: 21 tests for user management
+
+### Generated Code Summary
+- Backend: 3 admin endpoints with self-protection (cannot change own role/delete self), deleted user protection
+- Custom useDebounce hook for instant search (300ms debounce)
+- User table with columns: User (name, email), Role badge, Status badge, Created date, Actions
+- RoleChangeModal with role dropdown and warning messages for admin promotion
+- DeleteConfirmModal with user name and soft delete explanation
+- Pagination controls with Previous/Next buttons and page indicator
+- Action buttons disabled for current user and deleted users with informative tooltips
+- Deleted users shown with red background, strikethrough name, and "Deleted" badge
+- Cache invalidation on mutations (both adminUsersKeys and adminStatsKeys)
+
+### Result
+✅ Success - All 21 AdminUsersPage tests passing, TypeScript compiles without errors, backend builds successfully
+
+### AI Generation Percentage
+Estimate: ~94%
+
+### Learnings/Notes
+- useDebounce hook pattern: setState in setTimeout, clear previous timer on cleanup
+- Self-protection in API: cannot modify own role or delete self prevents admin lockout
+- Modal heading vs button text conflict in tests - use getByRole('heading', { name }) for specificity
+- Query invalidation pattern: invalidate both list and stats queries on user mutations
+- Status filter with null for "all" option works cleanly with API query params
+- Visual indicators for deleted users (bg-red-50, line-through, gray text) improve UX
+
+---
