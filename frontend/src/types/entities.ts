@@ -6,8 +6,8 @@
 export interface Skill {
   id: number;
   name: string;
-  description: string; // Category
-  createdAt: string; // ISO 8601 date string
+  category: string; // Category of skill (e.g., Medical, Education, Technology)
+  createdAt?: string; // ISO 8601 date string
 }
 
 /**

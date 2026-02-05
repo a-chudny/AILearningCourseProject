@@ -103,9 +103,11 @@ describe('EventListPage', () => {
       () => new Promise(() => {}) // Never resolves
     );
 
-    renderWithProviders(<EventListPage />);
+    const { container } = renderWithProviders(<EventListPage />);
 
-    expect(screen.getByText('Loading events...')).toBeInTheDocument();
+    // POL-002: Loading state now uses skeleton loaders instead of text
+    const skeletons = container.querySelectorAll('.animate-pulse');
+    expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('displays events when data is loaded', async () => {

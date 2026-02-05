@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useEvent, useCancelEvent } from '@/hooks/useEvents';
 import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 import { EventStatus, UserRole } from '@/types/enums';
 import {
   checkUserRegistration,
@@ -9,14 +10,17 @@ import {
   cancelRegistration,
 } from '@/services/registrationService';
 import { toast } from '@/utils/toast';
+import { getImageUrl } from '@/utils/imageUrl';
 import { CancelEventModal } from '@/components/modals/CancelEventModal';
 import { RegistrationConfirmModal } from '@/components/modals/RegistrationConfirmModal';
 import { SkillBadge } from '@/components/skills/SkillBadge';
+import { EventDetailsSkeleton } from '@/components/skeletons/EventSkeletons';
 
 export default function EventDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
   const eventId = Number(id);
 
   const { data: event, isLoading, isError, error, refetch } = useEvent(eventId);
@@ -40,6 +44,7 @@ export default function EventDetailsPage() {
   // Calculate if user is event owner or admin
   const isOwner = user && event && user.id === event.organizerId;
   const isAdmin = user?.role === UserRole.Admin;
+  const isOrganizer = user?.role === UserRole.Organizer;
   const canEdit = isOwner || isAdmin;
 
   // Calculate registration eligibility
@@ -48,14 +53,29 @@ export default function EventDetailsPage() {
   const isRegistrationClosed =
     event?.registrationDeadline && new Date(event.registrationDeadline) < new Date();
   const isFull = event && event.registrationCount >= event.capacity;
+  
+  // Check if user has all required skills for this event
+  const userSkillIds = user?.skills?.map(s => s.id) || [];
+  const requiredSkillIds = event?.requiredSkills?.map(s => s.id) || [];
+  const hasRequiredSkills = requiredSkillIds.length === 0 || 
+    requiredSkillIds.every(skillId => userSkillIds.includes(skillId));
+  const missingSkills = event?.requiredSkills?.filter(s => !userSkillIds.includes(s.id)) || [];
+  
+  // Allow registration for:
+  // - Volunteers: standard rules apply
+  // - Organizers/Admins: can register for events they don't own
+  const isVolunteer = user?.role === UserRole.Volunteer;
+  const canOrganizerOrAdminRegister = (isOrganizer || isAdmin) && !isOwner;
+  
   const canRegister =
     isAuthenticated &&
-    user?.role === UserRole.Volunteer &&
+    (isVolunteer || canOrganizerOrAdminRegister) &&
     !isRegistered &&
     !isEventCancelled &&
     !isEventInPast &&
     !isRegistrationClosed &&
-    !isFull;
+    !isFull &&
+    hasRequiredSkills;
 
   // Handle registration confirmation
   const handleRegister = async () => {
@@ -69,6 +89,9 @@ export default function EventDetailsPage() {
       
       // Refetch event to update registration count
       await refetch();
+      
+      // Invalidate registrations cache so My Events page shows the new registration
+      queryClient.invalidateQueries({ queryKey: ['registrations', 'me'] });
       
       toast.success(`Successfully registered for ${event.title}!`);
     } catch (err) {
@@ -90,6 +113,9 @@ export default function EventDetailsPage() {
       
       // Refetch event to update registration count
       await refetch();
+      
+      // Invalidate registrations cache so My Events page updates
+      queryClient.invalidateQueries({ queryKey: ['registrations', 'me'] });
       
       toast.success('Registration cancelled successfully');
     } catch (err) {
@@ -150,10 +176,9 @@ export default function EventDetailsPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
-          <p className="text-gray-600">Loading event details...</p>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="mx-auto max-w-4xl px-4">
+          <EventDetailsSkeleton />
         </div>
       </div>
     );
@@ -184,7 +209,7 @@ export default function EventDetailsPage() {
             </p>
             <Link
               to="/events"
-              className="mt-6 inline-block rounded-lg bg-red-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              className="mt-6 inline-block rounded-lg bg-red-600 px-6 py-3 min-h-[44px] min-w-[44px] text-center text-sm font-medium text-white transition-all hover:bg-red-700 hover:shadow-md active:scale-95"
             >
               Back to Events
             </Link>
@@ -214,7 +239,7 @@ export default function EventDetailsPage() {
         {/* Event image */}
         <div className="mb-6 overflow-hidden rounded-lg bg-gray-100" style={{ height: '15vh', minHeight: '150px' }}>
           {event.imageUrl ? (
-            <img src={event.imageUrl} alt={event.title} className="h-full w-full object-cover" />
+            <img src={getImageUrl(event.imageUrl)} alt={event.title} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600">
               <svg className="h-16 w-16 text-white opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -422,8 +447,9 @@ export default function EventDetailsPage() {
 
           {/* Action buttons */}
           <div className="mt-8 flex flex-wrap gap-3">
-            {/* Register/Cancel registration buttons for volunteers */}
-            {isAuthenticated && user?.role === UserRole.Volunteer && !isEventCancelled && (
+            {/* Register/Cancel registration buttons for eligible users */}
+            {/* Volunteers can always register, Organizers/Admins can register for events they don't own */}
+            {isAuthenticated && (isVolunteer || canOrganizerOrAdminRegister) && !isEventCancelled && (
               <>
                 {isRegistered ? (
                   <>
@@ -453,14 +479,30 @@ export default function EventDetailsPage() {
                     </button>
                     {!canRegister && !isEventCancelled && !isRegistered && (
                       <p className="flex items-center text-sm text-gray-600">
-                        {isEventInPast && 'This event has already occurred'}
-                        {isRegistrationClosed && !isEventInPast && 'Registration is closed'}
-                        {isFull && !isRegistrationClosed && !isEventInPast && 'This event is full'}
+                        {isOwner && 'You cannot register for your own event'}
+                        {!isOwner && isEventInPast && 'This event has already occurred'}
+                        {!isOwner && isRegistrationClosed && !isEventInPast && 'Registration is closed'}
+                        {!isOwner && isFull && !isRegistrationClosed && !isEventInPast && 'This event is full'}
+                        {!isOwner && !hasRequiredSkills && !isFull && !isRegistrationClosed && !isEventInPast && (
+                          <span className="text-amber-600">
+                            Missing required skills: {missingSkills.map(s => s.name).join(', ')}
+                          </span>
+                        )}
                       </p>
                     )}
                   </>
                 )}
               </>
+            )}
+
+            {/* Message for event owners */}
+            {isAuthenticated && isOwner && !isEventCancelled && (
+              <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-4 py-3 text-gray-600">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm">You are the organizer of this event</span>
+              </div>
             )}
 
             {/* Prompt to login for guests */}

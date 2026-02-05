@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { RegistrationResponse } from '@/services/registrationService';
-import { EventStatus } from '@/types/enums';
+import { EventStatus, RegistrationStatus } from '@/types/enums';
+import { getImageUrl } from '@/utils/imageUrl';
 
 interface RegistrationCardProps {
   registration: RegistrationResponse;
@@ -45,22 +46,25 @@ export function RegistrationCard({
   };
 
   const getStatusBadgeClasses = () => {
-    if (status === 'Confirmed') {
+    if (status === RegistrationStatus.Confirmed) {
       return 'bg-green-100 text-green-800';
     }
     return 'bg-gray-100 text-gray-800';
   };
 
   const isEventCancelled = event.status === EventStatus.Cancelled;
+  const isRegistrationCancelled = status === RegistrationStatus.Cancelled;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+    <div className={`rounded-lg border bg-white p-4 shadow-sm transition-shadow hover:shadow-md ${
+      isRegistrationCancelled ? 'border-gray-300 bg-gray-50 opacity-75' : 'border-gray-200'
+    }`}>
       <div className="flex gap-4">
         {/* Event image or placeholder */}
         <Link to={`/events/${event.id}`} className="flex-shrink-0">
           {event.imageUrl ? (
             <img
-              src={event.imageUrl}
+              src={getImageUrl(event.imageUrl)}
               alt={event.title}
               className="h-24 w-24 rounded-lg object-cover"
             />
@@ -92,7 +96,7 @@ export function RegistrationCard({
               {/* Status badges */}
               <div className="mt-2 flex flex-wrap gap-2">
                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClasses()}`}>
-                  {status}
+                  {status === RegistrationStatus.Cancelled ? 'Cancelled' : 'Confirmed'}
                 </span>
                 {isEventCancelled && (
                   <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
@@ -103,7 +107,7 @@ export function RegistrationCard({
             </div>
 
             {/* Cancel button */}
-            {showCancelButton && !isEventCancelled && (
+            {showCancelButton && !isEventCancelled && !isRegistrationCancelled && (
               <button
                 onClick={onCancelClick}
                 className="flex-shrink-0 rounded-lg border border-red-600 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"

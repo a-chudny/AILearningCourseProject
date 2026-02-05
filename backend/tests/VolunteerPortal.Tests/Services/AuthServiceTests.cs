@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using VolunteerPortal.API.Data;
+using VolunteerPortal.API.Exceptions;
 using VolunteerPortal.API.Models.DTOs.Auth;
 using VolunteerPortal.API.Models.Enums;
 using VolunteerPortal.API.Services;
@@ -307,7 +308,7 @@ public class AuthServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task LoginAsync_WrongPassword_ThrowsUnauthorizedAccessException()
+    public async Task LoginAsync_WrongPassword_ThrowsUnauthorizedException()
     {
         // Arrange - Create a user first
         var registerRequest = new RegisterRequest
@@ -325,14 +326,14 @@ public class AuthServiceTests : IDisposable
         };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
+        var exception = await Assert.ThrowsAsync<UnauthorizedException>(
             () => _authService.LoginAsync(loginRequest));
 
         Assert.Equal("Invalid email or password", exception.Message);
     }
 
     [Fact]
-    public async Task LoginAsync_NonExistentEmail_ThrowsUnauthorizedAccessException()
+    public async Task LoginAsync_NonExistentEmail_ThrowsUnauthorizedException()
     {
         // Arrange
         var loginRequest = new LoginRequest
@@ -342,14 +343,14 @@ public class AuthServiceTests : IDisposable
         };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
+        var exception = await Assert.ThrowsAsync<UnauthorizedException>(
             () => _authService.LoginAsync(loginRequest));
 
         Assert.Equal("Invalid email or password", exception.Message);
     }
 
     [Fact]
-    public async Task LoginAsync_DeletedUser_ThrowsUnauthorizedAccessException()
+    public async Task LoginAsync_DeletedUser_ThrowsUnauthorizedException()
     {
         // Arrange - Create a user and mark as deleted
         var user = new VolunteerPortal.API.Models.Entities.User
@@ -373,7 +374,7 @@ public class AuthServiceTests : IDisposable
         };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
+        var exception = await Assert.ThrowsAsync<UnauthorizedException>(
             () => _authService.LoginAsync(loginRequest));
 
         Assert.Equal("Invalid email or password", exception.Message);

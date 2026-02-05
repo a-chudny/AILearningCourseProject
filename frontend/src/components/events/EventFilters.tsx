@@ -123,7 +123,7 @@ export function EventFilters({
               type="checkbox"
               checked={includePastEvents}
               onChange={(e) => setIncludePastEvents(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-0 focus:ring-offset-0"
             />
             <span className="text-sm font-medium text-gray-700">Include past events</span>
           </label>
@@ -139,9 +139,9 @@ export function EventFilters({
             type="button"
             onClick={() => setSkillsDropdownOpen(!skillsDropdownOpen)}
             disabled={matchMySkills || skillsLoading}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-left focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed flex justify-between items-center"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-left text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-600 disabled:cursor-not-allowed flex justify-between items-center"
           >
-            <span className="truncate">
+            <span className={`truncate ${selectedSkillIds.length === 0 && !matchMySkills && !skillsLoading ? 'text-gray-500' : ''}`}>
               {skillsLoading
                 ? 'Loading skills...'
                 : matchMySkills
@@ -176,7 +176,7 @@ export function EventFilters({
                         type="checkbox"
                         checked={selectedSkillIds.includes(skill.id)}
                         onChange={() => handleSkillToggle(skill.id)}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-0 focus:ring-offset-0"
                       />
                       <span className="text-sm text-gray-700">
                         {skill.name}
@@ -199,7 +199,7 @@ export function EventFilters({
                 checked={matchMySkills}
                 onChange={handleMatchMySkillsToggle}
                 disabled={userSkills.length === 0}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed"
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-0 focus:ring-offset-0 disabled:cursor-not-allowed"
               />
               <span className="text-sm font-medium text-gray-700">
                 Match my skills

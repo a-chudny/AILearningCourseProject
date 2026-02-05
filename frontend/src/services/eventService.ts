@@ -1,6 +1,7 @@
 import { api } from './api';
 import type { Skill } from '@/types';
 import type { EventQueryParams } from '@/types/api';
+import { EventStatus } from '@/types/enums';
 
 /**
  * Event response from backend API - matches EventResponse DTO
@@ -15,7 +16,7 @@ export interface EventResponse {
   capacity: number;
   imageUrl?: string;
   registrationDeadline?: string; // ISO 8601 date-time
-  status: string; // EventStatus
+  status: EventStatus; // Numeric enum: 0 = Active, 1 = Cancelled
   organizerId: number;
   organizerName: string;
   registrationCount: number; // Confirmed registrations only

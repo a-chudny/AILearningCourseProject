@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using VolunteerPortal.API.Application;
 using VolunteerPortal.API.Data;
+using VolunteerPortal.API.Middleware;
 using VolunteerPortal.API.Services;
 using VolunteerPortal.API.Services.Interfaces;
 using VolunteerPortal.API.Swagger;
@@ -65,6 +67,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 // Register application services
+builder.Services.AddApplicationServices();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IExportService, ExcelExportService>();
@@ -125,7 +128,7 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "Bearer"
                 }
             },
-            Array.Empty<string>()
+            []
         }
     });
 });
@@ -136,15 +139,19 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
-// Seed data on application startup (idempotent)
-using (var scope = app.Services.CreateScope())
+// Seed data on application startup (idempotent) - skip in Testing environment
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var seeder = new DataSeeder(context);
     await seeder.SeedAsync();
 }
 
 // Configure the HTTP request pipeline
+
+// Global exception handling - must be first in the pipeline
+app.UseExceptionMiddleware();
 
 // Enable Swagger in development
 if (app.Environment.IsDevelopment())

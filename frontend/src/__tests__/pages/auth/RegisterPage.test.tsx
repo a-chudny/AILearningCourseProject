@@ -199,7 +199,7 @@ describe('RegisterPage', () => {
 
   it('displays error message on registration failure', async () => {
     const user = userEvent.setup()
-    const mockRegister = vi.fn().mockRejectedValue(new Error('Email already exists'))
+    const mockRegister = vi.fn().mockRejectedValue(new Error('This email address is already registered. Please use a different email or sign in.'))
     renderRegisterPage({ register: mockRegister })
 
     await user.type(screen.getByLabelText(/full name/i), 'John Doe')
@@ -212,7 +212,7 @@ describe('RegisterPage', () => {
     await user.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText(/email already exists/i)).toBeInTheDocument()
+      expect(screen.getByText(/email address is already registered/i)).toBeInTheDocument()
     })
   })
 

@@ -71,13 +71,13 @@ export function Header() {
             {/* Auth Section */}
             {isAuthenticated && user ? (
               <div
-                className="relative"
+                className="relative flex items-center"
                 onMouseEnter={() => setIsUserDropdownOpen(true)}
                 onMouseLeave={() => setIsUserDropdownOpen(false)}
               >
                 <button
                   type="button"
-                  className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors pb-2"
+                  className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
                   aria-expanded={isUserDropdownOpen}
                   aria-haspopup="true"
                 >
@@ -136,7 +136,7 @@ export function Header() {
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                     >
                       <div className="flex items-center gap-2">
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

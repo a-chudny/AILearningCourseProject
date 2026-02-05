@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MyEventsPage from '@/pages/user/MyEventsPage';
 import * as registrationService from '@/services/registrationService';
-import { EventStatus } from '@/types/enums';
+import { EventStatus, RegistrationStatus } from '@/types/enums';
 import type { RegistrationResponse } from '@/services/registrationService';
 
 // Mock the registration service
@@ -14,7 +14,7 @@ const mockUpcomingRegistration: RegistrationResponse = {
   id: 1,
   eventId: 10,
   userId: 5,
-  status: 'Confirmed',
+  status: RegistrationStatus.Confirmed,
   registeredAt: '2026-02-01T10:00:00Z',
   event: {
     id: 10,
@@ -31,7 +31,7 @@ const mockPastRegistration: RegistrationResponse = {
   id: 2,
   eventId: 11,
   userId: 5,
-  status: 'Confirmed',
+  status: RegistrationStatus.Confirmed,
   registeredAt: '2026-01-15T10:00:00Z',
   event: {
     id: 11,
@@ -48,7 +48,7 @@ const mockCancelledRegistration: RegistrationResponse = {
   id: 3,
   eventId: 12,
   userId: 5,
-  status: 'Cancelled',
+  status: RegistrationStatus.Cancelled,
   registeredAt: '2026-01-10T10:00:00Z',
   event: {
     id: 12,
@@ -87,9 +87,11 @@ describe('MyEventsPage', () => {
       () => new Promise(() => {}) // Never resolves
     );
 
-    renderWithProviders(<MyEventsPage />);
+    const { container } = renderWithProviders(<MyEventsPage />);
 
-    expect(screen.getByText('Loading your events...')).toBeInTheDocument();
+    // POL-002: Loading state now uses skeleton loaders instead of text
+    const skeletons = container.querySelectorAll('.animate-pulse');
+    expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('renders empty state when no registrations', async () => {

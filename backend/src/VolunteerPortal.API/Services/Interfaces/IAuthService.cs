@@ -1,3 +1,4 @@
+using VolunteerPortal.API.Exceptions;
 using VolunteerPortal.API.Models.DTOs.Auth;
 
 namespace VolunteerPortal.API.Services.Interfaces;
@@ -22,7 +23,7 @@ public interface IAuthService
     /// <param name="request">Login request with email and password</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Authentication response with user info and JWT token</returns>
-    /// <exception cref="UnauthorizedAccessException">Thrown when credentials are invalid or user is deleted</exception>
+    /// <exception cref="UnauthorizedException">Thrown when credentials are invalid or user is deleted</exception>
     Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>

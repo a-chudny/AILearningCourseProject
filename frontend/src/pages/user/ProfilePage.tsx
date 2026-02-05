@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useSkills, useUserSkills, useUpdateUserSkills } from '@/hooks/useSkills'
 import { SkillSelector } from '@/components/skills/SkillSelector'
+import { UserRoleLabels } from '@/types/enums'
 
 /**
  * User profile page with basic info and skill management
  * Shows read-only profile info (name, email, role) and allows users to manage their skills
  */
 export default function ProfilePage() {
-  const { user } = useAuth()
+  const { user, refetchUser } = useAuth()
   const { data: allSkills, isLoading: isLoadingAllSkills, error: allSkillsError } = useSkills()
   const { data: userSkills, isLoading: isLoadingUserSkills, error: userSkillsError } = useUserSkills()
   const updateSkillsMutation = useUpdateUserSkills()
@@ -41,6 +42,8 @@ export default function ProfilePage() {
   const handleSave = async () => {
     try {
       await updateSkillsMutation.mutateAsync(selectedSkillIds)
+      // Refetch user to update skills in auth context
+      await refetchUser()
       setHasChanges(false)
       setShowSuccessMessage(true)
       
@@ -96,7 +99,7 @@ export default function ProfilePage() {
               <label className="block text-sm font-medium text-gray-500">Role</label>
               <p className="mt-1">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  {user.role}
+                  {UserRoleLabels[user.role]}
                 </span>
               </p>
             </div>

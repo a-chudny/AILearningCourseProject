@@ -11,13 +11,13 @@ export function useCreateEvent() {
 
   return useMutation({
     mutationFn: async (formData: EventFormData) => {
-      // Combine date and time into ISO 8601 datetime
-      const startTime = `${formData.date}T${formData.time}:00`
+      // Combine date and time into ISO 8601 datetime with UTC timezone marker
+      const startTime = `${formData.date}T${formData.time}:00Z`
 
       // Combine registration deadline if provided
       let registrationDeadline: string | undefined
       if (formData.registrationDeadlineDate) {
-        registrationDeadline = `${formData.registrationDeadlineDate}T${formData.registrationDeadlineTime || '00:00'}:00`
+        registrationDeadline = `${formData.registrationDeadlineDate}T${formData.registrationDeadlineTime || '00:00'}:00Z`
       }
 
       // Prepare request data
