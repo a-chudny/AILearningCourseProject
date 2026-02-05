@@ -4442,3 +4442,83 @@ Estimate: ~93%
 - Backend API and frontend dev server both running with proper proxy configuration
 
 ---
+## [2026-02-07 09:30] - TST-001: Backend Unit Tests Implementation
+
+### Prompt
+"Implement TST-001 story from user story file"
+
+### Clarifying Questions
+1. **Q: Which services should have tests?** → A: All services (AuthService, EventService, RegistrationService, SkillService, ReportService)
+2. **Q: Code coverage tool preference?** → A: Built-in XPlat Code Coverage tool
+3. **Q: Should CI fail on coverage threshold?** → A: Just report metrics, don't fail builds
+4. **Q: Review/refactor existing vs write new?** → A: Review existing tests, refactor if needed, add new ones
+5. **Q: Mirror production code structure?** → A: Yes, mirror structure
+6. **Q: Create CI pipeline stories?** → A: Yes, for GitHub Actions - backend: build/unit-tests/integration-tests, frontend: lint/install-build/tests
+
+### Context
+- Existing test suite: 126 tests passing before implementation
+- Overall coverage: 47% line, 44% branch before improvements
+- Service layer already well covered (80-100%), but gaps existed in:
+  - LocalFileStorageService: 12.1% coverage
+  - Validators: 0% coverage (no tests existed)
+- TST-001 target: >70% coverage for service layer
+
+### Files Added/Modified
+- `backend/tests/VolunteerPortal.Tests/Services/LocalFileStorageServiceTests.cs` - Created: 22 tests for file upload/delete/exists operations
+- `backend/tests/VolunteerPortal.Tests/Validators/RegisterRequestValidatorTests.cs` - Created: Tests for registration validation rules
+- `backend/tests/VolunteerPortal.Tests/Validators/LoginRequestValidatorTests.cs` - Created: Tests for login validation rules
+- `backend/tests/VolunteerPortal.Tests/Validators/CreateEventRequestValidatorTests.cs` - Created: ~40 tests for event creation validation
+- `backend/tests/VolunteerPortal.Tests/Validators/UpdateEventRequestValidatorTests.cs` - Created: ~42 tests for event update validation
+
+### Generated Code Summary
+- **LocalFileStorageServiceTests**: 22 comprehensive tests covering:
+  - Valid file upload (jpg, png, jpeg)
+  - Invalid scenarios (null, empty, too large, invalid extension, invalid content type)
+  - Directory creation verification
+  - Unique filename generation
+  - Delete operations (existing, non-existent, invalid paths)
+  - FileExists operations
+  - Uses temp directory with IDisposable cleanup pattern
+
+- **Validator Tests**: ~95 tests total covering FluentValidation rules:
+  - RegisterRequestValidator: Email, password complexity, name, phone validation
+  - LoginRequestValidator: Email format, password required
+  - CreateEventRequestValidator: Title, description, location, startTime (past/future), duration (range), capacity (range), imageUrl (http/https validation), registrationDeadline, requiredSkillIds (uniqueness)
+  - UpdateEventRequestValidator: Same validations plus EventStatus enum validation
+
+### Result
+✅ Success - All 259 tests passing
+
+**Coverage Results (Before → After):**
+- Overall: 47% → 51.1% line coverage, 44% → 59.3% branch coverage
+- Total Tests: 126 → 259 (133 new tests)
+
+**Service Layer Coverage (All >70% target met):**
+- AuthService: 100%
+- EventService: 100%
+- RegistrationService: 100%
+- SkillService: 100%
+- ReportService: 100%
+- ExcelExportService: 92.3%
+- LocalFileStorageService: 87.9% (was 12.1%)
+
+**Validator Coverage (New):**
+- CreateEventRequestValidator: 95.9%
+- UpdateEventRequestValidator: 95.7%
+- LoginRequestValidator: 100%
+- RegisterRequestValidator: 100%
+
+### AI Generation Percentage
+Estimate: ~96%
+
+### Learnings/Notes
+- Existing service layer was already well-tested (80-100%), confirming earlier AI-generated tests were comprehensive
+- Identifying coverage gaps via XPlat Code Coverage report was critical for prioritization
+- LocalFileStorageService required actual file operations testing - used temp directory pattern with cleanup
+- FluentValidation.TestHelper extension methods (`TestValidate`, `ShouldHaveValidationErrorFor`) provide clean test assertions
+- Validator tests use factory method pattern (`CreateValidRequest()`) for DRY test setup
+- Edge cases like boundary values (capacity 10000, duration 1440) ensure thorough validation testing
+- EventStatus enum values needed verification - discovered only Active/Cancelled defined (not Upcoming/Ongoing/Completed)
+- 133 new tests written with high AI generation rate demonstrates effective prompting for test code
+
+---
