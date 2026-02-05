@@ -34,7 +34,7 @@ describe('AdminReportsPage', () => {
     renderPage();
     expect(screen.getByText('Reports & Exports')).toBeInTheDocument();
     expect(
-      screen.getByText('Export platform data to CSV files for analysis and reporting')
+      screen.getByText('Export platform data to Excel files for analysis and reporting')
     ).toBeInTheDocument();
   });
 
@@ -66,17 +66,17 @@ describe('AdminReportsPage', () => {
     renderPage();
     expect(screen.getByText('About Exports')).toBeInTheDocument();
     expect(
-      screen.getByText(/All exports are in CSV format/)
+      screen.getByText(/All exports are in Excel format/)
     ).toBeInTheDocument();
   });
 
   it('calls exportUsers when users export button is clicked', async () => {
-    const mockBlob = new Blob(['test'], { type: 'text/csv' });
+    const mockBlob = new Blob(['test'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     vi.mocked(adminService.exportUsers).mockResolvedValue(mockBlob);
 
     renderPage();
 
-    const exportButtons = screen.getAllByText('Export CSV');
+    const exportButtons = screen.getAllByText('Export Excel');
     await userEvent.click(exportButtons[0]); // First button is Users export
 
     await waitFor(() => {
@@ -91,19 +91,19 @@ describe('AdminReportsPage', () => {
 
     renderPage();
 
-    const exportButtons = screen.getAllByText('Export CSV');
+    const exportButtons = screen.getAllByText('Export Excel');
     await userEvent.click(exportButtons[0]);
 
     expect(screen.getByText('Exporting...')).toBeInTheDocument();
   });
 
   it('shows success state after successful export', async () => {
-    const mockBlob = new Blob(['test'], { type: 'text/csv' });
+    const mockBlob = new Blob(['test'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     vi.mocked(adminService.exportUsers).mockResolvedValue(mockBlob);
 
     renderPage();
 
-    const exportButtons = screen.getAllByText('Export CSV');
+    const exportButtons = screen.getAllByText('Export Excel');
     await userEvent.click(exportButtons[0]);
 
     await waitFor(() => {
@@ -116,7 +116,7 @@ describe('AdminReportsPage', () => {
 
     renderPage();
 
-    const exportButtons = screen.getAllByText('Export CSV');
+    const exportButtons = screen.getAllByText('Export Excel');
     await userEvent.click(exportButtons[0]);
 
     await waitFor(() => {
@@ -167,7 +167,7 @@ describe('AdminReportsPage', () => {
   });
 
   it('passes date filters to exportRegistrations', async () => {
-    const mockBlob = new Blob(['test'], { type: 'text/csv' });
+    const mockBlob = new Blob(['test'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     vi.mocked(adminService.exportRegistrations).mockResolvedValue(mockBlob);
 
     renderPage();
@@ -178,7 +178,7 @@ describe('AdminReportsPage', () => {
     await userEvent.type(startDateInput, '2026-01-01');
     await userEvent.type(endDateInput, '2026-12-31');
 
-    const exportButtons = screen.getAllByText('Export CSV');
+    const exportButtons = screen.getAllByText('Export Excel');
     await userEvent.click(exportButtons[2]); // Third button is Registrations export
 
     await waitFor(() => {

@@ -112,7 +112,7 @@ function ExportCard({ title, description, icon: Icon, onExport, children }: Expo
           <p className="mt-1 text-sm text-gray-600">{description}</p>
           {children && <div className="mt-4">{children}</div>}
           <div className="mt-4">
-            <ExportButton onExport={onExport} label="Export CSV" />
+            <ExportButton onExport={onExport} label="Export Excel" />
           </div>
         </div>
       </div>
@@ -140,25 +140,25 @@ export default function AdminReportsPage() {
   const handleExportUsers = async () => {
     const blob = await exportUsers();
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-    downloadBlob(blob, `users_${timestamp}.csv`);
+    downloadBlob(blob, `users_${timestamp}.xlsx`);
   };
 
   const handleExportEvents = async () => {
     const blob = await exportEvents();
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-    downloadBlob(blob, `events_${timestamp}.csv`);
+    downloadBlob(blob, `events_${timestamp}.xlsx`);
   };
 
   const handleExportRegistrations = async () => {
     const blob = await exportRegistrations(registrationFilters);
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-    downloadBlob(blob, `registrations_${timestamp}.csv`);
+    downloadBlob(blob, `registrations_${timestamp}.xlsx`);
   };
 
   const handleExportSkills = async () => {
     const blob = await exportSkillsSummary();
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-    downloadBlob(blob, `skills_summary_${timestamp}.csv`);
+    downloadBlob(blob, `skills_summary_${timestamp}.xlsx`);
   };
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,7 +185,7 @@ export default function AdminReportsPage() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Reports & Exports</h1>
         <p className="mt-2 text-gray-600">
-          Export platform data to CSV files for analysis and reporting
+          Export platform data to Excel files for analysis and reporting
         </p>
       </div>
 
@@ -266,7 +266,7 @@ export default function AdminReportsPage() {
       <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
         <h3 className="text-sm font-semibold text-blue-900">About Exports</h3>
         <ul className="mt-2 space-y-1 text-sm text-blue-800">
-          <li>• All exports are in CSV format and can be opened in Excel or any spreadsheet software</li>
+          <li>• All exports are in Excel format (.xlsx) and can be opened in any spreadsheet software</li>
           <li>• Files are timestamped with the export date and time</li>
           <li>• Date filters for registrations are based on registration date, not event date</li>
           <li>• Exports include all data visible to admin users, including soft-deleted records</li>
