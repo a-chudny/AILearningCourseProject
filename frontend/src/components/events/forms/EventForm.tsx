@@ -456,7 +456,7 @@ export function EventForm({
           onChange={handleChange}
           onBlur={handleBlur}
           maxLength={200}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.title && touched.title ? 'border-red-500' : 'border-gray-300'
           }`}
           placeholder="e.g., Beach Cleanup Day"
@@ -481,7 +481,7 @@ export function EventForm({
           onBlur={handleBlur}
           maxLength={2000}
           rows={6}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.description && touched.description ? 'border-red-500' : 'border-gray-300'
           }`}
           placeholder="Describe the event, activities, and what volunteers will do..."
@@ -511,7 +511,7 @@ export function EventForm({
             onChange={handleChange}
             onBlur={handleBlur}
             min={getMinDate()}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.date && touched.date ? 'border-red-500' : 'border-gray-300'
             } ${isEventDateInPast() ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             disabled={isLoading || isEventDateInPast()}
@@ -533,7 +533,7 @@ export function EventForm({
             value={formData.time}
             onChange={handleChange}
             onBlur={handleBlur}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.time && touched.time ? 'border-red-500' : 'border-gray-300'
             }`}
             disabled={isLoading}
@@ -554,7 +554,7 @@ export function EventForm({
             id="duration"
             value={isCustomDuration ? 0 : formData.durationMinutes}
             onChange={handleDurationChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.durationMinutes && touched.durationMinutes ? 'border-red-500' : 'border-gray-300'
             }`}
             disabled={isLoading}
@@ -575,7 +575,7 @@ export function EventForm({
                 onBlur={handleBlur}
                 min={1}
                 max={1440}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Minutes"
                 disabled={isLoading}
               />
@@ -601,7 +601,7 @@ export function EventForm({
           onChange={handleChange}
           onBlur={handleBlur}
           maxLength={300}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.location && touched.location ? 'border-red-500' : 'border-gray-300'
           }`}
           placeholder="e.g., Santa Monica Beach, Los Angeles, CA"
@@ -626,7 +626,7 @@ export function EventForm({
           onBlur={handleBlur}
           min={1}
           max={10000}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full px-3 py-2 border rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.capacity && touched.capacity ? 'border-red-500' : 'border-gray-300'
           }`}
           disabled={isLoading}
@@ -651,7 +651,7 @@ export function EventForm({
             onBlur={handleBlur}
             min={getMinDate()}
             max={getMaxDeadlineDate()}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
           />
           <input
@@ -660,7 +660,7 @@ export function EventForm({
             value={formData.registrationDeadlineTime}
             onChange={handleChange}
             onBlur={handleBlur}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading || !formData.registrationDeadlineDate}
           />
         </div>

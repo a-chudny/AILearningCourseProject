@@ -320,7 +320,7 @@ export default function AdminEventsPage() {
             placeholder="Search by title..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 text-gray-900 bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
 
@@ -329,7 +329,7 @@ export default function AdminEventsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded-md border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">All Events</option>
             <option value="active">Active Only</option>
@@ -340,37 +340,37 @@ export default function AdminEventsPage() {
 
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Organizer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Date/Time</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Registrations</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-1/4">Title</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-1/6">Organizer</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-1/5">Date/Time</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-24">Registrations</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-24">Status</th>
+                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 w-40">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <tr key={index}>
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <div className="h-4 w-48 animate-pulse rounded bg-gray-200" />
+                    <td className="px-6 py-4">
+                      <div className="h-4 w-full max-w-48 animate-pulse rounded bg-gray-200" />
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
+                    <td className="px-6 py-4">
+                      <div className="h-4 w-full max-w-32 animate-pulse rounded bg-gray-200" />
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <div className="h-4 w-40 animate-pulse rounded bg-gray-200" />
+                    <td className="px-6 py-4">
+                      <div className="h-4 w-full max-w-40 animate-pulse rounded bg-gray-200" />
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4">
+                    <td className="px-6 py-4">
                       <div className="h-4 w-16 animate-pulse rounded bg-gray-200" />
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4">
+                    <td className="px-6 py-4">
                       <div className="h-6 w-20 animate-pulse rounded bg-gray-200" />
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4">
+                    <td className="px-6 py-4">
                       <div className="h-8 w-32 animate-pulse rounded bg-gray-200 ml-auto" />
                     </td>
                   </tr>
@@ -389,21 +389,21 @@ export default function AdminEventsPage() {
                   return (
                     <tr key={event.id} className={isDeleted ? 'bg-red-50' : ''}>
                       <td className="px-6 py-4">
-                        <div className={`font-medium ${isDeleted ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
+                        <div className={`font-medium break-words ${isDeleted ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
                           {event.title}
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-gray-500">
                         {event.organizerName}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                        <div>{formatDate(event.startTime)}</div>
-                        <div className="text-xs text-gray-400"> {calculateEndTime(event.startTime, event.durationMinutes)}</div>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        <div className="whitespace-nowrap">{formatDate(event.startTime)}</div>
+                        <div className="whitespace-nowrap text-xs text-gray-400"> {calculateEndTime(event.startTime, event.durationMinutes)}</div>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                         {event.registrationCount} / {event.capacity}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4">
+                      <td className="px-6 py-4">
                         <div className="flex flex-col gap-1">
                           <span className={`inline-flex w-fit rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeColor(event.status)}`}>
                             {event.status === 0 ? 'Active' : 'Cancelled'}
@@ -415,8 +415,8 @@ export default function AdminEventsPage() {
                           )}
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-right">
-                        <div className="flex justify-end gap-2">
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-1">
                           <button
                             onClick={() => navigate(`/events/${event.id}/edit`)}
                             disabled={isDeleted}

@@ -4094,3 +4094,75 @@ Estimate: ~94%
 - Date filter uses inclusive start and exclusive end-of-day for endDate
 
 ---
+
+## [2026-02-05 14:30-15:15] - Post-RPT-003 UI/UX Bug Fixes
+
+### Prompts
+1. "Few more fixes needed: (1) Input text almost invisible everywhere due to font color, not only login page (2) Admin dashboard page got 500 error from backend endpoint admin/stats"
+2. "Few more fixes: (1) Dropdown menu in Header closes before user can click Profile/My Events/Logout (2) Admin Events page content doesn't fit properly on 15.1" screen at 2560x1600 resolution"
+3. "Few more fixes: (1) On login page after entering wrong credentials, could be displayed some user friendly message, instead of 401 error text? (2) After successful login site redirect to main page, but it looks like the user still unlogged until refresh the page"
+4. "First issue was fixed, but immediate login still doesn't work"
+5. "No. it has not fixed, Now I'm getting 200 status code from backend, but nothing happened (no redirection to main page)"
+6. "Still no redirect to main page after successful login"
+
+### Context
+- RPT-003 completed and committed
+- User testing revealed 6 distinct UI/UX bugs
+- Issues spanned backend (DateTime), frontend styling (text visibility), and UX (navigation, error messages)
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Controllers/AdminController.cs` - Fixed: DateTime UTC issue (DateTimeKind.Utc)
+- `frontend/src/pages/auth/LoginPage.tsx` - Fixed: Input colors, error messages, navigation with window.location.href
+- `frontend/src/pages/auth/RegisterPage.tsx` - Fixed: Added text-gray-900 bg-white to all inputs
+- `frontend/src/components/events/EventFilters.tsx` - Fixed: Search input and select text colors
+- `frontend/src/components/events/forms/EventForm.tsx` - Fixed: All 10 form inputs text/bg colors
+- `frontend/src/pages/admin/AdminUsersPage.tsx` - Fixed: Search and filter text colors
+- `frontend/src/pages/admin/AdminEventsPage.tsx` - Fixed: Input colors and table layout with proportional widths
+- `frontend/src/pages/admin/AdminReportsPage.tsx` - Fixed: Date input text colors
+- `frontend/src/components/layout/Header.tsx` - Fixed: Dropdown gap with pb-2 and top-full positioning
+- `frontend/src/context/AuthContext.tsx` - Fixed: Auth state timing
+
+### Issues Fixed
+**1. Input Text Visibility (All Forms)**
+- Problem: Input/select text nearly invisible (no explicit color)
+- Solution: Added `text-gray-900 bg-white` to all form inputs across 8 files
+
+**2. Admin Dashboard 500 Error**
+- Problem: `System.ArgumentException: Cannot write DateTime with Kind=Unspecified to PostgreSQL`
+- Solution: Changed to `new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc)` in AdminController
+
+**3. Header Dropdown Closes Prematurely**
+- Problem: `mt-2` margin created gap, triggering `onMouseLeave` when moving to menu
+- Solution: Button `pb-2` + dropdown `top-full` creates continuous hover area
+
+**4. Admin Events Table Layout (2560x1600)**
+- Problem: Table using `min-w-full` with no column width distribution
+- Solution: Changed to `w-full` with proportional widths (w-1/4, w-1/6, w-1/5, w-24, w-40), added `break-words` to Title
+
+**5. Login Error Messages**
+- Problem: Raw "Request failed with status code 401" shown to users
+- Solution: Check `error.response?.status === 401` → show "Invalid email or password. Please check your credentials and try again."
+
+**6. Login Redirect Auth State**
+- Problem: After login, header shows logged-out state until refresh
+- Root Cause: React state batching + multiple navigation triggers causing timing issues
+- Solution Evolution: Tried useEffect-only navigation → setTimeout(0) delay → Final: `window.location.href = from` for full page reload ensuring localStorage token loads
+
+### Result
+✅ All 6 issues resolved - Application fully functional with proper UX
+
+### AI Generation Percentage
+Estimate: ~78% (debugging iterations required for auth state navigation)
+
+### Learnings/Notes
+- PostgreSQL requires explicit DateTimeKind.Utc for timestamp with time zone columns
+- Tailwind needs explicit `text-color` and `bg-color` - no defaults
+- CSS margin breaks hover interactions - use padding for continuous areas
+- Table `w-full` with proportional column widths better than `min-w-full`
+- User error messages should never expose technical details (HTTP codes)
+- window.location.href more reliable than SPA navigation for auth state transitions
+- Multiple navigation triggers (useEffect + manual) cause race conditions
+- React state batching can delay derived computed values (isAuthenticated)
+- Full page reload guarantees localStorage → Context initialization flow
+
+---
