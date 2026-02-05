@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using VolunteerPortal.API.Data;
 using VolunteerPortal.API.Services;
 using VolunteerPortal.API.Services.Interfaces;
+using VolunteerPortal.API.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -98,6 +99,9 @@ builder.Services.AddSwaggerGen(options =>
         options.IncludeXmlComments(xmlPath);
     }
 
+    // Support file uploads in Swagger UI
+    options.OperationFilter<FileUploadOperationFilter>();
+    
     // Configure JWT authentication in Swagger (prepared for AUTH-002)
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {

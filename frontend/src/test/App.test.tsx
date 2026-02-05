@@ -32,9 +32,9 @@ describe('App', () => {
     const { default: App } = await import('@/App')
     render(<App />)
     
-    // Wait for the lazy-loaded content to appear
+    // Wait for the lazy-loaded content to appear - check for "Volunteer Portal" text in header
     await waitFor(() => {
-      expect(screen.getByText('Volunteer Event Portal')).toBeInTheDocument()
+      expect(screen.getByText('Volunteer Portal')).toBeInTheDocument()
     }, { timeout: 3000 })
   })
 })

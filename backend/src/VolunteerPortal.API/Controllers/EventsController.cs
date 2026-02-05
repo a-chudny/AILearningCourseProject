@@ -174,13 +174,14 @@ public class EventsController : ControllerBase
     /// <param name="file">Image file (JPG or PNG, max 5MB)</param>
     /// <returns>Updated event with image URL</returns>
     [HttpPost("{id}/image")]
+    [Consumes("multipart/form-data")]
     [Authorize(Roles = "Organizer,Admin")]
     [ProducesResponseType(typeof(EventResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<EventResponse>> UploadEventImage(int id, [FromForm] IFormFile file)
+    public async Task<ActionResult<EventResponse>> UploadEventImage(int id, IFormFile file)
     {
         try
         {
@@ -188,6 +189,10 @@ public class EventsController : ControllerBase
             
             // Verify event exists and user has permission
             var existingEvent = await _eventService.GetByIdAsync(id);
+            if (existingEvent == null)
+            {
+                return NotFound(new { message = $"Event with ID {id} not found." });
+            }
             var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
             
             if (existingEvent.OrganizerId != userId && userRole != "Admin")
@@ -257,6 +262,10 @@ public class EventsController : ControllerBase
             
             // Verify event exists and user has permission
             var existingEvent = await _eventService.GetByIdAsync(id);
+            if (existingEvent == null)
+            {
+                return NotFound(new { message = $"Event with ID {id} not found." });
+            }
             var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
             
             if (existingEvent.OrganizerId != userId && userRole != "Admin")
@@ -315,6 +324,10 @@ public class EventsController : ControllerBase
             
             // Verify event exists and user has permission
             var existingEvent = await _eventService.GetByIdAsync(id);
+            if (existingEvent == null)
+            {
+                return NotFound(new { message = $"Event with ID {id} not found." });
+            }
             var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
             
             if (existingEvent.OrganizerId != userId && userRole != "Admin")

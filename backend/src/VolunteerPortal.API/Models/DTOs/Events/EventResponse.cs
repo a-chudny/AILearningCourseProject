@@ -98,6 +98,11 @@ public class EventResponse
     public DateTime? UpdatedAt { get; set; }
 
     /// <summary>
+    /// Indicates whether the event has been soft-deleted.
+    /// </summary>
+    public bool IsDeleted { get; set; }
+
+    /// <summary>
     /// List of skills required for this event.
     /// </summary>
     public List<SkillResponse> RequiredSkills { get; set; } = new();

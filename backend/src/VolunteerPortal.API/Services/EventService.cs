@@ -359,6 +359,7 @@ public class EventService : IEventService
             OrganizerEmail = eventEntity.Organizer.Email,
             CreatedAt = eventEntity.CreatedAt,
             UpdatedAt = eventEntity.UpdatedAt,
+            IsDeleted = eventEntity.IsDeleted,
             RequiredSkills = eventEntity.EventSkills
                 .Select(es => new Models.DTOs.SkillResponse
                 {
