@@ -3657,3 +3657,60 @@ Estimate: ~95%
 - Operation filter removes auto-generated query parameters and replaces with RequestBody
 
 ---
+
+## [2026-02-05 15:00] - ADM-001: Admin Layout Implementation
+
+### Prompt
+"Implement ADM-001 story from user story file. Ask if something unclear."
+
+Follow-up: "Could you check ui tests again and fix them if somethin wrong?"
+
+### Context
+- Starting Phase 6 (Admin) implementation
+- AUTH-008 (Protected Route Component) already completed
+- Need admin-specific layout separate from MainLayout
+- User preferences: darker sidebar, left position, mobile bottom nav, back to home page, use Heroicons
+- After implementation, one test was failing due to outdated text assertion
+
+### Files Added/Modified
+- `frontend/src/layouts/AdminLayout.tsx` - Created: Main admin layout with collapsible sidebar (30 lines)
+- `frontend/src/components/admin/AdminSidebar.tsx` - Created: Desktop/mobile navigation (122 lines)
+- `frontend/src/components/admin/AdminHeader.tsx` - Created: Header with back link and user info (38 lines)
+- `frontend/src/pages/admin/AdminDashboardPage.tsx` - Created: Placeholder dashboard page (28 lines)
+- `frontend/src/routes/index.tsx` - Modified: Added /admin route with AdminLayout and RoleGuard
+- `frontend/src/__tests__/components/admin/AdminSidebar.test.tsx` - Created: 3 tests for sidebar
+- `frontend/src/__tests__/components/admin/AdminHeader.test.tsx` - Created: 2 tests for header
+- `frontend/src/test/App.test.tsx` - Fixed: Updated test to check for "Volunteer Portal" instead of "Volunteer Event Portal"
+- `frontend/package.json` - Modified: Added @heroicons/react dependency
+
+### Generated Code Summary
+- AdminLayout with collapsible sidebar state (collapsed: w-16, expanded: w-64)
+- AdminSidebar with dual navigation: desktop fixed sidebar + mobile bottom bar
+- Navigation links: Dashboard, Users, Events, Reports with Heroicons
+- Dark sidebar (bg-gray-800) with blue active link highlighting
+- AdminHeader with back to main site link (redirects to /) and user info display
+- Placeholder AdminDashboardPage for ADM-002 implementation
+- Route protection: /admin only accessible by Admin role via RoleGuard
+- Responsive design: sidebar collapses to bottom navigation on mobile
+- Test fixes: Updated App.test.tsx assertion from "Volunteer Event Portal" to "Volunteer Portal"
+- Test fixes: Updated AdminSidebar.test.tsx to use getAllByText for labels appearing in both desktop and mobile nav
+
+### Result
+✅ Success
+- All 26 test files passing (190 tests)
+- TypeScript compilation successful
+- Frontend builds successfully (321KB main bundle)
+- Admin layout renders correctly with proper styling
+
+### AI Generation Percentage
+Estimate: ~97%
+
+### Learnings/Notes
+- @heroicons/react provides clean outline icons perfect for navigation
+- Mobile-first design: bottom navigation works better than drawer on mobile for frequent switching
+- Testing navigation components: use getAllByText when both desktop and mobile render same labels
+- Dark sidebar (gray-800) provides good visual distinction from main site's white theme
+- AdminLayout padding-bottom (pb-20 on mobile, pb-6 on desktop) prevents content hiding behind bottom nav
+- RoleGuard enforces Admin-only access at route level for security
+
+---

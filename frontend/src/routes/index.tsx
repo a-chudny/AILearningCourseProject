@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 import { MainLayout } from '@/layouts/MainLayout'
+import { AdminLayout } from '@/layouts/AdminLayout'
 import { RoleGuard } from '@/components/RoleGuard'
 import { UserRole } from '@/types/enums'
 
@@ -15,6 +16,7 @@ const CreateEventPage = lazy(() => import('@/pages/user/CreateEventPage'))
 const EditEventPage = lazy(() => import('@/pages/user/EditEventPage'))
 const MyEventsPage = lazy(() => import('@/pages/user/MyEventsPage'))
 const ProfilePage = lazy(() => import('@/pages/user/ProfilePage'))
+const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'))
 
 // Loading fallback component
 function PageLoader() {
@@ -96,6 +98,18 @@ export function AppRoutes() {
               <MainLayout>
                 <ProfilePage />
               </MainLayout>
+            </RoleGuard>
+          }
+        />
+
+        {/* Admin Routes - only accessible by Admin role */}
+        <Route
+          path="/admin"
+          element={
+            <RoleGuard allowedRoles={[UserRole.Admin]}>
+              <AdminLayout>
+                <AdminDashboardPage />
+              </AdminLayout>
             </RoleGuard>
           }
         />
