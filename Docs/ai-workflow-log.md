@@ -3714,3 +3714,51 @@ Estimate: ~97%
 - RoleGuard enforces Admin-only access at route level for security
 
 ---
+## [2026-02-05 12:22] - ADM-002: Admin Dashboard with Statistics
+
+### Prompt
+"Implement ADM-002 story from user story file. Ask if something unclear. You can also use workflow log to check what was done before if you need"
+
+### Clarifying Questions
+- **Q1: Registrations This Month - current month or last 30 days?** → A: Current calendar month
+- **Q2: Quick Actions - include navigation links?** → A: Yes, include Users, Events navigations links
+- **Q3: Stat cards - use icons and visual indicators?** → A: Use icons
+- **Q4: Error handling approach?** → A: Generic error message
+- **Q5: Admin role authorization required?** → A: Yes
+
+### Context
+- Building on ADM-001 AdminLayout with sidebar navigation
+- Need real statistics to replace placeholder dashboard
+- Following existing service/hook patterns from events and registrations
+
+### Files Added/Modified
+- `backend/src/VolunteerPortal.API/Models/DTOs/Admin/AdminStatsResponse.cs` - Created: DTO with 5 statistics fields
+- `backend/src/VolunteerPortal.API/Controllers/AdminController.cs` - Created: GET /api/admin/stats endpoint with Admin authorization
+- `frontend/src/services/adminService.ts` - Created: API service for getAdminStats
+- `frontend/src/hooks/useAdminStats.ts` - Created: React Query hook for admin statistics
+- `frontend/src/pages/admin/AdminDashboardPage.tsx` - Modified: Replaced placeholder with full implementation (StatCard, QuickAction components)
+- `frontend/src/__tests__/pages/admin/AdminDashboardPage.test.tsx` - Created: 7 tests for dashboard functionality
+
+### Generated Code Summary
+- Backend endpoint with current month calculation for registrations using DateTime.UtcNow
+- 4 stat cards with Heroicons (UserGroupIcon, CalendarDaysIcon, ClipboardDocumentCheckIcon, ChartBarIcon)
+- Loading skeleton animations with pulse effect
+- 3 quick action cards linking to /admin/users, /admin/events, /admin/settings
+- Error boundary with generic error message for failed stats loading
+- Comprehensive tests covering rendering, loading, success, and error states
+
+### Result
+✅ Success - All 197 tests passing (27 test files), backend builds successfully, dashboard displays real statistics with icons and quick actions
+
+### AI Generation Percentage
+Estimate: ~95%
+
+### Learnings/Notes
+- React Query retry config in hooks overrides test QueryClient defaults - removed retry from hook for test compatibility
+- Current month calculation: `new DateTime(now.Year, now.Month, 1)` for first day of month
+- Stat cards with icon badges (rounded-full bg-blue-50 p-3) provide professional dashboard aesthetic
+- Quick action cards with hover effects (hover:border-blue-300 hover:shadow-md) improve UX
+- Generic error handling preferred over detailed error messages for admin stats
+- useAdminStats hook with 2-minute staleTime balances data freshness with API load
+
+---

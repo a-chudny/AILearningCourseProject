@@ -212,6 +212,63 @@ frontend/
 "Add image upload to event creation"
 "Add email notification on registration"
 
+## Asking Clarifying Questions During Implementation
+
+When a user's request has design ambiguities or multiple valid approaches, ask focused clarifying questions **before** implementing. This ensures the generated code matches user preferences and reduces iterations.
+
+### When to Ask Clarifying Questions
+
+Ask questions when the request leaves room for different design or implementation choices:
+- **Visual design**: Theme, colors, positioning, spacing, typography
+- **Layout & responsiveness**: Desktop vs mobile behavior, navigation structure, breakpoints
+- **Interaction patterns**: Click vs hover, animation style, loading states
+- **Technology choices**: Library selection, naming conventions, icon sources
+- **Business logic**: Feature scope, data validation rules, error handling approach
+
+### How to Ask Effectively
+
+1. **Ask all related questions in one message** - Use numbered format, keep questions concise
+2. **Ask about decisions, not details** - "Dark or light theme?" not "What shade of gray?"
+3. **Accept brief answers** - Yes/No, names, brief descriptions are sufficient
+4. **Ask upfront** - Before generating code, not after
+5. **Use clear options** - Offer 2-3 realistic options when appropriate
+
+### Example Pattern
+
+**User request:** "Implement an admin layout component"
+
+**AI clarifying questions:**
+1. Should the sidebar be dark or light themed?
+2. Should it be on the left or right side?
+3. How should it behave on mobile - collapse to icons or hide completely?
+4. What should clicking the logo do - go to dashboard or main site?
+5. Which icon library would you prefer - Heroicons, Font Awesome, or Material Icons?
+
+**User answers:**
+1. Dark theme
+2. Left side
+3. Hide completely on mobile, show bottom navigation instead
+4. Redirect to main site
+5. Heroicons
+
+**Result:** AI generates layout matching all preferences with 90%+ efficiency
+
+### Documenting in Workflow Log
+
+Include clarifying questions in the workflow log **Prompt** section with both questions and answers:
+
+```markdown
+### Prompt
+User request: [Original request]
+
+Clarifying questions asked:
+- **Q1: Dark or light sidebar?** → A: Dark theme with blue accents
+- **Q2: Mobile behavior?** → A: Bottom navigation with 4 main links
+- **Q3: Logo click action?** → A: Redirect to main site home
+```
+
+This documents both the implementation context and the decision-making process, valuable for reviewing the feature later.
+
 ## Development Workflow Logging
 
 ### Log Each Significant Development Step
@@ -238,6 +295,13 @@ Each entry should follow this standardized format. **Keep entries brief and focu
 
 ### Prompt
 The exact user prompt/request without modifications or paraphrasing.
+
+### Clarifying Questions (if any)
+If the AI asked clarifying questions during implementation:
+- **Q1: [Question text]** → A: Your answer
+- **Q2: [Question text]** → A: Your answer
+
+*Note: Include this section only if questions were asked. Otherwise omit.*
 
 ### Context
 - Brief project state and dependencies (2-4 bullet points)
