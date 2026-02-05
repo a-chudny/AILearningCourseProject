@@ -1,112 +1,119 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using VolunteerPortal.API.Application.Events.Commands;
+using VolunteerPortal.API.Application.Events.Queries;
 using VolunteerPortal.API.Models.DTOs.Events;
-using VolunteerPortal.API.Models.Enums;
-using VolunteerPortal.API.Services.Interfaces;
 
 namespace VolunteerPortal.API.Controllers;
 
 /// <summary>
-/// Controller for managing volunteer events
+/// Controller for managing volunteer events.
+/// Provides endpoints for CRUD operations, image management, and event status changes.
 /// </summary>
 [ApiController]
 [Route("api/events")]
+[Produces("application/json")]
 public class EventsController : ControllerBase
 {
-    private readonly IEventService _eventService;
-    private readonly IFileStorageService _fileStorageService;
+    private readonly IMediator _mediator;
 
-    public EventsController(
-        IEventService eventService,
-        IFileStorageService fileStorageService)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EventsController"/> class.
+    /// </summary>
+    /// <param name="mediator">MediatR mediator for dispatching commands and queries.</param>
+    public EventsController(IMediator mediator)
     {
-        _eventService = eventService;
-        _fileStorageService = fileStorageService;
+        _mediator = mediator;
     }
 
     /// <summary>
-    /// Get a paginated list of events
+    /// Get a paginated list of events.
     /// </summary>
-    /// <param name="queryParams">Query parameters for filtering, sorting, and pagination</param>
-    /// <returns>Paginated list of events</returns>
+    /// <remarks>
+    /// Supports filtering by date range, location, status, and required skills.
+    /// Authenticated users can filter events matching their skills.
+    /// Results are paginated with configurable page size.
+    /// </remarks>
+    /// <param name="queryParams">Query parameters for filtering, sorting, and pagination.</param>
+    /// <returns>Paginated list of events with metadata.</returns>
+    /// <response code="200">Returns the paginated event list.</response>
     [HttpGet]
     [AllowAnonymous]
     [ProducesResponseType(typeof(EventListResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<EventListResponse>> GetEvents([FromQuery] EventQueryParams queryParams)
     {
-        // Extract userId from claims if authenticated (for "Match My Skills" feature)
         int? currentUserId = null;
-        if (User.Identity?.IsAuthenticated == true)
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (int.TryParse(userIdClaim, out var userId))
-            {
-                currentUserId = userId;
-            }
-        }
+        if (User.Identity?.IsAuthenticated == true && int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid))
+            currentUserId = uid;
 
-        var result = await _eventService.GetAllAsync(queryParams, currentUserId);
+        var query = new GetEventsQuery(queryParams, currentUserId);
+        var result = await _mediator.Send(query);
         return Ok(result);
     }
 
     /// <summary>
-    /// Get event details by ID
+    /// Get event details by ID.
     /// </summary>
-    /// <param name="id">Event ID</param>
-    /// <returns>Event details</returns>
+    /// <param name="id">The unique identifier of the event.</param>
+    /// <returns>Event details including organizer info and required skills.</returns>
+    /// <response code="200">Returns the event details.</response>
+    /// <response code="404">Event not found.</response>
     [HttpGet("{id}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(EventResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EventResponse>> GetEventById(int id)
     {
-        var eventResponse = await _eventService.GetByIdAsync(id);
-        if (eventResponse == null)
-        {
-            return NotFound(new { message = $"Event with ID {id} not found." });
-        }
-        return Ok(eventResponse);
+        var query = new GetEventByIdQuery(id);
+        var eventResponse = await _mediator.Send(query);
+        return eventResponse == null 
+            ? NotFound(new { message = $"Event with ID {id} not found." }) 
+            : Ok(eventResponse);
     }
 
     /// <summary>
-    /// Create a new event
+    /// Create a new event.
     /// </summary>
-    /// <param name="request">Event creation request</param>
-    /// <returns>Created event details</returns>
+    /// <remarks>
+    /// Requires Organizer or Admin role. The authenticated user becomes the event organizer.
+    /// Event start time must be in the future. Registration deadline (if provided) must be before start time.
+    /// </remarks>
+    /// <param name="request">Event creation details.</param>
+    /// <returns>The created event details.</returns>
+    /// <response code="201">Event created successfully.</response>
+    /// <response code="400">Invalid request data or validation error.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="403">User does not have required role.</response>
     [HttpPost]
     [Authorize(Roles = "Organizer,Admin")]
     [ProducesResponseType(typeof(EventResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<EventResponse>> CreateEvent([FromBody] CreateEventRequest request)
     {
-        try
-        {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var eventResponse = await _eventService.CreateAsync(request, userId);
-            return CreatedAtAction(
-                nameof(GetEventById),
-                new { id = eventResponse.Id },
-                eventResponse
-            );
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var userId = GetCurrentUserId();
+        var command = new CreateEventCommand(request, userId);
+        var eventResponse = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetEventById), new { id = eventResponse.Id }, eventResponse);
     }
 
     /// <summary>
-    /// Update an existing event
+    /// Update an existing event.
     /// </summary>
-    /// <param name="id">Event ID</param>
-    /// <param name="request">Event update request</param>
-    /// <returns>Updated event details</returns>
+    /// <remarks>
+    /// Only the event organizer or an Admin can update the event.
+    /// </remarks>
+    /// <param name="id">The unique identifier of the event to update.</param>
+    /// <param name="request">Updated event details.</param>
+    /// <returns>The updated event details.</returns>
+    /// <response code="200">Event updated successfully.</response>
+    /// <response code="400">Invalid request data or validation error.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="403">User does not have permission to update this event.</response>
+    /// <response code="404">Event not found.</response>
     [HttpPut("{id}")]
     [Authorize]
     [ProducesResponseType(typeof(EventResponse), StatusCodes.Status200OK)]
@@ -116,32 +123,25 @@ public class EventsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EventResponse>> UpdateEvent(int id, [FromBody] UpdateEventRequest request)
     {
-        try
-        {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            
-            var eventResponse = await _eventService.UpdateAsync(id, request, userId);
-            return Ok(eventResponse);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var userId = GetCurrentUserId();
+        var command = new UpdateEventCommand(id, request, userId);
+        var eventResponse = await _mediator.Send(command);
+        return Ok(eventResponse);
     }
 
     /// <summary>
-    /// Delete an event (soft delete)
+    /// Delete an event (soft delete).
     /// </summary>
-    /// <param name="id">Event ID</param>
-    /// <returns>No content on success</returns>
+    /// <remarks>
+    /// Only the event organizer or an Admin can delete the event.
+    /// This performs a soft delete - the event is marked as deleted but not removed from the database.
+    /// </remarks>
+    /// <param name="id">The unique identifier of the event to delete.</param>
+    /// <returns>No content on success.</returns>
+    /// <response code="204">Event deleted successfully.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="403">User does not have permission to delete this event.</response>
+    /// <response code="404">Event not found.</response>
     [HttpDelete("{id}")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -150,29 +150,27 @@ public class EventsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteEvent(int id)
     {
-        try
-        {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            
-            await _eventService.DeleteAsync(id, userId);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
-        }
+        var userId = GetCurrentUserId();
+        var command = new DeleteEventCommand(id, userId);
+        await _mediator.Send(command);
+        return NoContent();
     }
 
     /// <summary>
-    /// Upload an image for an event
+    /// Upload an image for an event.
     /// </summary>
-    /// <param name="id">Event ID</param>
-    /// <param name="file">Image file (JPG or PNG, max 5MB)</param>
-    /// <returns>Updated event with image URL</returns>
+    /// <remarks>
+    /// Accepts JPG or PNG images up to 5MB. Only the event organizer or an Admin can upload images.
+    /// If the event already has an image, the old image is deleted and replaced.
+    /// </remarks>
+    /// <param name="id">The unique identifier of the event.</param>
+    /// <param name="file">The image file to upload (JPG or PNG, max 5MB).</param>
+    /// <returns>Updated event with the new image URL.</returns>
+    /// <response code="200">Image uploaded successfully.</response>
+    /// <response code="400">Invalid file format or file too large.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="403">User does not have permission to upload images for this event.</response>
+    /// <response code="404">Event not found.</response>
     [HttpPost("{id}/image")]
     [Consumes("multipart/form-data")]
     [Authorize(Roles = "Organizer,Admin")]
@@ -183,71 +181,25 @@ public class EventsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EventResponse>> UploadEventImage(int id, IFormFile file)
     {
-        try
-        {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            
-            // Verify event exists and user has permission
-            var existingEvent = await _eventService.GetByIdAsync(id);
-            if (existingEvent == null)
-            {
-                return NotFound(new { message = $"Event with ID {id} not found." });
-            }
-            var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
-            
-            if (existingEvent.OrganizerId != userId && userRole != "Admin")
-            {
-                return StatusCode(StatusCodes.Status403Forbidden, 
-                    new { message = "You don't have permission to upload images for this event." });
-            }
-
-            // Delete old image if exists
-            if (!string.IsNullOrEmpty(existingEvent.ImageUrl))
-            {
-                await _fileStorageService.DeleteAsync(existingEvent.ImageUrl);
-            }
-
-            // Upload new image
-            var imageUrl = await _fileStorageService.UploadAsync(file, "events");
-
-            // Update event with new image URL
-            var updateRequest = new UpdateEventRequest
-            {
-                Title = existingEvent.Title,
-                Description = existingEvent.Description,
-                Location = existingEvent.Location,
-                StartTime = existingEvent.StartTime,
-                DurationMinutes = existingEvent.DurationMinutes,
-                Capacity = existingEvent.Capacity,
-                ImageUrl = imageUrl,
-                RegistrationDeadline = existingEvent.RegistrationDeadline,
-                RequiredSkillIds = existingEvent.RequiredSkills.Select(s => s.Id).ToList(),
-                Status = existingEvent.Status
-            };
-
-            var updatedEvent = await _eventService.UpdateAsync(id, updateRequest, userId);
-            return Ok(updatedEvent);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (IOException ex)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, 
-                new { message = ex.Message });
-        }
+        var userId = GetCurrentUserId();
+        var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+        var command = new UploadEventImageCommand(id, file, userId, userRole);
+        var updatedEvent = await _mediator.Send(command);
+        return Ok(updatedEvent);
     }
 
     /// <summary>
-    /// Delete an event's image
+    /// Delete an event's image.
     /// </summary>
-    /// <param name="id">Event ID</param>
-    /// <returns>Updated event without image</returns>
+    /// <remarks>
+    /// Only the event organizer or an Admin can delete the event image.
+    /// </remarks>
+    /// <param name="id">The unique identifier of the event.</param>
+    /// <returns>Updated event without the image.</returns>
+    /// <response code="200">Image deleted successfully.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="403">User does not have permission to delete images for this event.</response>
+    /// <response code="404">Event not found.</response>
     [HttpDelete("{id}/image")]
     [Authorize(Roles = "Organizer,Admin")]
     [ProducesResponseType(typeof(EventResponse), StatusCodes.Status200OK)]
@@ -256,59 +208,27 @@ public class EventsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EventResponse>> DeleteEventImage(int id)
     {
-        try
-        {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            
-            // Verify event exists and user has permission
-            var existingEvent = await _eventService.GetByIdAsync(id);
-            if (existingEvent == null)
-            {
-                return NotFound(new { message = $"Event with ID {id} not found." });
-            }
-            var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
-            
-            if (existingEvent.OrganizerId != userId && userRole != "Admin")
-            {
-                return StatusCode(StatusCodes.Status403Forbidden, 
-                    new { message = "You don't have permission to delete images for this event." });
-            }
-
-            // Delete image file if exists
-            if (!string.IsNullOrEmpty(existingEvent.ImageUrl))
-            {
-                await _fileStorageService.DeleteAsync(existingEvent.ImageUrl);
-            }
-
-            // Update event to remove image URL
-            var updateRequest = new UpdateEventRequest
-            {
-                Title = existingEvent.Title,
-                Description = existingEvent.Description,
-                Location = existingEvent.Location,
-                StartTime = existingEvent.StartTime,
-                DurationMinutes = existingEvent.DurationMinutes,
-                Capacity = existingEvent.Capacity,
-                ImageUrl = null,
-                RegistrationDeadline = existingEvent.RegistrationDeadline,
-                RequiredSkillIds = existingEvent.RequiredSkills.Select(s => s.Id).ToList(),
-                Status = existingEvent.Status
-            };
-
-            var updatedEvent = await _eventService.UpdateAsync(id, updateRequest, userId);
-            return Ok(updatedEvent);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+        var userId = GetCurrentUserId();
+        var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+        var command = new DeleteEventImageCommand(id, userId, userRole);
+        var updatedEvent = await _mediator.Send(command);
+        return Ok(updatedEvent);
     }
 
     /// <summary>
-    /// Cancel an event
+    /// Cancel an event.
     /// </summary>
-    /// <param name="id">Event ID</param>
-    /// <returns>Updated event with cancelled status</returns>
+    /// <remarks>
+    /// Only the event organizer or an Admin can cancel the event.
+    /// Only active events can be cancelled.
+    /// </remarks>
+    /// <param name="id">The unique identifier of the event to cancel.</param>
+    /// <returns>Updated event with cancelled status.</returns>
+    /// <response code="200">Event cancelled successfully.</response>
+    /// <response code="400">Event is not in active status.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="403">User does not have permission to cancel this event.</response>
+    /// <response code="404">Event not found.</response>
     [HttpPut("{id}/cancel")]
     [Authorize(Roles = "Organizer,Admin")]
     [ProducesResponseType(typeof(EventResponse), StatusCodes.Status200OK)]
@@ -318,51 +238,18 @@ public class EventsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EventResponse>> CancelEvent(int id)
     {
-        try
-        {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            
-            // Verify event exists and user has permission
-            var existingEvent = await _eventService.GetByIdAsync(id);
-            if (existingEvent == null)
-            {
-                return NotFound(new { message = $"Event with ID {id} not found." });
-            }
-            var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
-            
-            if (existingEvent.OrganizerId != userId && userRole != "Admin")
-            {
-                return StatusCode(StatusCodes.Status403Forbidden, 
-                    new { message = "You don't have permission to cancel this event." });
-            }
+        var userId = GetCurrentUserId();
+        var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+        var command = new CancelEventCommand(id, userId, userRole);
+        var updatedEvent = await _mediator.Send(command);
+        return Ok(updatedEvent);
+    }
 
-            // Validate event is Active
-            if (existingEvent.Status != EventStatus.Active)
-            {
-                return BadRequest(new { message = "Only active events can be cancelled." });
-            }
-
-            // Update event to Cancelled status
-            var updateRequest = new UpdateEventRequest
-            {
-                Title = existingEvent.Title,
-                Description = existingEvent.Description,
-                Location = existingEvent.Location,
-                StartTime = existingEvent.StartTime,
-                DurationMinutes = existingEvent.DurationMinutes,
-                Capacity = existingEvent.Capacity,
-                ImageUrl = existingEvent.ImageUrl,
-                RegistrationDeadline = existingEvent.RegistrationDeadline,
-                RequiredSkillIds = existingEvent.RequiredSkills.Select(s => s.Id).ToList(),
-                Status = EventStatus.Cancelled
-            };
-
-            var updatedEvent = await _eventService.UpdateAsync(id, updateRequest, userId);
-            return Ok(updatedEvent);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+    private int GetCurrentUserId()
+    {
+        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(claim) || !int.TryParse(claim, out var userId))
+            throw new UnauthorizedAccessException("Invalid token");
+        return userId;
     }
 }
