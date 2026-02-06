@@ -9,9 +9,9 @@ import type { Skill } from '@/types';
 vi.mock('@/services/skillService');
 
 const mockSkills: Skill[] = [
-  { id: 1, name: 'React', description: 'Technology' },
-  { id: 2, name: 'Node.js', description: 'Technology' },
-  { id: 3, name: 'Leadership', description: 'Community' },
+  { id: 1, name: 'React', category: 'Technology', createdAt: '2024-01-01T00:00:00Z' },
+  { id: 2, name: 'Node.js', category: 'Technology', createdAt: '2024-01-01T00:00:00Z' },
+  { id: 3, name: 'Leadership', category: 'Community', createdAt: '2024-01-01T00:00:00Z' },
 ];
 
 const createWrapper = () => {

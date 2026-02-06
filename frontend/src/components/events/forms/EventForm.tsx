@@ -138,23 +138,29 @@ export function EventForm({
   ): string | undefined => {
     switch (name) {
       case 'title':
-        if (!value || value.trim().length === 0) return 'Title is required';
-        if (value.length > 200) return 'Title must be 200 characters or less';
+        if (typeof value === 'string') {
+          if (!value || value.trim().length === 0) return 'Title is required';
+          if (value.length > 200) return 'Title must be 200 characters or less';
+        }
         break;
 
       case 'description':
-        if (!value || value.trim().length === 0) return 'Description is required';
-        if (value.length > 2000) return 'Description must be 2000 characters or less';
+        if (typeof value === 'string') {
+          if (!value || value.trim().length === 0) return 'Description is required';
+          if (value.length > 2000) return 'Description must be 2000 characters or less';
+        }
         break;
 
       case 'location':
-        if (!value || value.trim().length === 0) return 'Location is required';
-        if (value.length > 300) return 'Location must be 300 characters or less';
+        if (typeof value === 'string') {
+          if (!value || value.trim().length === 0) return 'Location is required';
+          if (value.length > 300) return 'Location must be 300 characters or less';
+        }
         break;
 
       case 'date': {
         if (!value) return 'Event date is required';
-        const selectedDate = new Date(value);
+        const selectedDate = new Date(value as string | number);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -178,20 +184,24 @@ export function EventForm({
         break;
 
       case 'durationMinutes':
-        // When duration is 0, it means Custom is selected - check customDuration instead
-        if (value === 0) {
-          const customValue = parseInt(formData.customDuration, 10);
-          if (!customValue || customValue <= 0) return 'Duration must be greater than 0';
-          if (customValue > 1440) return 'Duration cannot exceed 24 hours (1440 minutes)';
-        } else {
-          if (!value || value <= 0) return 'Duration must be greater than 0';
-          if (value > 1440) return 'Duration cannot exceed 24 hours (1440 minutes)';
+        if (typeof value === 'number') {
+          // When duration is 0, it means Custom is selected - check customDuration instead
+          if (value === 0) {
+            const customValue = parseInt(formData.customDuration, 10);
+            if (!customValue || customValue <= 0) return 'Duration must be greater than 0';
+            if (customValue > 1440) return 'Duration cannot exceed 24 hours (1440 minutes)';
+          } else {
+            if (!value || value <= 0) return 'Duration must be greater than 0';
+            if (value > 1440) return 'Duration cannot exceed 24 hours (1440 minutes)';
+          }
         }
         break;
 
       case 'capacity':
-        if (!value || value < 1) return 'Capacity must be at least 1';
-        if (value > 10000) return 'Capacity seems unrealistically high';
+        if (typeof value === 'number') {
+          if (!value || value < 1) return 'Capacity must be at least 1';
+          if (value > 10000) return 'Capacity seems unrealistically high';
+        }
         break;
     }
 

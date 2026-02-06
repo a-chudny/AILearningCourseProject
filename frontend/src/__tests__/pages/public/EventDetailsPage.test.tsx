@@ -38,13 +38,13 @@ const mockEvent: EventResponse = {
     {
       id: 1,
       name: 'First Aid',
-      description: 'Basic first aid and CPR skills',
+      category: 'Medical',
       createdAt: '2026-01-01T00:00:00Z',
     },
     {
       id: 2,
       name: 'Driving',
-      description: 'Valid driver license',
+      category: 'Transportation',
       createdAt: '2026-01-01T00:00:00Z',
     },
   ],

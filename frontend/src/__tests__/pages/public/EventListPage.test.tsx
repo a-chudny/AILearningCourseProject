@@ -28,7 +28,7 @@ const mockEventListResponse: EventListResponse = {
         {
           id: 1,
           name: 'First Aid',
-          description: 'First aid skills',
+          category: 'Medical',
           createdAt: '2026-01-01T00:00:00Z',
         },
       ],

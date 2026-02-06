@@ -188,7 +188,7 @@ export function EventFilters({
                       />
                       <span className="text-sm text-gray-700">
                         {skill.name}
-                        <span className="text-xs text-gray-500 ml-1">({skill.description})</span>
+                        <span className="text-xs text-gray-500 ml-1">({skill.category})</span>
                       </span>
                     </label>
                   ))}

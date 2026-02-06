@@ -176,10 +176,10 @@ export default function EditEventPage() {
       location: formData.location,
       startTime,
       durationMinutes,
-      capacity: formData.capacity,
+      capacity: Number(formData.capacity),
       registrationDeadline,
       requiredSkillIds,
-      status: event.status, // Keep current status
+      status: event.status.toString(), // Keep current status
       // Note: Image upload will be handled separately
     };
 
