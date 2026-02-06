@@ -24,7 +24,7 @@ public class UpdateEventRequestValidatorTests
         ImageUrl = null,
         RegistrationDeadline = DateTime.UtcNow.AddDays(5),
         Status = EventStatus.Active,
-        RequiredSkillIds = null
+        RequiredSkillIds = null!
     };
 
     #region Title Tests
@@ -479,7 +479,7 @@ public class UpdateEventRequestValidatorTests
     public void Validate_NullRequiredSkillIds_NoError()
     {
         var model = CreateValidRequest();
-        model.RequiredSkillIds = null;
+        model.RequiredSkillIds = null!;
 
         var result = _validator.TestValidate(model);
 

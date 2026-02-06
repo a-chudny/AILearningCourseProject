@@ -53,20 +53,21 @@ export default function EventDetailsPage() {
   const isRegistrationClosed =
     event?.registrationDeadline && new Date(event.registrationDeadline) < new Date();
   const isFull = event && event.registrationCount >= event.capacity;
-  
+
   // Check if user has all required skills for this event
-  const userSkillIds = user?.skills?.map(s => s.id) || [];
-  const requiredSkillIds = event?.requiredSkills?.map(s => s.id) || [];
-  const hasRequiredSkills = requiredSkillIds.length === 0 || 
-    requiredSkillIds.every(skillId => userSkillIds.includes(skillId));
-  const missingSkills = event?.requiredSkills?.filter(s => !userSkillIds.includes(s.id)) || [];
-  
+  const userSkillIds = user?.skills?.map((s) => s.id) || [];
+  const requiredSkillIds = event?.requiredSkills?.map((s) => s.id) || [];
+  const hasRequiredSkills =
+    requiredSkillIds.length === 0 ||
+    requiredSkillIds.every((skillId) => userSkillIds.includes(skillId));
+  const missingSkills = event?.requiredSkills?.filter((s) => !userSkillIds.includes(s.id)) || [];
+
   // Allow registration for:
   // - Volunteers: standard rules apply
   // - Organizers/Admins: can register for events they don't own
   const isVolunteer = user?.role === UserRole.Volunteer;
   const canOrganizerOrAdminRegister = (isOrganizer || isAdmin) && !isOwner;
-  
+
   const canRegister =
     isAuthenticated &&
     (isVolunteer || canOrganizerOrAdminRegister) &&
@@ -86,16 +87,17 @@ export default function EventDetailsPage() {
       await registerForEvent({ eventId: event.id });
       setIsRegistered(true);
       setShowRegistrationModal(false);
-      
+
       // Refetch event to update registration count
       await refetch();
-      
+
       // Invalidate registrations cache so My Events page shows the new registration
       queryClient.invalidateQueries({ queryKey: ['registrations', 'me'] });
-      
+
       toast.success(`Successfully registered for ${event.title}!`);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to register for event. Please try again.';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to register for event. Please try again.';
       toast.error(errorMessage);
     } finally {
       setIsRegistering(false);
@@ -110,16 +112,17 @@ export default function EventDetailsPage() {
     try {
       await cancelRegistration(event.id);
       setIsRegistered(false);
-      
+
       // Refetch event to update registration count
       await refetch();
-      
+
       // Invalidate registrations cache so My Events page updates
       queryClient.invalidateQueries({ queryKey: ['registrations', 'me'] });
-      
+
       toast.success('Registration cancelled successfully');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to cancel registration. Please try again.';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to cancel registration. Please try again.';
       toast.error(errorMessage);
     } finally {
       setIsCancelling(false);
@@ -163,7 +166,8 @@ export default function EventDetailsPage() {
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    if (hours > 0 && mins > 0) return `${hours} hour${hours > 1 ? 's' : ''} ${mins} minute${mins > 1 ? 's' : ''}`;
+    if (hours > 0 && mins > 0)
+      return `${hours} hour${hours > 1 ? 's' : ''} ${mins} minute${mins > 1 ? 's' : ''}`;
     if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''}`;
     return `${mins} minute${mins > 1 ? 's' : ''}`;
   };
@@ -205,7 +209,9 @@ export default function EventDetailsPage() {
             </svg>
             <h2 className="mt-4 text-xl font-semibold text-red-900">Event not found</h2>
             <p className="mt-2 text-sm text-red-700">
-              {error instanceof Error ? error.message : 'The event you are looking for does not exist.'}
+              {error instanceof Error
+                ? error.message
+                : 'The event you are looking for does not exist.'}
             </p>
             <Link
               to="/events"
@@ -220,7 +226,7 @@ export default function EventDetailsPage() {
   }
 
   const availableSpots = event.capacity - event.registrationCount;
-  const isNearlyFull = !isFull && (event.registrationCount / event.capacity) > 0.8;
+  const isNearlyFull = !isFull && event.registrationCount / event.capacity > 0.8;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -231,18 +237,35 @@ export default function EventDetailsPage() {
           className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
           Back to Events
         </Link>
 
         {/* Event image */}
-        <div className="mb-6 overflow-hidden rounded-lg bg-gray-100" style={{ height: '15vh', minHeight: '150px' }}>
+        <div
+          className="mb-6 overflow-hidden rounded-lg bg-gray-100"
+          style={{ height: '15vh', minHeight: '150px' }}
+        >
           {event.imageUrl ? (
-            <img src={getImageUrl(event.imageUrl)} alt={event.title} className="h-full w-full object-cover" />
+            <img
+              src={getImageUrl(event.imageUrl)}
+              alt={event.title}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="flex h-full items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600">
-              <svg className="h-16 w-16 text-white opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="h-16 w-16 text-white opacity-50"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -259,7 +282,12 @@ export default function EventDetailsPage() {
           {/* Cancelled banner */}
           {isEventCancelled && (
             <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 flex items-start gap-3">
-              <svg className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -270,7 +298,8 @@ export default function EventDetailsPage() {
               <div>
                 <p className="font-semibold text-amber-900">This event has been cancelled</p>
                 <p className="mt-1 text-sm text-amber-800">
-                  This event is no longer accepting registrations and will not take place as scheduled.
+                  This event is no longer accepting registrations and will not take place as
+                  scheduled.
                 </p>
               </div>
             </div>
@@ -279,7 +308,12 @@ export default function EventDetailsPage() {
           {/* Nearly full banner */}
           {!isEventCancelled && !isFull && isNearlyFull && (
             <div className="mb-6 rounded-lg border border-orange-300 bg-orange-50 px-4 py-3 flex items-start gap-3">
-              <svg className="h-6 w-6 text-orange-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="h-6 w-6 text-orange-600 flex-shrink-0 mt-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -288,7 +322,10 @@ export default function EventDetailsPage() {
                 />
               </svg>
               <div>
-                <p className="font-semibold text-orange-900">Almost Full - Only {availableSpots} spot{availableSpots !== 1 ? 's' : ''} remaining!</p>
+                <p className="font-semibold text-orange-900">
+                  Almost Full - Only {availableSpots} spot{availableSpots !== 1 ? 's' : ''}{' '}
+                  remaining!
+                </p>
                 <p className="mt-1 text-sm text-orange-800">
                   This event is filling up fast. Register soon to secure your spot.
                 </p>
@@ -324,7 +361,12 @@ export default function EventDetailsPage() {
           {/* Date, time, and duration */}
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <div className="flex items-start gap-3">
-              <svg className="mt-0.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="mt-0.5 h-5 w-5 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -341,7 +383,12 @@ export default function EventDetailsPage() {
             </div>
 
             <div className="flex items-start gap-3">
-              <svg className="mt-0.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="mt-0.5 h-5 w-5 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -356,14 +403,24 @@ export default function EventDetailsPage() {
             </div>
 
             <div className="flex items-start gap-3">
-              <svg className="mt-0.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="mt-0.5 h-5 w-5 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
                   d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                 />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
               </svg>
               <div>
                 <p className="text-sm font-medium text-gray-500">Location</p>
@@ -379,7 +436,12 @@ export default function EventDetailsPage() {
             </div>
 
             <div className="flex items-start gap-3">
-              <svg className="mt-0.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="mt-0.5 h-5 w-5 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -393,7 +455,9 @@ export default function EventDetailsPage() {
                   {event.registrationCount} / {event.capacity} registered
                   {isFull && <span className="ml-2 text-orange-600 font-semibold">(Full)</span>}
                   {!isFull && (
-                    <span className="ml-2 text-gray-600">({availableSpots} spot{availableSpots !== 1 ? 's' : ''} left)</span>
+                    <span className="ml-2 text-gray-600">
+                      ({availableSpots} spot{availableSpots !== 1 ? 's' : ''} left)
+                    </span>
                   )}
                 </p>
               </div>
@@ -403,7 +467,12 @@ export default function EventDetailsPage() {
           {/* Registration deadline */}
           {event.registrationDeadline && (
             <div className="mt-4 flex items-start gap-3">
-              <svg className="mt-0.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="mt-0.5 h-5 w-5 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -413,8 +482,11 @@ export default function EventDetailsPage() {
               </svg>
               <div>
                 <p className="text-sm font-medium text-gray-500">Registration Deadline</p>
-                <p className={`mt-1 ${isRegistrationClosed ? 'text-red-600 font-semibold' : 'text-gray-900'}`}>
-                  {formatDate(event.registrationDeadline)} at {formatTime(event.registrationDeadline)}
+                <p
+                  className={`mt-1 ${isRegistrationClosed ? 'text-red-600 font-semibold' : 'text-gray-900'}`}
+                >
+                  {formatDate(event.registrationDeadline)} at{' '}
+                  {formatTime(event.registrationDeadline)}
                   {isRegistrationClosed && ' - Registration Closed'}
                 </p>
               </div>
@@ -424,22 +496,21 @@ export default function EventDetailsPage() {
           {/* Description */}
           <div className="mt-8">
             <h2 className="text-lg font-semibold text-gray-900">About this event</h2>
-            <p className="mt-3 whitespace-pre-wrap text-gray-700 leading-relaxed">{event.description}</p>
+            <p className="mt-3 whitespace-pre-wrap text-gray-700 leading-relaxed">
+              {event.description}
+            </p>
           </div>
 
           {/* Required skills */}
           {event.requiredSkills.length > 0 && (
             <div className="mt-8">
               <h2 className="text-lg font-semibold text-gray-900 mb-1">Required Skills</h2>
-              <p className="text-sm text-gray-600 mb-3">Volunteers should have the following skills:</p>
+              <p className="text-sm text-gray-600 mb-3">
+                Volunteers should have the following skills:
+              </p>
               <div className="flex flex-wrap gap-2">
                 {event.requiredSkills.map((skill) => (
-                  <SkillBadge 
-                    key={skill.id} 
-                    skill={skill} 
-                    size="md"
-                    showTooltip={true}
-                  />
+                  <SkillBadge key={skill.id} skill={skill} size="md" showTooltip={true} />
                 ))}
               </div>
             </div>
@@ -449,57 +520,86 @@ export default function EventDetailsPage() {
           <div className="mt-8 flex flex-wrap gap-3">
             {/* Register/Cancel registration buttons for eligible users */}
             {/* Volunteers can always register, Organizers/Admins can register for events they don't own */}
-            {isAuthenticated && (isVolunteer || canOrganizerOrAdminRegister) && !isEventCancelled && (
-              <>
-                {isRegistered ? (
-                  <>
-                    {/* Already registered indicator */}
-                    <div className="flex items-center gap-2 rounded-lg bg-green-50 px-4 py-3 text-green-800">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="font-medium">You are registered for this event</span>
-                    </div>
-                    <button
-                      onClick={handleCancelRegistration}
-                      disabled={isCancelling}
-                      className="rounded-lg border border-red-600 bg-white px-6 py-3 font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {isCancelling ? 'Cancelling...' : 'Cancel Registration'}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => setShowRegistrationModal(true)}
-                      disabled={!canRegister}
-                      className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
-                    >
-                      Register for Event
-                    </button>
-                    {!canRegister && !isEventCancelled && !isRegistered && (
-                      <p className="flex items-center text-sm text-gray-600">
-                        {isOwner && 'You cannot register for your own event'}
-                        {!isOwner && isEventInPast && 'This event has already occurred'}
-                        {!isOwner && isRegistrationClosed && !isEventInPast && 'Registration is closed'}
-                        {!isOwner && isFull && !isRegistrationClosed && !isEventInPast && 'This event is full'}
-                        {!isOwner && !hasRequiredSkills && !isFull && !isRegistrationClosed && !isEventInPast && (
-                          <span className="text-amber-600">
-                            Missing required skills: {missingSkills.map(s => s.name).join(', ')}
-                          </span>
-                        )}
-                      </p>
-                    )}
-                  </>
-                )}
-              </>
-            )}
+            {isAuthenticated &&
+              (isVolunteer || canOrganizerOrAdminRegister) &&
+              !isEventCancelled && (
+                <>
+                  {isRegistered ? (
+                    <>
+                      {/* Already registered indicator */}
+                      <div className="flex items-center gap-2 rounded-lg bg-green-50 px-4 py-3 text-green-800">
+                        <svg
+                          className="h-5 w-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span className="font-medium">You are registered for this event</span>
+                      </div>
+                      <button
+                        onClick={handleCancelRegistration}
+                        disabled={isCancelling}
+                        className="rounded-lg border border-red-600 bg-white px-6 py-3 font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isCancelling ? 'Cancelling...' : 'Cancel Registration'}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setShowRegistrationModal(true)}
+                        disabled={!canRegister}
+                        className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+                      >
+                        Register for Event
+                      </button>
+                      {!canRegister && !isEventCancelled && !isRegistered && (
+                        <p className="flex items-center text-sm text-gray-600">
+                          {isOwner && 'You cannot register for your own event'}
+                          {!isOwner && isEventInPast && 'This event has already occurred'}
+                          {!isOwner &&
+                            isRegistrationClosed &&
+                            !isEventInPast &&
+                            'Registration is closed'}
+                          {!isOwner &&
+                            isFull &&
+                            !isRegistrationClosed &&
+                            !isEventInPast &&
+                            'This event is full'}
+                          {!isOwner &&
+                            !hasRequiredSkills &&
+                            !isFull &&
+                            !isRegistrationClosed &&
+                            !isEventInPast && (
+                              <span className="text-amber-600">
+                                Missing required skills:{' '}
+                                {missingSkills.map((s) => s.name).join(', ')}
+                              </span>
+                            )}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
 
             {/* Message for event owners */}
             {isAuthenticated && isOwner && !isEventCancelled && (
               <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-4 py-3 text-gray-600">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <span className="text-sm">You are the organizer of this event</span>
               </div>

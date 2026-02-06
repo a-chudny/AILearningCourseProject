@@ -15,12 +15,12 @@ export const authService = {
       email,
       password,
     } as LoginRequest);
-    
+
     // Store token in localStorage
     if (response.data.token) {
       localStorage.setItem(AUTH_TOKEN_KEY, response.data.token);
     }
-    
+
     return response.data;
   },
 
@@ -29,12 +29,12 @@ export const authService = {
    */
   async register(data: RegisterRequest): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>('/auth/register', data);
-    
+
     // Store token in localStorage
     if (response.data.token) {
       localStorage.setItem(AUTH_TOKEN_KEY, response.data.token);
     }
-    
+
     return response.data;
   },
 

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { 
-  registerForEvent, 
-  cancelRegistration, 
+import {
+  registerForEvent,
+  cancelRegistration,
   checkUserRegistration,
-  getMyRegistrations 
+  getMyRegistrations,
 } from '@/services/registrationService';
 import { api } from '@/services/api';
 import { RegistrationStatus } from '@/types/enums';
@@ -15,7 +15,7 @@ vi.mock('@/services/api', () => ({
     post: vi.fn(),
     delete: vi.fn(),
   },
-  getErrorMessage: vi.fn((error: any) => error.message || 'An error occurred'),
+  getErrorMessage: vi.fn((error: { message?: string }) => error.message || 'An error occurred'),
 }));
 
 describe('registrationService', () => {
@@ -132,7 +132,9 @@ describe('registrationService', () => {
 
       const result = await registerForEvent({ eventId: 10, notes: 'I can bring supplies' });
 
-      expect(api.post).toHaveBeenCalledWith('/events/10/register', { notes: 'I can bring supplies' });
+      expect(api.post).toHaveBeenCalledWith('/events/10/register', {
+        notes: 'I can bring supplies',
+      });
       expect(result).toEqual(mockResponse);
     });
 

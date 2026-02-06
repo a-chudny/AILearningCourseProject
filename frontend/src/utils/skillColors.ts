@@ -4,11 +4,11 @@
  */
 
 export interface SkillColor {
-  bg: string
-  text: string
-  border: string
-  hoverBg: string
-  hoverBorder: string
+  bg: string;
+  text: string;
+  border: string;
+  hoverBg: string;
+  hoverBorder: string;
 }
 
 const categoryColorMap: Record<string, SkillColor> = {
@@ -96,7 +96,7 @@ const categoryColorMap: Record<string, SkillColor> = {
     hoverBg: 'hover:bg-rose-100',
     hoverBorder: 'hover:border-rose-300',
   },
-}
+};
 
 // Default color for unmapped categories
 const defaultColor: SkillColor = {
@@ -105,18 +105,18 @@ const defaultColor: SkillColor = {
   border: 'border-gray-200',
   hoverBg: 'hover:bg-gray-100',
   hoverBorder: 'hover:border-gray-300',
-}
+};
 
 /**
  * Get color classes for a skill based on its category (description field)
  */
 export function getSkillColor(category: string): SkillColor {
-  return categoryColorMap[category] || defaultColor
+  return categoryColorMap[category] || defaultColor;
 }
 
 /**
  * Get all unique categories from the color map
  */
 export function getAllCategories(): string[] {
-  return Object.keys(categoryColorMap)
+  return Object.keys(categoryColorMap);
 }

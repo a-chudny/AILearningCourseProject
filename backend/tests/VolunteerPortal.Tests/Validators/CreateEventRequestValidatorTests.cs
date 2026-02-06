@@ -451,7 +451,7 @@ public class CreateEventRequestValidatorTests
     {
         // Arrange
         var model = CreateValidRequest();
-        model.RequiredSkillIds = null;
+        model.RequiredSkillIds = null!;
 
         // Act
         var result = _validator.TestValidate(model);

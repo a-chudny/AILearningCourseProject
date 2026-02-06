@@ -1,4 +1,10 @@
-﻿export function Logo({ className = "text-blue-600", size = 64 }: { className?: string; size?: number }) {
+﻿export function Logo({
+  className = 'text-blue-600',
+  size = 64,
+}: {
+  className?: string;
+  size?: number;
+}) {
   return (
     <svg
       width={size}
@@ -33,5 +39,5 @@
         className="text-blue-600"
       />
     </svg>
-  )
+  );
 }

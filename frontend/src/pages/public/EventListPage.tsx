@@ -19,13 +19,16 @@ export default function EventListPage() {
     const status = searchParams.get('status') || undefined;
     const sortBy = searchParams.get('sortBy') || 'StartTime';
     const sortDirection = (searchParams.get('sortDirection') as 'asc' | 'desc') || 'asc';
-    
+
     // Parse skillIds from comma-separated string
     const skillIdsParam = searchParams.get('skillIds');
     const skillIds = skillIdsParam
-      ? skillIdsParam.split(',').map(Number).filter((id) => !isNaN(id))
+      ? skillIdsParam
+          .split(',')
+          .map(Number)
+          .filter((id) => !isNaN(id))
       : undefined;
-    
+
     const matchMySkills = searchParams.get('matchMySkills') === 'true';
 
     return {
@@ -47,7 +50,7 @@ export default function EventListPage() {
   // Update URL when query params change
   useEffect(() => {
     const params = new URLSearchParams();
-    
+
     if (queryParams.page && queryParams.page > 1) {
       params.set('page', queryParams.page.toString());
     }
@@ -220,7 +223,10 @@ export default function EventListPage() {
             </svg>
             <h3 className="mt-4 text-lg font-semibold text-gray-900">No events found</h3>
             <p className="mt-2 text-gray-600">
-              {queryParams.searchTerm || queryParams.status || queryParams.skillIds || queryParams.matchMySkills
+              {queryParams.searchTerm ||
+              queryParams.status ||
+              queryParams.skillIds ||
+              queryParams.matchMySkills
                 ? 'Try adjusting your filters to see more results'
                 : 'Check back later for upcoming volunteer opportunities'}
             </p>

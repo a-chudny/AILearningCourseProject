@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
 
 // Mock window.matchMedia for tests that use media queries
 Object.defineProperty(window, 'matchMedia', {
@@ -13,33 +13,33 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: () => {},
     dispatchEvent: () => false,
   }),
-})
+});
 
 // Mock IntersectionObserver
 class MockIntersectionObserver {
-  observe = () => null
-  disconnect = () => null
-  unobserve = () => null
+  observe = () => null;
+  disconnect = () => null;
+  unobserve = () => null;
 }
 
 Object.defineProperty(window, 'IntersectionObserver', {
   writable: true,
   configurable: true,
   value: MockIntersectionObserver,
-})
+});
 
 // Mock ResizeObserver
 class MockResizeObserver {
-  observe = () => null
-  disconnect = () => null
-  unobserve = () => null
+  observe = () => null;
+  disconnect = () => null;
+  unobserve = () => null;
 }
 
 Object.defineProperty(window, 'ResizeObserver', {
   writable: true,
   configurable: true,
   value: MockResizeObserver,
-})
+});
 
 // Suppress console errors during tests (optional - remove if you want to see them)
 // const originalError = console.error

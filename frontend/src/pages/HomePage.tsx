@@ -150,7 +150,7 @@ export default function HomePage() {
               to="/events"
               className="text-green-600 font-semibold hover:text-green-700 transition-colors"
             >
-              View All 
+              View All
             </Link>
           </div>
 

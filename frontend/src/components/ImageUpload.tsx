@@ -1,34 +1,34 @@
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react'
+import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
 
 export interface ImageUploadProps {
   /**
    * Current image URL (if any)
    */
-  imageUrl?: string
+  imageUrl?: string;
   /**
    * Callback when image is selected
    */
-  onImageSelect: (file: File) => void
+  onImageSelect: (file: File) => void;
   /**
    * Callback when image is removed
    */
-  onImageRemove: () => void
+  onImageRemove: () => void;
   /**
    * Whether upload is in progress
    */
-  isUploading?: boolean
+  isUploading?: boolean;
   /**
    * Whether component is disabled
    */
-  disabled?: boolean
+  disabled?: boolean;
   /**
    * Error message to display
    */
-  error?: string
+  error?: string;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png']
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png'];
 
 /**
  * Image upload component with drag-and-drop support
@@ -41,112 +41,112 @@ export function ImageUpload({
   disabled = false,
   error,
 }: ImageUploadProps) {
-  const [isDragging, setIsDragging] = useState(false)
-  const [validationError, setValidationError] = useState<string>()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isDragging, setIsDragging] = useState(false);
+  const [validationError, setValidationError] = useState<string>();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   /**
    * Validate file
    */
   const validateFile = (file: File): string | undefined => {
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return 'Only JPG and PNG images are allowed'
+      return 'Only JPG and PNG images are allowed';
     }
     if (file.size > MAX_FILE_SIZE) {
-      return 'Image size must be less than 5MB'
+      return 'Image size must be less than 5MB';
     }
-    return undefined
-  }
+    return undefined;
+  };
 
   /**
    * Handle file selection
    */
   const handleFileSelect = (file: File) => {
-    const error = validateFile(file)
+    const error = validateFile(file);
     if (error) {
-      setValidationError(error)
-      return
+      setValidationError(error);
+      return;
     }
-    
-    setValidationError(undefined)
-    onImageSelect(file)
-  }
+
+    setValidationError(undefined);
+    onImageSelect(file);
+  };
 
   /**
    * Handle file input change
    */
   const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      handleFileSelect(file)
+      handleFileSelect(file);
     }
-  }
+  };
 
   /**
    * Handle drag enter
    */
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
     if (!disabled && !isUploading) {
-      setIsDragging(true)
+      setIsDragging(true);
     }
-  }
+  };
 
   /**
    * Handle drag leave
    */
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(false)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
 
   /**
    * Handle drag over
    */
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   /**
    * Handle drop
    */
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(false)
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
 
-    if (disabled || isUploading) return
+    if (disabled || isUploading) return;
 
-    const file = e.dataTransfer.files[0]
+    const file = e.dataTransfer.files[0];
     if (file) {
-      handleFileSelect(file)
+      handleFileSelect(file);
     }
-  }
+  };
 
   /**
    * Handle click on drop zone
    */
   const handleClick = () => {
     if (!disabled && !isUploading) {
-      fileInputRef.current?.click()
+      fileInputRef.current?.click();
     }
-  }
+  };
 
   /**
    * Handle remove image
    */
   const handleRemove = () => {
-    setValidationError(undefined)
-    onImageRemove()
+    setValidationError(undefined);
+    onImageRemove();
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      fileInputRef.current.value = '';
     }
-  }
+  };
 
-  const displayError = error || validationError
+  const displayError = error || validationError;
 
   return (
     <div className="w-full">
@@ -225,9 +225,7 @@ export function ImageUpload({
                 <p className="text-sm text-gray-700 font-medium">
                   Drag and drop an image here, or click to browse
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  JPG or PNG, max 5MB
-                </p>
+                <p className="text-xs text-gray-500 mt-1">JPG or PNG, max 5MB</p>
               </div>
             </>
           )}
@@ -235,9 +233,7 @@ export function ImageUpload({
       )}
 
       {/* Error message */}
-      {displayError && (
-        <p className="mt-2 text-sm text-red-600">{displayError}</p>
-      )}
+      {displayError && <p className="mt-2 text-sm text-red-600">{displayError}</p>}
     </div>
-  )
+  );
 }

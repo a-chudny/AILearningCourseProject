@@ -101,9 +101,7 @@ describe('MyEventsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('No events yet')).toBeInTheDocument();
-      expect(
-        screen.getByText(/You haven't registered for any events/)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/You haven't registered for any events/)).toBeInTheDocument();
     });
   });
 
@@ -152,9 +150,7 @@ describe('MyEventsPage', () => {
   });
 
   it('opens cancel modal when cancel button is clicked', async () => {
-    vi.mocked(registrationService.getMyRegistrations).mockResolvedValue([
-      mockUpcomingRegistration,
-    ]);
+    vi.mocked(registrationService.getMyRegistrations).mockResolvedValue([mockUpcomingRegistration]);
 
     renderWithProviders(<MyEventsPage />);
 
@@ -200,9 +196,7 @@ describe('MyEventsPage', () => {
   });
 
   it('shows browse events link when user has registrations', async () => {
-    vi.mocked(registrationService.getMyRegistrations).mockResolvedValue([
-      mockUpcomingRegistration,
-    ]);
+    vi.mocked(registrationService.getMyRegistrations).mockResolvedValue([mockUpcomingRegistration]);
 
     renderWithProviders(<MyEventsPage />);
 

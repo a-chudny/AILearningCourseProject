@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MagnifyingGlassIcon, FunnelIcon, UserCircleIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
+import {
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  UserCircleIcon,
+  TrashIcon,
+  PencilIcon,
+} from '@heroicons/react/24/outline';
 import { useAdminUsers, useUpdateUserRole, useSoftDeleteUser } from '@/hooks/useAdminUsers';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/utils/toast';
@@ -34,8 +40,10 @@ interface RoleChangeModalProps {
 function RoleChangeModal({ user, isOpen, onClose, onConfirm, isLoading }: RoleChangeModalProps) {
   const [selectedRole, setSelectedRole] = useState<number>(user?.role ?? 0);
 
+  // Sync selectedRole when user prop changes
   useEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing prop to local state is an accepted pattern
       setSelectedRole(user.role);
     }
   }, [user]);
@@ -76,7 +84,8 @@ function RoleChangeModal({ user, isOpen, onClose, onConfirm, isLoading }: RoleCh
           {selectedRole !== user.role && (
             <div className="mb-4 rounded-md bg-yellow-50 border border-yellow-200 p-3">
               <p className="text-sm text-yellow-800">
-                <strong>Warning:</strong> Changing this user's role will affect their permissions immediately.
+                <strong>Warning:</strong> Changing this user's role will affect their permissions
+                immediately.
                 {selectedRole === UserRole.Admin && (
                   <span className="block mt-1">
                     Making this user an Admin will grant them full system access.
@@ -118,7 +127,13 @@ interface DeleteConfirmModalProps {
   isLoading: boolean;
 }
 
-function DeleteConfirmModal({ user, isOpen, onClose, onConfirm, isLoading }: DeleteConfirmModalProps) {
+function DeleteConfirmModal({
+  user,
+  isOpen,
+  onClose,
+  onConfirm,
+  isLoading,
+}: DeleteConfirmModalProps) {
   if (!isOpen || !user) return null;
 
   return (
@@ -134,8 +149,8 @@ function DeleteConfirmModal({ user, isOpen, onClose, onConfirm, isLoading }: Del
             Are you sure you want to delete <strong>{user.name}</strong> ({user.email})?
           </p>
           <p className="mt-2 text-sm text-gray-500">
-            The user will be marked as deleted and will no longer be able to log in. 
-            Their data will be preserved but they won't appear in active user lists.
+            The user will be marked as deleted and will no longer be able to log in. Their data will
+            be preserved but they won't appear in active user lists.
           </p>
         </div>
 
@@ -185,30 +200,28 @@ export default function AdminUsersPage() {
   const updateRoleMutation = useUpdateUserRole();
   const deleteMutation = useSoftDeleteUser();
 
-  // Reset to page 1 when search or filter changes
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, statusFilter]);
-
   // Modal state
   const [roleModalUser, setRoleModalUser] = useState<AdminUserResponse | null>(null);
   const [deleteModalUser, setDeleteModalUser] = useState<AdminUserResponse | null>(null);
 
-  const handleRoleChange = useCallback(async (newRole: number) => {
-    if (!roleModalUser) return;
+  const handleRoleChange = useCallback(
+    async (newRole: number) => {
+      if (!roleModalUser) return;
 
-    try {
-      await updateRoleMutation.mutateAsync({
-        userId: roleModalUser.id,
-        request: { role: newRole },
-      });
-      toast.success(`Role updated successfully for ${roleModalUser.name}`);
-      setRoleModalUser(null);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update role';
-      toast.error(message);
-    }
-  }, [roleModalUser, updateRoleMutation]);
+      try {
+        await updateRoleMutation.mutateAsync({
+          userId: roleModalUser.id,
+          request: { role: newRole },
+        });
+        toast.success(`Role updated successfully for ${roleModalUser.name}`);
+        setRoleModalUser(null);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to update role';
+        toast.error(message);
+      }
+    },
+    [roleModalUser, updateRoleMutation]
+  );
 
   const handleDelete = useCallback(async () => {
     if (!deleteModalUser) return;
@@ -250,9 +263,7 @@ export default function AdminUsersPage() {
           <p className="mt-2 text-gray-600">View and manage all users</p>
         </div>
         <div className="rounded-lg border border-red-200 bg-red-50 p-6">
-          <p className="text-red-800">
-            Failed to load users. Please try again later.
-          </p>
+          <p className="text-red-800">Failed to load users. Please try again later.</p>
           <button
             onClick={() => refetch()}
             className="mt-4 rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700"
@@ -280,7 +291,10 @@ export default function AdminUsersPage() {
             type="text"
             placeholder="Search by name or email..."
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              setPage(1);
+            }}
             className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 text-gray-900 bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -289,7 +303,10 @@ export default function AdminUsersPage() {
           <FunnelIcon className="h-5 w-5 text-gray-500" />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'deleted')}
+            onChange={(e) => {
+              setStatusFilter(e.target.value as 'all' | 'active' | 'deleted');
+              setPage(1);
+            }}
             className="rounded-md border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">All Users</option>
@@ -305,19 +322,34 @@ export default function AdminUsersPage() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                >
                   User
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                >
                   Role
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                >
                   Status
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                >
                   Created
                 </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                >
                   Actions
                 </th>
               </tr>
@@ -363,22 +395,30 @@ export default function AdminUsersPage() {
                     <tr key={user.id} className={user.isDeleted ? 'bg-red-50' : ''}>
                       <td className="whitespace-nowrap px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <UserCircleIcon className={`h-10 w-10 ${user.isDeleted ? 'text-gray-400' : 'text-gray-500'}`} />
+                          <UserCircleIcon
+                            className={`h-10 w-10 ${user.isDeleted ? 'text-gray-400' : 'text-gray-500'}`}
+                          />
                           <div>
-                            <div className={`font-medium ${user.isDeleted ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
+                            <div
+                              className={`font-medium ${user.isDeleted ? 'text-gray-500 line-through' : 'text-gray-900'}`}
+                            >
                               {user.name}
                               {isCurrentUser && (
                                 <span className="ml-2 text-xs text-blue-600">(You)</span>
                               )}
                             </div>
-                            <div className={`text-sm ${user.isDeleted ? 'text-gray-400' : 'text-gray-500'}`}>
+                            <div
+                              className={`text-sm ${user.isDeleted ? 'text-gray-400' : 'text-gray-500'}`}
+                            >
                               {user.email}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
-                        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${getRoleBadgeColor(user.role)}`}
+                        >
                           {user.roleName}
                         </span>
                       </td>
@@ -401,7 +441,13 @@ export default function AdminUsersPage() {
                           <button
                             onClick={() => setRoleModalUser(user)}
                             disabled={isCurrentUser || user.isDeleted}
-                            title={isCurrentUser ? "Cannot change own role" : user.isDeleted ? "Cannot modify deleted user" : "Change role"}
+                            title={
+                              isCurrentUser
+                                ? 'Cannot change own role'
+                                : user.isDeleted
+                                  ? 'Cannot modify deleted user'
+                                  : 'Change role'
+                            }
                             className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <PencilIcon className="h-5 w-5" />
@@ -409,7 +455,13 @@ export default function AdminUsersPage() {
                           <button
                             onClick={() => setDeleteModalUser(user)}
                             disabled={isCurrentUser || user.isDeleted}
-                            title={isCurrentUser ? "Cannot delete yourself" : user.isDeleted ? "Already deleted" : "Delete user"}
+                            title={
+                              isCurrentUser
+                                ? 'Cannot delete yourself'
+                                : user.isDeleted
+                                  ? 'Already deleted'
+                                  : 'Delete user'
+                            }
                             className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <TrashIcon className="h-5 w-5" />
@@ -428,7 +480,8 @@ export default function AdminUsersPage() {
         {data && data.totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-gray-200 bg-white px-6 py-3">
             <div className="text-sm text-gray-700">
-              Showing {((data.page - 1) * data.pageSize) + 1} to {Math.min(data.page * data.pageSize, data.totalCount)} of {data.totalCount} users
+              Showing {(data.page - 1) * data.pageSize + 1} to{' '}
+              {Math.min(data.page * data.pageSize, data.totalCount)} of {data.totalCount} users
             </div>
             <div className="flex gap-2">
               <button

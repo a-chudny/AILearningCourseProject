@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 
 export default function NotFoundPage() {
   return (
@@ -30,5 +30,5 @@ export default function NotFoundPage() {
         </Link>
       </div>
     </div>
-  )
+  );
 }

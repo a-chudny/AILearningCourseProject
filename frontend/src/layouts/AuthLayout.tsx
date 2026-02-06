@@ -1,9 +1,9 @@
-﻿import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
-import { Logo } from '@/assets/Logo'
+﻿import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
+import { Logo } from '@/assets/Logo';
 
 interface AuthLayoutProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
@@ -48,10 +48,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         </div>
 
         {/* Content Card */}
-        <div className="mt-8 bg-white px-6 py-8 shadow-md rounded-lg sm:px-10">
-          {children}
-        </div>
+        <div className="mt-8 bg-white px-6 py-8 shadow-md rounded-lg sm:px-10">{children}</div>
       </div>
     </div>
-  )
+  );
 }

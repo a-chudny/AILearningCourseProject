@@ -1,9 +1,9 @@
-﻿import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
-import { AdminHeader } from '@/components/admin/AdminHeader'
-import { AuthContext } from '@/context/AuthContext'
-import { UserRole } from '@/types/enums'
+﻿import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { AuthContext } from '@/context/AuthContext';
+import { UserRole } from '@/types/enums';
 
 const mockUser = {
   id: 1,
@@ -14,7 +14,7 @@ const mockUser = {
   skills: [],
   createdAt: '2026-01-01T00:00:00Z',
   updatedAt: '2026-01-01T00:00:00Z',
-}
+};
 
 const mockAuthContextValue = {
   user: mockUser,
@@ -25,7 +25,7 @@ const mockAuthContextValue = {
   register: vi.fn(),
   logout: vi.fn(),
   refetchUser: vi.fn(),
-}
+};
 
 describe('AdminHeader', () => {
   it('renders back to main site link', () => {
@@ -35,12 +35,12 @@ describe('AdminHeader', () => {
           <AdminHeader />
         </BrowserRouter>
       </AuthContext>
-    )
+    );
 
-    const backLink = screen.getByText('Back to Main Site')
-    expect(backLink).toBeInTheDocument()
-    expect(backLink.closest('a')).toHaveAttribute('href', '/')
-  })
+    const backLink = screen.getByText('Back to Main Site');
+    expect(backLink).toBeInTheDocument();
+    expect(backLink.closest('a')).toHaveAttribute('href', '/');
+  });
 
   it('displays user name and role', () => {
     render(
@@ -49,9 +49,9 @@ describe('AdminHeader', () => {
           <AdminHeader />
         </BrowserRouter>
       </AuthContext>
-    )
+    );
 
-    expect(screen.getByText('Admin User')).toBeInTheDocument()
-    expect(screen.getByText('Admin')).toBeInTheDocument()
-  })
-})
+    expect(screen.getByText('Admin User')).toBeInTheDocument();
+    expect(screen.getByText('Admin')).toBeInTheDocument();
+  });
+});

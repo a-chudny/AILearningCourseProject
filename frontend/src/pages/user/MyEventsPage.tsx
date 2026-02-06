@@ -115,9 +115,13 @@ export default function MyEventsPage() {
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h2 className="mt-4 text-xl font-semibold text-red-900">Failed to load registrations</h2>
+            <h2 className="mt-4 text-xl font-semibold text-red-900">
+              Failed to load registrations
+            </h2>
             <p className="mt-2 text-sm text-red-700">
-              {error instanceof Error ? error.message : 'An error occurred while loading your events.'}
+              {error instanceof Error
+                ? error.message
+                : 'An error occurred while loading your events.'}
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -162,7 +166,8 @@ export default function MyEventsPage() {
   }
 
   const { upcomingConfirmed, pastConfirmed, cancelled } = groupedRegistrations;
-  const hasAnyEvents = upcomingConfirmed.length > 0 || pastConfirmed.length > 0 || cancelled.length > 0;
+  const hasAnyEvents =
+    upcomingConfirmed.length > 0 || pastConfirmed.length > 0 || cancelled.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -275,7 +280,12 @@ export default function MyEventsPage() {
             >
               <span>Browse more events</span>
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </Link>
           </div>

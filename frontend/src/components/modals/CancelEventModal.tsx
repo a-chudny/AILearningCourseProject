@@ -36,7 +36,12 @@ export function CancelEventModal({
             disabled={isLoading}
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -46,17 +51,13 @@ export function CancelEventModal({
           <p className="text-gray-700">
             Are you sure you want to cancel <span className="font-semibold">"{eventTitle}"</span>?
           </p>
-          <p className="mt-3 text-sm text-gray-600">
-            This action will:
-          </p>
+          <p className="mt-3 text-sm text-gray-600">This action will:</p>
           <ul className="mt-2 text-sm text-gray-600 list-disc list-inside space-y-1">
             <li>Prevent new volunteer registrations</li>
             <li>Mark the event as cancelled</li>
             <li>Keep the event visible with cancelled status</li>
           </ul>
-          <p className="mt-3 text-sm text-amber-600 font-medium">
-            This action cannot be undone.
-          </p>
+          <p className="mt-3 text-sm text-amber-600 font-medium">This action cannot be undone.</p>
         </div>
 
         {/* Footer */}

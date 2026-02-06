@@ -200,11 +200,7 @@ export function EventCard({ event }: EventCardProps) {
           {event.requiredSkills.length > 0 && (
             <div className="mt-4 flex-1">
               <h4 className="text-xs font-semibold text-gray-700 mb-2">Required Skills</h4>
-              <SkillBadgeList 
-                skills={event.requiredSkills} 
-                maxVisible={3}
-                showTooltips={true}
-              />
+              <SkillBadgeList skills={event.requiredSkills} maxVisible={3} showTooltips={true} />
             </div>
           )}
 

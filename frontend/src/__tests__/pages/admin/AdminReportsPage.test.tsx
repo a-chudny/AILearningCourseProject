@@ -48,9 +48,7 @@ describe('AdminReportsPage', () => {
 
   it('renders export descriptions', () => {
     renderPage();
-    expect(
-      screen.getByText(/Export all users with their email, role, skills/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Export all users with their email, role, skills/)).toBeInTheDocument();
     expect(
       screen.getByText(/Export all events including title, date, location/)
     ).toBeInTheDocument();
@@ -65,13 +63,13 @@ describe('AdminReportsPage', () => {
   it('renders information section', () => {
     renderPage();
     expect(screen.getByText('About Exports')).toBeInTheDocument();
-    expect(
-      screen.getByText(/All exports are in Excel format/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/All exports are in Excel format/)).toBeInTheDocument();
   });
 
   it('calls exportUsers when users export button is clicked', async () => {
-    const mockBlob = new Blob(['test'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const mockBlob = new Blob(['test'], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
     vi.mocked(adminService.exportUsers).mockResolvedValue(mockBlob);
 
     renderPage();
@@ -98,7 +96,9 @@ describe('AdminReportsPage', () => {
   });
 
   it('shows success state after successful export', async () => {
-    const mockBlob = new Blob(['test'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const mockBlob = new Blob(['test'], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
     vi.mocked(adminService.exportUsers).mockResolvedValue(mockBlob);
 
     renderPage();
@@ -167,7 +167,9 @@ describe('AdminReportsPage', () => {
   });
 
   it('passes date filters to exportRegistrations', async () => {
-    const mockBlob = new Blob(['test'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const mockBlob = new Blob(['test'], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
     vi.mocked(adminService.exportRegistrations).mockResolvedValue(mockBlob);
 
     renderPage();

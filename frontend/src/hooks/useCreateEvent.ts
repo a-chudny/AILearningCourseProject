@@ -1,23 +1,23 @@
-﻿import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createEvent, type CreateEventRequest } from '@/services/eventService'
-import type { EventFormData } from '@/components/events/forms/EventForm'
+﻿import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createEvent, type CreateEventRequest } from '@/services/eventService';
+import type { EventFormData } from '@/components/events/forms/EventForm';
 
 /**
  * Hook to create a new event
  * Invalidates event queries on success
  */
 export function useCreateEvent() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (formData: EventFormData) => {
       // Combine date and time into ISO 8601 datetime with UTC timezone marker
-      const startTime = `${formData.date}T${formData.time}:00Z`
+      const startTime = `${formData.date}T${formData.time}:00Z`;
 
       // Combine registration deadline if provided
-      let registrationDeadline: string | undefined
+      let registrationDeadline: string | undefined;
       if (formData.registrationDeadlineDate) {
-        registrationDeadline = `${formData.registrationDeadlineDate}T${formData.registrationDeadlineTime || '00:00'}:00Z`
+        registrationDeadline = `${formData.registrationDeadlineDate}T${formData.registrationDeadlineTime || '00:00'}:00Z`;
       }
 
       // Prepare request data
@@ -29,10 +29,10 @@ export function useCreateEvent() {
         durationMinutes: formData.durationMinutes,
         capacity: formData.capacity,
         registrationDeadline,
-        requiredSkillIds: formData.requiredSkills.map(skill => skill.id),
+        requiredSkillIds: formData.requiredSkills.map((skill) => skill.id),
         // imageUrl will be added when image upload API is implemented
         // For now, we can use a mock placeholder or leave it undefined
-      }
+      };
 
       // TODO: When image upload API is ready, upload image first and get URL
       // if (formData.imageFile) {
@@ -40,11 +40,11 @@ export function useCreateEvent() {
       //   requestData.imageUrl = imageUrl
       // }
 
-      return createEvent(requestData)
+      return createEvent(requestData);
     },
     onSuccess: () => {
       // Invalidate and refetch event queries
-      queryClient.invalidateQueries({ queryKey: ['events'] })
+      queryClient.invalidateQueries({ queryKey: ['events'] });
     },
-  })
+  });
 }

@@ -1,94 +1,97 @@
-import { useState, useMemo } from 'react'
-import type { Skill } from '@/types'
+import { useState, useMemo } from 'react';
+import type { Skill } from '@/types';
 
 interface SkillSelectorProps {
   /** All available skills */
-  allSkills: Skill[]
+  allSkills: Skill[];
   /** Currently selected skill IDs */
-  selectedSkillIds: number[]
+  selectedSkillIds: number[];
   /** Callback when selection changes */
-  onChange: (skillIds: number[]) => void
+  onChange: (skillIds: number[]) => void;
   /** Optional label */
-  label?: string
+  label?: string;
 }
 
 /**
  * Multi-select skill selector with category grouping and accordion UI
  * Skills are grouped by category with expand/collapse functionality
  */
-export function SkillSelector({ allSkills, selectedSkillIds, onChange, label }: SkillSelectorProps) {
+export function SkillSelector({
+  allSkills,
+  selectedSkillIds,
+  onChange,
+  label,
+}: SkillSelectorProps) {
   // Group skills by category
   const skillsByCategory = useMemo(() => {
-    const grouped = new Map<string, Skill[]>()
-    
+    const grouped = new Map<string, Skill[]>();
+
     allSkills.forEach((skill) => {
-      const category = skill.category
+      const category = skill.category;
       if (!grouped.has(category)) {
-        grouped.set(category, [])
+        grouped.set(category, []);
       }
-      grouped.get(category)!.push(skill)
-    })
-    
+      grouped.get(category)!.push(skill);
+    });
+
     // Sort categories alphabetically
-    return Array.from(grouped.entries()).sort((a, b) => a[0].localeCompare(b[0]))
-  }, [allSkills])
+    return Array.from(grouped.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [allSkills]);
 
   // Track which categories are expanded (all expanded by default)
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(skillsByCategory.map(([category]) => category))
-  )
+  );
 
   const toggleCategory = (category: string) => {
     setExpandedCategories((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (next.has(category)) {
-        next.delete(category)
+        next.delete(category);
       } else {
-        next.add(category)
+        next.add(category);
       }
-      return next
-    })
-  }
+      return next;
+    });
+  };
 
   const toggleSkill = (skillId: number) => {
     const newSelection = selectedSkillIds.includes(skillId)
       ? selectedSkillIds.filter((id) => id !== skillId)
-      : [...selectedSkillIds, skillId]
-    onChange(newSelection)
-  }
+      : [...selectedSkillIds, skillId];
+    onChange(newSelection);
+  };
 
   const selectAllInCategory = (categorySkills: Skill[]) => {
-    const categorySkillIds = categorySkills.map((s) => s.id)
-    const newSelection = Array.from(new Set([...selectedSkillIds, ...categorySkillIds]))
-    onChange(newSelection)
-  }
+    const categorySkillIds = categorySkills.map((s) => s.id);
+    const newSelection = Array.from(new Set([...selectedSkillIds, ...categorySkillIds]));
+    onChange(newSelection);
+  };
 
   const deselectAllInCategory = (categorySkills: Skill[]) => {
-    const categorySkillIds = new Set(categorySkills.map((s) => s.id))
-    const newSelection = selectedSkillIds.filter((id) => !categorySkillIds.has(id))
-    onChange(newSelection)
-  }
+    const categorySkillIds = new Set(categorySkills.map((s) => s.id));
+    const newSelection = selectedSkillIds.filter((id) => !categorySkillIds.has(id));
+    onChange(newSelection);
+  };
 
   const isCategoryFullySelected = (categorySkills: Skill[]) => {
-    return categorySkills.every((skill) => selectedSkillIds.includes(skill.id))
-  }
+    return categorySkills.every((skill) => selectedSkillIds.includes(skill.id));
+  };
 
   const isCategoryPartiallySelected = (categorySkills: Skill[]) => {
-    const selected = categorySkills.filter((skill) => selectedSkillIds.includes(skill.id))
-    return selected.length > 0 && selected.length < categorySkills.length
-  }
+    const selected = categorySkills.filter((skill) => selectedSkillIds.includes(skill.id));
+    return selected.length > 0 && selected.length < categorySkills.length;
+  };
 
   return (
     <div className="space-y-2">
-      {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-3">{label}</label>
-      )}
+      {label && <label className="block text-sm font-medium text-gray-700 mb-3">{label}</label>}
 
       <div className="border border-gray-300 rounded-lg divide-y divide-gray-200">
         {skillsByCategory.map(([category, skills]) => {
-          const isExpanded = expandedCategories.has(category)
-          const isFullySelected = isCategoryFullySelected(skills)
-          const isPartiallySelected = isCategoryPartiallySelected(skills)
+          const isExpanded = expandedCategories.has(category);
+          const isFullySelected = isCategoryFullySelected(skills);
+          const isPartiallySelected = isCategoryPartiallySelected(skills);
 
           return (
             <div key={category} className="bg-white">
@@ -108,7 +111,12 @@ export function SkillSelector({ allSkills, selectedSkillIds, onChange, label }: 
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                   <span className="font-medium text-gray-900">{category}</span>
                   <span className="text-sm text-gray-500">
@@ -159,7 +167,7 @@ export function SkillSelector({ allSkills, selectedSkillIds, onChange, label }: 
                 </div>
               )}
             </div>
-          )
+          );
         })}
       </div>
 
@@ -171,8 +179,8 @@ export function SkillSelector({ allSkills, selectedSkillIds, onChange, label }: 
           </p>
           <div className="flex flex-wrap gap-2">
             {selectedSkillIds.map((skillId) => {
-              const skill = allSkills.find((s) => s.id === skillId)
-              if (!skill) return null
+              const skill = allSkills.find((s) => s.id === skillId);
+              if (!skill) return null;
               return (
                 <span
                   key={skill.id}
@@ -195,11 +203,11 @@ export function SkillSelector({ allSkills, selectedSkillIds, onChange, label }: 
                     </svg>
                   </button>
                 </span>
-              )
+              );
             })}
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }

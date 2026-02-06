@@ -1,12 +1,12 @@
-import { Link, useRouteError, isRouteErrorResponse } from 'react-router-dom'
+import { Link, useRouteError, isRouteErrorResponse } from 'react-router-dom';
 
 interface ErrorPageProps {
   /** Custom error to display (for non-route errors) */
-  error?: Error | null
+  error?: Error | null;
   /** Custom title */
-  title?: string
+  title?: string;
   /** Custom message */
-  message?: string
+  message?: string;
 }
 
 /**
@@ -14,33 +14,32 @@ interface ErrorPageProps {
  * Can be used as a route error element or standalone error page.
  */
 export default function ErrorPage({ error, title, message }: ErrorPageProps) {
-  const routeError = useRouteError()
+  const routeError = useRouteError();
 
   // Determine error details
-  let errorTitle = title || 'Something went wrong'
-  let errorMessage =
-    message || 'We apologize for the inconvenience. Please try again later.'
-  let statusCode: number | null = null
+  let errorTitle = title || 'Something went wrong';
+  let errorMessage = message || 'We apologize for the inconvenience. Please try again later.';
+  let statusCode: number | null = null;
 
   if (isRouteErrorResponse(routeError)) {
-    statusCode = routeError.status
+    statusCode = routeError.status;
     if (routeError.status === 404) {
-      errorTitle = 'Page Not Found'
-      errorMessage = "Sorry, the page you're looking for doesn't exist."
+      errorTitle = 'Page Not Found';
+      errorMessage = "Sorry, the page you're looking for doesn't exist.";
     } else if (routeError.status === 403) {
-      errorTitle = 'Access Denied'
-      errorMessage = "You don't have permission to view this page."
+      errorTitle = 'Access Denied';
+      errorMessage = "You don't have permission to view this page.";
     } else if (routeError.status === 401) {
-      errorTitle = 'Unauthorized'
-      errorMessage = 'Please log in to access this page.'
+      errorTitle = 'Unauthorized';
+      errorMessage = 'Please log in to access this page.';
     } else if (routeError.status >= 500) {
-      errorTitle = 'Server Error'
-      errorMessage = "We're experiencing technical difficulties. Please try again later."
+      errorTitle = 'Server Error';
+      errorMessage = "We're experiencing technical difficulties. Please try again later.";
     }
   } else if (routeError instanceof Error) {
-    errorMessage = routeError.message
+    errorMessage = routeError.message;
   } else if (error) {
-    errorMessage = error.message
+    errorMessage = error.message;
   }
 
   return (
@@ -170,5 +169,5 @@ export default function ErrorPage({ error, title, message }: ErrorPageProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

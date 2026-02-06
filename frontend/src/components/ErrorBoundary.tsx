@@ -1,20 +1,20 @@
-import { Component, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Component, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 interface ErrorBoundaryProps {
   /** Content to render when no error */
-  children: ReactNode
+  children: ReactNode;
   /** Custom fallback component to render on error */
-  fallback?: ReactNode
+  fallback?: ReactNode;
   /** Whether to show inline error (compact) or full-page error */
-  inline?: boolean
+  inline?: boolean;
   /** Callback when error is caught */
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 interface ErrorBoundaryState {
-  hasError: boolean
-  error: Error | null
+  hasError: boolean;
+  error: Error | null;
 }
 
 /**
@@ -39,64 +39,51 @@ interface ErrorBoundaryState {
  *   <App />
  * </ErrorBoundary>
  */
-export class ErrorBoundary extends Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
-    super(props)
-    this.state = { hasError: false, error: null }
+    super(props);
+    this.state = { hasError: false, error: null };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error }
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     // Log error to console in development
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
 
     // Call custom error handler if provided
-    this.props.onError?.(error, errorInfo)
+    this.props.onError?.(error, errorInfo);
   }
 
   handleRetry = (): void => {
-    this.setState({ hasError: false, error: null })
-  }
+    this.setState({ hasError: false, error: null });
+  };
 
   render(): ReactNode {
     if (this.state.hasError) {
       // Custom fallback provided
       if (this.props.fallback) {
-        return this.props.fallback
+        return this.props.fallback;
       }
 
       // Inline error (compact)
       if (this.props.inline) {
-        return (
-          <InlineErrorFallback
-            error={this.state.error}
-            onRetry={this.handleRetry}
-          />
-        )
+        return <InlineErrorFallback error={this.state.error} onRetry={this.handleRetry} />;
       }
 
       // Full-page error (default)
-      return (
-        <FullPageErrorFallback
-          error={this.state.error}
-          onRetry={this.handleRetry}
-        />
-      )
+      return <FullPageErrorFallback error={this.state.error} onRetry={this.handleRetry} />;
     }
 
-    return this.props.children
+    return this.props.children;
   }
 }
 
 interface ErrorFallbackProps {
-  error: Error | null
-  onRetry: () => void
+  error: Error | null;
+  onRetry: () => void;
 }
 
 /**
@@ -124,12 +111,10 @@ function FullPageErrorFallback({ error, onRetry }: ErrorFallbackProps) {
           </svg>
         </div>
 
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">
-          Something went wrong
-        </h1>
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">Something went wrong</h1>
         <p className="mb-6 text-gray-600">
-          We're sorry, but something unexpected happened. Please try again or
-          return to the home page.
+          We're sorry, but something unexpected happened. Please try again or return to the home
+          page.
         </p>
 
         {/* Error details in development */}
@@ -191,7 +176,7 @@ function FullPageErrorFallback({ error, onRetry }: ErrorFallbackProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 /**
@@ -218,12 +203,8 @@ function InlineErrorFallback({ error, onRetry }: ErrorFallbackProps) {
           </svg>
         </div>
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-red-800">
-            Something went wrong
-          </h3>
-          <p className="mt-1 text-sm text-red-700">
-            This component failed to load.
-          </p>
+          <h3 className="text-sm font-medium text-red-800">Something went wrong</h3>
+          <p className="mt-1 text-sm text-red-700">This component failed to load.</p>
 
           {/* Error details in development */}
           {import.meta.env.DEV && error && (
@@ -255,7 +236,7 @@ function InlineErrorFallback({ error, onRetry }: ErrorFallbackProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default ErrorBoundary
+export default ErrorBoundary;
