@@ -2,7 +2,44 @@
 
 This document tracks all significant development steps in the Volunteer Event Portal project, documenting the AI-assisted development journey toward achieving ~90% AI-generated code.
 
+## Developer Summary
+
+GitHub Copilot functionality within Visual Studio Code was used throughout the work.
+
+### Primary Models Leveraged
+
+The primary models used during development were Claude Sonnet 4.5, Claude Opus 4.5, and Claude Haiku 4.5. In addition, several free-tier models — GPT-4.1, GPT-5 Mini, and Grok Code Fast 1 — were used to a very limited extent.
+
+For the initial setup of instructions and agents, reference configurations from the awesome-copilot repository were used as examples of well-structured instruction design. Custom instructions were then generated directly within the project, incorporating project context and expected agent behavior.
+
+### Model Allocation Strategy
+
+Model allocation was task-dependent:
+
+- **Claude Opus 4.5** was used for complex and high-capacity tasks such as requirements analysis, user story generation, integration test development, authentication implementation and etc.
+- **Claude Sonnet 4.5** was used for medium-complexity tasks.
+- **Claude Haiku 4.5** was used for relatively simple or routine tasks.
+
+### Key Observations
+
+It was observed that for medium and high-complexity work, prompt quality significantly impacted outcomes. Specifically, better results were achieved when prompts explicitly instructed the model to:
+
+- Ask clarifying questions where ambiguity existed
+- Reference the workflow log (i.e., previously implemented changes) to maintain development context and continuity
+
+Manual intervention was occasionally required. In several cases, the model was unable to resolve defects — even when using higher-capacity models — until explicit hints were provided regarding which files were likely involved.
+
+Instruction tuning was also necessary. At times, the agent incorrectly inserted workflow log entries at the beginning of files, disrupting chronological order. After repeated occurrences, the instructions were updated to explicitly require that workflow logs be appended to the end of files.
+
+Free-tier models demonstrated weaker performance in agent mode, even when assigned lower-complexity tasks.
+
+### Conclusion
+
+Overall, GitHub Copilot proved to be an effective development accelerator. However, active oversight remains essential — models should be guided and validated continuously rather than allowed to operate fully autonomously, in order to avoid accumulation of non-functional or inconsistent code.
+
 ---
+
+## Development Entries
 
 ## [2026-01-31 15:45] - GitHub Copilot Instructions Setup
 
@@ -5313,5 +5350,78 @@ Breakdown:
 - **Type Safety**: Strict TypeScript validation prevents future similar errors
 - **Test Infrastructure**: All 334 tests passing provides confidence in codebase
 - **Production Ready**: Build output is optimized and validated
+
+---
+
+## [2026-02-06 21:20] - POL-003: Developer Documentation
+
+### Prompt
+"Now implement POL-003 feature from user stories file. Additionally On readme file in the beggining after project introduction text also add link to workflow file to mentor who will review my work process with AI. Make Readme file not overloaded but meaningful, make info about to how run app locally more compact."
+
+### Context
+- All features implemented, CI/CD pipelines working, 334 frontend + 101 backend tests passing
+- Root README existed but was verbose (~300 lines) with redundant setup instructions
+- No backend or frontend sub-project READMEs existed
+- No environment variables documentation existed
+
+### Files Added/Modified
+- `README.md` - Rewritten: Compact root README with mentor workflow log link, condensed Quick Start
+- `backend/README.md` - Created: Backend API docs with endpoint table, project structure, database setup
+- `frontend/README.md` - Created: Frontend docs with component architecture, scripts, patterns
+- `Docs/ENVIRONMENT.md` - Created: Complete environment variables reference for backend, frontend, Docker
+
+### Generated Code Summary
+- Root README reduced from ~300 to ~120 lines while keeping all essential info
+- Added mentor review callout with direct link to AI workflow log
+- Backend README includes full API endpoint reference table (18 endpoints)
+- Environment docs cover all config settings with tables and security notes
+- Tech stack presented as compact side-by-side table instead of two separate lists
+
+### Result
+✅ Success - POL-003 acceptance criteria met: README with setup instructions, API documentation (Swagger + endpoint table), frontend component documentation, environment variable documentation, database migration guide
+
+### AI Generation Percentage
+Estimate: ~95%
+
+### Learnings/Notes
+- Condensing verbose docs into compact tables improves readability significantly
+- Side-by-side tech stack table is more scannable than separate lists
+- A single Quick Start code block is far more effective than 5 separate subsections
+- Adding mentor review link as a blockquote callout makes it prominent without being intrusive
+
+---
+
+## [2026-02-06 21:39] - README Review & CI/CD Documentation
+
+### Prompt
+"Review readme files, add info about ci/cd actions when it triggered and etc. Add short info about it to main readme, and more detailed to specific readme for frontend and backend. Also double check projects structure, available script, api endpoints and etc. I already found mismatch on backend readme file, there is /api/auth/profile listed, but in project it doesn not exist. Also in main readme add breafly what features are available for users (Roles, businnes features like creating event, cancel by admin, which layers exists, reports generation and so on)"
+
+### Context
+- Previous POL-003 documentation created but needed refinement
+- Backend README had incorrect API endpoint (`/api/auth/profile` doesn't exist)
+- CI/CD pipeline information was missing from all README files
+- Main README lacked feature overview (user roles, business capabilities)
+
+### Files Modified
+- `README.md` - Added Features section (roles table, business features), CI/CD pipelines section, fixed test script name
+- `backend/README.md` - Fixed API endpoints (removed non-existent `/api/auth/profile`, grouped by domain, added 10 missing endpoints), added CI/CD Pipeline section with jobs and features
+- `frontend/README.md` - Added CI/CD Pipeline section with jobs and features, fixed `coverage` script to `test:coverage`
+
+### Generated Code Summary
+- **Main README**: Added user roles table (Volunteer/Organizer/Admin capabilities), 6 business features listed, CI/CD summary table
+- **Backend README**: Reorganized 27 endpoints into 6 categories (Auth, Events, Registrations, Skills, Admin, Reports), added pipeline documentation
+- **Frontend README**: Added pipeline jobs table (Lint, Build, Test), documented CI features (coverage reports, artifacts, Codecov)
+
+### Result
+✅ Success - All READMEs now accurate with CI/CD info and correct API endpoints
+
+### AI Generation Percentage
+Estimate: ~95%
+
+### Learnings/Notes
+- Reviewing actual controller code is essential to document accurate endpoints
+- Grouping API endpoints by domain (Auth, Events, Admin) is more readable than a flat list
+- CI/CD documentation should mention triggers, jobs, and key features like coverage reports
+- Feature overview helps users quickly understand what the app can do
 
 ---

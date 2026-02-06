@@ -1,134 +1,63 @@
 # Volunteer Event Portal
 
-[![Backend CI](https://github.com/YOUR_USERNAME/AILearningCourseProject/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/AILearningCourseProject/actions/workflows/backend-ci.yml)
-[![Frontend CI](https://github.com/YOUR_USERNAME/AILearningCourseProject/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/AILearningCourseProject/actions/workflows/frontend-ci.yml)
+A full-stack web application for managing volunteer events, built as a learning project for the **GitHub Copilot AI training course**. The goal is to achieve ~90% AI-generated code through effective prompting.
 
-A full-stack web application for managing volunteer events, built as a learning project for GitHub Copilot AI training. The goal is to achieve ~90% AI-generated code through effective prompting.
+> **AI Workflow Review**: See the [AI Workflow Log](Docs/ai-workflow-log.md) for a detailed record of the development process, prompts used, and AI generation percentages.
 
-## 🏗️ Tech Stack
+## Features
 
-### Backend
-- **.NET 10** - Web API
-- **PostgreSQL** - Database
-- **Entity Framework Core 9** - ORM
-- **JWT Authentication** - Security
-- **FluentValidation** - Input validation
-- **Swagger/OpenAPI** - API documentation
-- **xUnit** - Testing
+### User Roles
+| Role | Capabilities |
+|------|-------------|
+| **Volunteer** | Browse events, register/cancel registrations, manage profile & skills |
+| **Organizer** | All Volunteer features + create/edit/cancel own events, view registrations |
+| **Admin** | All features + manage users, change roles, delete users, export reports |
 
-### Frontend
-- **React 19.2** - UI framework
-- **TypeScript 5.9** - Type safety
-- **Vite 7.3** - Build tool
-- **Tailwind CSS 4** - Styling
-- **React Router 7** - Navigation
-- **TanStack Query 5** - Server state
-- **Axios** - HTTP client
-- **React Hook Form** - Form handling
-- **Vitest** - Testing
+### Business Features
+- **Event Management**: Create, edit, cancel events with images, required skills, capacity limits, registration deadlines
+- **Registration System**: Register for events, cancel registrations, view registration history
+- **Skill Matching**: 15 predefined skills (First Aid, Teaching, Driving, etc.) for users and events
+- **Admin Dashboard**: Statistics overview, user management, role assignments
+- **Excel Reports**: Export users, events, registrations, and skills data
+- **Soft Delete**: Users and events can be deactivated without data loss
 
-## 📋 Prerequisites
+## Tech Stack
 
-Before running the project locally, ensure you have the following installed:
+| Backend | Frontend |
+|---------|----------|
+| .NET 10 Web API | React 19.2 + TypeScript 5.9 |
+| PostgreSQL 16 + EF Core 9 | Vite 7.3 + Tailwind CSS 4 |
+| JWT Authentication | TanStack Query 5 |
+| FluentValidation + MediatR | React Router 7 + React Hook Form |
+| Swagger / OpenAPI | Vitest + React Testing Library |
+| xUnit | Axios |
 
-- **Node.js 20+** and npm - [Download](https://nodejs.org/)
-- **.NET 10 SDK** - [Download](https://dotnet.microsoft.com/download/dotnet/10.0)
-- **Docker Desktop** - [Download](https://www.docker.com/products/docker-desktop/) (for PostgreSQL)
-- **Git** - [Download](https://git-scm.com/downloads)
+## Prerequisites
 
-## 🚀 Getting Started
+- [Node.js 20+](https://nodejs.org/) · [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) · [Docker Desktop](https://www.docker.com/products/docker-desktop/) · [Git](https://git-scm.com/downloads)
 
-### 1. Clone the Repository
+## Quick Start
 
 ```bash
-git clone <repository-url>
-cd AILearningCourseProject
-```
+# 1. Clone
+git clone <repository-url> && cd AILearningCourseProject
 
-### 2. Database Setup with Docker
+# 2. Start database
+cd backend && docker compose up -d
 
-Start PostgreSQL using Docker Compose:
-
-```bash
-cd backend
-docker compose up -d
-```
-
-This will:
-- Pull and start PostgreSQL 16 in a Docker container
-- Create a database named `volunteer_portal`
-- Expose PostgreSQL on port `5432`
-- Use credentials: `postgres/postgres`
-- Persist data in a Docker volume
-
-Verify the database is running:
-
-```bash
-docker compose ps
-```
-
-To stop the database:
-
-```bash
-docker compose down
-```
-
-To stop and remove all data:
-
-```bash
-docker compose down -v
-```
-
-**Alternative:** If you prefer a local PostgreSQL installation instead of Docker:
-
-Create a PostgreSQL database manually:
-
-```sql
--- Connect to PostgreSQL (use psql or pgAdmin)
-CREATE DATABASE volunteer_portal;
-```
-
-Update the connection string in `backend/src/VolunteerPortal.API/appsettings.Development.json`:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=volunteer_portal;Username=postgres;Password=your_password"
-  }
-}
-```
-
-### 3. Backend Setup
-
-Navigate to the backend API directory:
-
-```bash
+# 3. Run backend (new terminal)
 cd backend/src/VolunteerPortal.API
+dotnet restore && dotnet ef database update && dotnet run
+# → API: http://localhost:5000  |  Swagger: http://localhost:5000/swagger
+
+# 4. Run frontend (new terminal)
+cd frontend && npm install && npm run dev
+# → App: http://localhost:5173
 ```
 
-Restore dependencies:
+**Verify**: Open http://localhost:5173 — the "Backend Connection Status" card should show "Connected Successfully!"
 
-```bash
-dotnet restore
-```
-
-Run Entity Framework migrations to create the database schema:
-
-```bash
-dotnet ef database update
-```
-
-Run the backend API:
-
-```bash
-dotnet run
-```
-
-The API will start at:
-- **HTTP**: http://localhost:5000
-- **Swagger UI**: http://localhost:5000/swagger
-
-**Seeded Test Users**: The application automatically seeds the following test accounts on first run:
+### Seeded Test Accounts
 
 | Role | Email | Password |
 |------|-------|----------|
@@ -136,168 +65,74 @@ The API will start at:
 | Organizer | organizer@volunteer-portal.com | Organizer123! |
 | Volunteer | volunteer@volunteer-portal.com | Volunteer123! |
 
-The database is also seeded with 15 predefined skills (First Aid/CPR, Teaching/Tutoring, Driving, etc.).
+The database is also seeded with 15 predefined skills.
 
-To run backend tests:
-
-```bash
-cd backend
-dotnet test
-```
-
-### 4. Frontend Setup
-
-Open a new terminal and navigate to the frontend directory:
+## Running Tests
 
 ```bash
+# Backend
+cd backend && dotnet test
+
+# Frontend
 cd frontend
+npm run test              # Watch mode
+npm run test:coverage     # With coverage report
 ```
 
-Install dependencies:
-
-```bash
-npm install
-```
-
-Start the development server:
-
-```bash
-npm run dev
-```
-
-The frontend will start at:
-- **Local**: http://localhost:5173
-
-The frontend is configured to proxy API requests to the backend at `http://localhost:5000`.
-
-### 5. Verify Setup
-
-1. Open http://localhost:5173 in your browser
-2. You should see the Volunteer Event Portal homepage
-3. The "Backend Connection Status" card should show "Connected Successfully!" if the backend is running
-
-## 🧪 Running Tests
-
-### Backend Tests
-
-```bash
-cd backend
-dotnet test
-```
-
-### Frontend Tests
-
-```bash
-cd frontend
-npm run test        # Run tests in watch mode
-npm run test:ui     # Run tests with UI
-npm run coverage    # Generate coverage report
-```
-
-## 📝 Available Scripts
-
-### Backend
-
-| Command | Description |
-|---------|-------------|
-| `dotnet run` | Start the API server |
-| `dotnet build` | Build the project |
-| `dotnet test` | Run all tests |
-| `dotnet watch run` | Run with hot reload |
-| `dotnet ef migrations add <name>` | Create a new migration |
-| `dotnet ef database update` | Apply migrations |
-
-### Frontend
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start dev server |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build |
-| `npm run test` | Run tests |
-| `npm run coverage` | Generate coverage report |
-| `npm run lint` | Check code quality |
-| `npm run lint:fix` | Auto-fix linting issues |
-| `npm run format` | Format code with Prettier |
-| `npm run typecheck` | Check TypeScript types |
-
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 AILearningCourseProject/
-├── backend/
-│   ├── src/
-│   │   └── VolunteerPortal.API/        # Main API project
-│   │       ├── Controllers/            # API controllers
-│   │       ├── Data/                   # DbContext
-│   │       ├── Program.cs              # App entry point
-│   │       └── appsettings.json        # Configuration
-│   └── tests/
-│       └── VolunteerPortal.Tests/      # Unit tests
-├── frontend/
-│   ├── src/
-│   │   ├── components/                 # Reusable components
-│   │   ├── pages/                      # Page components
-│   │   ├── services/                   # API client
-│   │   ├── types/                      # TypeScript types
-│   │   └── routes/                     # Route configuration
-│   ├── vite.config.ts                  # Vite configuration
-│   └── package.json                    # Dependencies
-└── Docs/
-    ├── REQUIREMENTS.md                 # Project requirements
-    ├── USER-STORIES.md                 # User stories
-    └── ai-workflow-log.md              # Development log
+├── backend/                    → See backend/README.md
+│   ├── src/VolunteerPortal.API/   # Controllers, Services, Models, Migrations
+│   ├── tests/                     # xUnit tests
+│   └── docker-compose.yml         # PostgreSQL + pgAdmin
+├── frontend/                   → See frontend/README.md
+│   ├── src/                       # Components, Pages, Hooks, Services, Types
+│   └── vitest.config.ts           # Test configuration
+├── Docs/
+│   ├── REQUIREMENTS.md            # Feature specifications
+│   ├── USER-STORIES.md            # Implementation roadmap
+│   ├── ENVIRONMENT.md             # Environment variables reference
+│   └── ai-workflow-log.md         # AI development log
+└── .github/
+    ├── workflows/                 # CI pipelines (backend + frontend)
+    ├── copilot-instructions.md    # AI prompting guidelines
+    └── instructions/              # Coding standards
 ```
 
-## 🔧 Development Workflow
+## Documentation
 
-This project follows an AI-first development approach:
+| Document | Description |
+|----------|-------------|
+| [AI Workflow Log](Docs/ai-workflow-log.md) | Development history & AI usage tracking |
+| [Requirements](Docs/REQUIREMENTS.md) | Feature specifications |
+| [User Stories](Docs/USER-STORIES.md) | Implementation roadmap |
+| [Environment Variables](Docs/ENVIRONMENT.md) | Configuration reference |
+| [Backend README](backend/README.md) | API details, endpoints, database setup |
+| [Frontend README](frontend/README.md) | Component architecture, scripts, patterns |
+| [Copilot Instructions](.github/copilot-instructions.md) | AI prompting guidelines |
+| [Swagger UI](http://localhost:5000/swagger) | Interactive API documentation (when running) |
 
-1. **Start with User Stories** - See `Docs/USER-STORIES.md`
-2. **Generate Code with AI** - Use GitHub Copilot for implementation
-3. **Track Progress** - Log work in `Docs/ai-workflow-log.md`
-4. **Test & Verify** - Ensure quality with automated tests
+## CI/CD Pipelines
 
-## 📚 Documentation
+GitHub Actions workflows run automatically:
 
-- **[Requirements](Docs/REQUIREMENTS.md)** - Feature specifications
-- **[User Stories](Docs/USER-STORIES.md)** - Implementation roadmap
-- **[AI Workflow Log](Docs/ai-workflow-log.md)** - Development history
-- **[GitHub Copilot Instructions](.github/copilot-instructions.md)** - AI prompting guidelines
+| Pipeline | Triggers | Jobs |
+|----------|----------|------|
+| **Backend CI** | Push/PR to `backend/**` | Build, Unit Tests, Integration Tests (with PostgreSQL), Coverage |
+| **Frontend CI** | Push/PR to `frontend/**` | Lint, TypeCheck, Build, Tests with Coverage |
 
-## 🐛 Troubleshooting
+See [backend/README.md](backend/README.md#cicd-pipeline) and [frontend/README.md](frontend/README.md#cicd-pipeline) for details.
 
-### Docker issues
-- Ensure Docker Desktop is running
-- Check container status: `docker compose ps`
-- View logs: `docker compose logs postgres`
-- Restart containers: `docker compose restart`
+## Troubleshooting
 
-### Backend won't start
-- Ensure PostgreSQL container is running: `docker compose ps`
-- Check database connection string in `appsettings.Development.json`
-- Verify .NET 10 SDK is installed: `dotnet --version`
-- Ensure migrations are applied: `dotnet ef database update`
-
-### Frontend can't connect to API
-- Ensure backend is running on port 5000
-- Check Vite proxy configuration in `vite.config.ts`
-- Clear browser cache and reload
-
-### Database migration errors
-- Ensure PostgreSQL container is running: `docker compose ps`
-- Drop and recreate database if needed
-- Verify EF Core tools: `dotnet tool install --global dotnet-ef`
-- Check connection string matches Docker Compose credentials (postgres/postgres)
-
-### Node/npm issues
-- Clear npm cache: `npm cache clean --force`
-- Delete `node_modules` and `package-lock.json`, then run `npm install`
-- Ensure Node.js version is 20+: `node --version`
-
-## 📄 License
-
-This is a learning project for educational purposes.
+| Issue | Solution |
+|-------|----------|
+| Docker not starting | Ensure Docker Desktop is running, then `docker compose ps` |
+| Backend won't start | Check PostgreSQL is running, verify connection string, run `dotnet ef database update` |
+| Frontend can't reach API | Ensure backend runs on port 5000, check Vite proxy config |
+| Database errors | Try `docker compose down -v && docker compose up -d` to reset data |
 
 ## 🤝 Contributing
 
