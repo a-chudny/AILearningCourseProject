@@ -328,7 +328,7 @@ describe('AdminUsersPage', () => {
     await user.click(updateButton);
 
     await waitFor(() => {
-      expect(adminService.updateUserRole).toHaveBeenCalledWith(2, UserRole.Organizer);
+      expect(adminService.updateUserRole).toHaveBeenCalledWith(2, { role: UserRole.Organizer });
       expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('Role updated'));
     });
   });
