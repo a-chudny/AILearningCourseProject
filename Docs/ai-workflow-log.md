@@ -4964,3 +4964,63 @@ Estimate: ~92%
 - Test mocks must exactly match actual API response types
 
 ---
+## [2026-02-06 01:30] - Skill Filter Fix + CI-001 Backend Pipeline
+
+### Prompt
+"Required skill filter doesn't work. After fixing filter, implement CI-001 feature from user stories, ask if something unclear. Backend pipeline should work only if something was changed on backend project"
+
+### Context
+- Event list page had non-functional skill filtering
+- Need to implement CI-001: Backend CI Pipeline with path-based triggering
+- Frontend sending comma-separated array params, ASP.NET Core expects repeated keys
+- All 641 tests passing (334 frontend + 307 backend)
+- Cleanly merged feature/polishing to main (commit 9035d28)
+
+### Files Added/Modified
+- `frontend/src/services/api.ts` - Modified: Added custom paramsSerializer for array handling
+- `.github/workflows/backend-ci.yml` - Created: Complete backend CI pipeline with coverage
+
+### Generated Code Summary
+
+#### Skill Filter Fix
+- Problem: Axios sent `skillIds=15,10` but ASP.NET Core expects `skillIds=15&skillIds=10`
+- Solution: Added custom `paramsSerializer` with URLSearchParams that repeats keys for arrays
+- Result: EventFilters component now properly filters events by selected skills
+
+#### CI-001 Backend Pipeline
+- **Path Filtering**: Only runs on `push` and `pull_request` when `backend/**` files change
+- **Build & Test Job**:
+  - Restores and builds solution
+  - Runs xUnit tests with Coverlet code coverage collection
+  - Uploads test results and coverage artifacts (30-day retention)
+  - Posts coverage summary to PR comments
+  - Optional Codecov integration for tracking over time
+- **Integration Tests Job** (separate, depends on build):
+  - Sets up PostgreSQL 16 service container
+  - Runs integration tests with database
+  - Filters by "FullyQualifiedName~Integration" test category
+  - Uses Testing environment configuration
+- **GitHub Actions Best Practices**:
+  - Uses `setup-dotnet@v4` for SDK management
+  - Proper artifact uploads with retention policies
+  - Service container with health checks
+  - Suppressible token for Codecov
+
+### Result
+✅ Success
+- Skill filter now works correctly (verified with 334 passing tests)
+- CI-001 pipeline created with all acceptance criteria met
+- Path filtering prevents unnecessary runs on frontend-only changes
+- Coverage reporting integrated for quality tracking
+
+### AI Generation Percentage
+Estimate: ~88%
+
+### Learnings/Notes
+- ASP.NET Core model binding expects repeated query parameters for arrays, not comma-separated
+- GitHub Actions `paramsSerializer` is crucial for cross-platform API compatibility
+- Path filters in workflows significantly reduce CI costs and execution time
+- Separate jobs for unit vs integration tests allow parallel execution
+- Service containers simplify test environment setup in CI
+
+---

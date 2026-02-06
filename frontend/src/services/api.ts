@@ -36,6 +36,23 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Serialize arrays as repeated keys for ASP.NET Core compatibility
+  // e.g., skillIds: [1, 2] becomes ?skillIds=1&skillIds=2
+  paramsSerializer: {
+    serialize: (params) => {
+      const searchParams = new URLSearchParams();
+      for (const key in params) {
+        const value = params[key];
+        if (value === undefined || value === null) continue;
+        if (Array.isArray(value)) {
+          value.forEach((v) => searchParams.append(key, String(v)));
+        } else {
+          searchParams.append(key, String(value));
+        }
+      }
+      return searchParams.toString();
+    },
+  },
 })
 
 // Request interceptor for adding auth token
