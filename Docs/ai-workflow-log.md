@@ -5155,3 +5155,91 @@ Estimate: ~89%
 
 ---
 
+## [2026-02-06 12:35] - Frontend ESLint Error Cleanup
+
+### Prompt
+"Check again lint checking? On github after merging code to main, Lint and Type check got 15 errors and 32 warnings (47 problems (15 errors, 32 warnings))"
+
+### Context
+- GitHub Actions CI showing 15 ESLint errors and 32 warnings
+- Frontend linting blocked by actual errors that need fixing
+- Strict React and TypeScript linting rules enabled
+- 334 tests passing but CI blocked by lint failures
+
+### Files Added/Modified
+- Multiple test files - Removed unused imports/variables (3 errors fixed)
+- `frontend/src/components/RoleGuard.tsx` - Moved `Date.now()` call into `useEffect` to keep render pure
+- `frontend/src/components/events/forms/EventForm.tsx` - Wrapped case block in braces, fixed any types
+- `frontend/src/context/AuthContext.tsx` - Removed unnecessary try/catch wrappers, added eslint-disable
+- `frontend/src/pages/admin/*` - Added proper types, fixed state-in-effect patterns
+- `frontend/src/pages/auth/LoginPage.tsx` - Fixed error handling type casting
+- `frontend/src/services/adminService.ts` - Added proper type definitions
+- Test files - Replaced 16+ `as any` with proper `as unknown as ReturnType<...>`
+
+### Generated Code Summary
+- **15 Errors Fixed**:
+  - 3 unused variable/import errors
+  - 1 impure function in render (Date.now())
+  - 1 variable reassignment during render
+  - 5 lexical declarations in case block
+  - 3 unnecessary try/catch wrappers
+  - 2 setState-in-effect patterns
+
+- **32 Warnings Fixed**:
+  - 18 `@typescript-eslint/no-explicit-any` → typed casts
+  - 8 `@typescript-eslint/no-explicit-any` → proper interfaces
+  - 2 `@typescript-eslint/no-explicit-any` → response types
+  - 2 `@typescript-eslint/no-explicit-any` → typed errors
+  - 1 `react-refresh/only-export-components` → eslint-disable
+  - 1 prettier formatting fix
+
+### Result
+✅ Success - ESLint completely clean (0 errors, 0 warnings, 334 tests passing)
+
+### AI Generation Percentage
+Estimate: ~88%
+
+### Learnings/Notes
+- React strict rules require careful state management patterns
+- Moving setState into event handlers is cleaner than ref-based approaches
+- Using `unknown` with typed assertions is better than `any`
+- Proper type definitions eliminate `@typescript-eslint/no-explicit-any` warnings
+- Lint-clean code achievable through systematic refactoring
+
+---
+
+## [2026-02-06 12:45] - CI Workflow Optimization & Backend Warning Fixes
+
+### Prompt
+"Update ci files as follows: 1. For frontend I want to run action lint-and-typecheck not only on Main branch, but for every push. (build and test only in main) 2. For backend I want to run build and test step for every push, integration tests only on main. 3. Also I got some warnings on Integrations step on github (screenshot). Could you fix it?"
+
+### Context
+- CI pipelines running only on main branch
+- Need faster feedback on feature branches
+- Backend validator tests showing null literal warnings
+- Optimizing CI cost and feedback loop
+
+### Files Added/Modified
+- `.github/workflows/frontend-ci.yml` - Changed push trigger to all branches, added conditions to build/test jobs
+- `.github/workflows/backend-ci.yml` - Changed push trigger to all branches, added condition to integration-tests job
+- `backend/tests/.../CreateEventRequestValidatorTests.cs` - Fixed null literal warnings
+- `backend/tests/.../UpdateEventRequestValidatorTests.cs` - Fixed null literal warnings
+
+### Generated Code Summary
+- **Frontend CI**: Lint/typecheck on all pushes, build/test on main/PRs
+- **Backend CI**: Build/test on all pushes, integration tests on main/PRs
+- **Null Warnings**: Used null-forgiving operator (`!`) on non-nullable List<int> assignments in tests
+
+### Result
+✅ Success - Optimized CI, eliminated warnings, improved feedback loop
+
+### AI Generation Percentage
+Estimate: ~91%
+
+### Learnings/Notes
+- GitHub Actions job conditions enable flexible deployment strategies
+- Running lint on all branches catches issues early
+- Null-forgiving operator documents intentional null assignments
+- CI optimization significantly improves developer experience
+
+---

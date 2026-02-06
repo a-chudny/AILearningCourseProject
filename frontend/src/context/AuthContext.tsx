@@ -21,6 +21,7 @@ export interface AuthContextType {
 /**
  * Authentication context
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
@@ -78,20 +79,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Note: Navigation is handled by the calling component to support return URLs
    */
   const login = useCallback(async (email: string, password: string) => {
-    try {
-      const response = await authService.login(email, password);
-      // Set auth state - use a callback to ensure state is updated
-      setToken(response.token);
-      setUser(response.user);
+    const response = await authService.login(email, password);
+    // Set auth state - use a callback to ensure state is updated
+    setToken(response.token);
+    setUser(response.user);
 
-      // Small delay to ensure React processes the state updates
-      // This prevents navigation happening before state propagates
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      // Note: No automatic navigation - let calling component handle redirect
-    } catch (error) {
-      // Re-throw error to be handled by the component
-      throw error;
-    }
+    // Small delay to ensure React processes the state updates
+    // This prevents navigation happening before state propagates
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    // Note: No automatic navigation - let calling component handle redirect
   }, []);
 
   /**
@@ -108,9 +104,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Use window.location.href for full page reload like login does
       // This ensures all state is fresh and components re-render properly
       window.location.href = '/';
-    } catch (error) {
-      // Re-throw error to be handled by the component
-      throw error;
     } finally {
       setIsLoading(false);
     }

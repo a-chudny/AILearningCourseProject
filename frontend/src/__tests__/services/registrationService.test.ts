@@ -15,7 +15,7 @@ vi.mock('@/services/api', () => ({
     post: vi.fn(),
     delete: vi.fn(),
   },
-  getErrorMessage: vi.fn((error: any) => error.message || 'An error occurred'),
+  getErrorMessage: vi.fn((error: { message?: string }) => error.message || 'An error occurred'),
 }));
 
 describe('registrationService', () => {

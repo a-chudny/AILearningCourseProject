@@ -151,71 +151,66 @@ export default function EditEventPage() {
   const handleSubmit = async (formData: EventFormData) => {
     if (!event) return;
 
-    try {
-      // Combine date and time into ISO 8601 format with UTC timezone marker
-      const startTime = `${formData.date}T${formData.time}:00Z`;
+    // Combine date and time into ISO 8601 format with UTC timezone marker
+    const startTime = `${formData.date}T${formData.time}:00Z`;
 
-      // Combine registration deadline if provided
-      let registrationDeadline: string | undefined;
-      if (formData.registrationDeadlineDate && formData.registrationDeadlineTime) {
-        registrationDeadline = `${formData.registrationDeadlineDate}T${formData.registrationDeadlineTime}:00Z`;
-      }
-
-      // Get duration in minutes
-      const durationMinutes =
-        formData.durationMinutes === 0
-          ? parseInt(formData.customDuration, 10)
-          : formData.durationMinutes;
-
-      // Extract skill IDs
-      const requiredSkillIds = formData.requiredSkills.map((skill: Skill) => skill.id);
-
-      // Prepare update request
-      const updateRequest: UpdateEventRequest = {
-        title: formData.title,
-        description: formData.description,
-        location: formData.location,
-        startTime,
-        durationMinutes,
-        capacity: formData.capacity,
-        registrationDeadline,
-        requiredSkillIds,
-        status: event.status, // Keep current status
-        // Note: Image upload will be handled separately
-      };
-
-      // Submit update
-      await updateEvent.mutateAsync({ id: eventId, data: updateRequest });
-
-      // Handle image upload/deletion
-      if (formData.imageFile) {
-        // New image selected - upload it
-        try {
-          await uploadEventImage(eventId, formData.imageFile);
-        } catch (imageError) {
-          console.error('Failed to upload image:', imageError);
-          // Don't fail the whole operation if just image upload fails
-        }
-      } else if (!formData.imagePreview && event.imageUrl) {
-        // Image was removed - delete it
-        try {
-          await deleteEventImage(eventId);
-        } catch (imageError) {
-          console.error('Failed to delete image:', imageError);
-        }
-      }
-
-      // Clear unsaved changes flag
-      setHasUnsavedChanges(false);
-
-      // Redirect to event details with success message
-      navigate(`/events/${eventId}`, {
-        state: { successMessage: 'Event updated successfully!' },
-      });
-    } catch (error) {
-      // Re-throw to let EventForm handle error display
-      throw error;
+    // Combine registration deadline if provided
+    let registrationDeadline: string | undefined;
+    if (formData.registrationDeadlineDate && formData.registrationDeadlineTime) {
+      registrationDeadline = `${formData.registrationDeadlineDate}T${formData.registrationDeadlineTime}:00Z`;
     }
+
+    // Get duration in minutes
+    const durationMinutes =
+      formData.durationMinutes === 0
+        ? parseInt(formData.customDuration, 10)
+        : formData.durationMinutes;
+
+    // Extract skill IDs
+    const requiredSkillIds = formData.requiredSkills.map((skill: Skill) => skill.id);
+
+    // Prepare update request
+    const updateRequest: UpdateEventRequest = {
+      title: formData.title,
+      description: formData.description,
+      location: formData.location,
+      startTime,
+      durationMinutes,
+      capacity: formData.capacity,
+      registrationDeadline,
+      requiredSkillIds,
+      status: event.status, // Keep current status
+      // Note: Image upload will be handled separately
+    };
+
+    // Submit update - errors will propagate to EventForm's error handler
+    await updateEvent.mutateAsync({ id: eventId, data: updateRequest });
+
+    // Handle image upload/deletion
+    if (formData.imageFile) {
+      // New image selected - upload it
+      try {
+        await uploadEventImage(eventId, formData.imageFile);
+      } catch (imageError) {
+        console.error('Failed to upload image:', imageError);
+        // Don't fail the whole operation if just image upload fails
+      }
+    } else if (!formData.imagePreview && event.imageUrl) {
+      // Image was removed - delete it
+      try {
+        await deleteEventImage(eventId);
+      } catch (imageError) {
+        console.error('Failed to delete image:', imageError);
+      }
+    }
+
+    // Clear unsaved changes flag
+    setHasUnsavedChanges(false);
+
+    // Redirect to event details with success message
+    navigate(`/events/${eventId}`, {
+      state: { successMessage: 'Event updated successfully!' },
+    });
   };
 
   /**

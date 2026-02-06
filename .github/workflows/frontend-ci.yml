@@ -2,7 +2,7 @@ name: Frontend CI
 
 on:
   push:
-    branches: [main]
+    branches: ['**']
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend-ci.yml'
@@ -47,6 +47,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: lint-and-typecheck
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     defaults:
       run:
         working-directory: frontend
@@ -79,6 +80,7 @@ jobs:
     name: Test with Coverage
     runs-on: ubuntu-latest
     needs: lint-and-typecheck
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     defaults:
       run:
         working-directory: frontend

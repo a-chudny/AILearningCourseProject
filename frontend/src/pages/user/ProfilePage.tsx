@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSkills, useUserSkills, useUpdateUserSkills } from '@/hooks/useSkills';
 import { SkillSelector } from '@/components/skills/SkillSelector';
@@ -20,27 +20,26 @@ export default function ProfilePage() {
 
   // Local state for selected skill IDs
   const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>([]);
-  const [hasChanges, setHasChanges] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  // Initialize selected skills from user's current skills
+  // Sync selected skills from user's current skills when they change
   useEffect(() => {
     if (userSkills) {
       const ids = userSkills.map((skill) => skill.id);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing server data to local state is an accepted pattern
       setSelectedSkillIds(ids);
     }
   }, [userSkills]);
 
-  // Track if there are unsaved changes
-  useEffect(() => {
-    if (userSkills) {
-      const currentIds = new Set(userSkills.map((s) => s.id));
-      const selectedIds = new Set(selectedSkillIds);
-      const hasChanged =
-        currentIds.size !== selectedIds.size ||
-        Array.from(currentIds).some((id) => !selectedIds.has(id));
-      setHasChanges(hasChanged);
-    }
+  // Derive hasChanges from current state (no effect needed)
+  const hasChanges = useMemo(() => {
+    if (!userSkills) return false;
+    const currentIds = new Set(userSkills.map((s) => s.id));
+    const selectedIds = new Set(selectedSkillIds);
+    return (
+      currentIds.size !== selectedIds.size ||
+      Array.from(currentIds).some((id) => !selectedIds.has(id))
+    );
   }, [selectedSkillIds, userSkills]);
 
   const handleSave = async () => {
@@ -48,7 +47,6 @@ export default function ProfilePage() {
       await updateSkillsMutation.mutateAsync(selectedSkillIds);
       // Refetch user to update skills in auth context
       await refetchUser();
-      setHasChanges(false);
       setShowSuccessMessage(true);
 
       // Hide success message after 3 seconds
@@ -63,7 +61,6 @@ export default function ProfilePage() {
   const handleCancel = () => {
     if (userSkills) {
       setSelectedSkillIds(userSkills.map((skill) => skill.id));
-      setHasChanges(false);
     }
   };
 

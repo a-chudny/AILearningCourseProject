@@ -132,7 +132,10 @@ export function EventForm({
   };
 
   // Validate single field
-  const validateField = (name: keyof EventFormData, value: any): string | undefined => {
+  const validateField = (
+    name: keyof EventFormData,
+    value: EventFormData[keyof EventFormData]
+  ): string | undefined => {
     switch (name) {
       case 'title':
         if (!value || value.trim().length === 0) return 'Title is required';
@@ -149,7 +152,7 @@ export function EventForm({
         if (value.length > 300) return 'Location must be 300 characters or less';
         break;
 
-      case 'date':
+      case 'date': {
         if (!value) return 'Event date is required';
         const selectedDate = new Date(value);
         const today = new Date();
@@ -168,6 +171,7 @@ export function EventForm({
 
         if (selectedDate < today) return 'Event date must be in the future';
         break;
+      }
 
       case 'time':
         if (!value) return 'Event time is required';
@@ -248,7 +252,7 @@ export function EventForm({
         // Single click confirmed - open picker
         if ('showPicker' in HTMLInputElement.prototype) {
           try {
-            (input as any).showPicker();
+            (input as HTMLInputElement).showPicker();
           } catch {
             input.focus();
           }
@@ -519,10 +523,12 @@ export function EventForm({
 
     try {
       await onSubmit(formData);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to submit form. Please try again.';
       setErrors((prev) => ({
         ...prev,
-        submit: error.message || 'Failed to submit form. Please try again.',
+        submit: errorMessage,
       }));
     }
   };

@@ -17,6 +17,30 @@ import {
 import { toast } from '@/utils/toast';
 import type { AdminEventsQueryParams } from '@/services/adminService';
 
+// Type definitions for admin event data
+interface AdminEventItem {
+  id: number;
+  title: string;
+  organizerName: string;
+  startTime: string;
+  durationMinutes: number;
+  registrationCount: number;
+  capacity: number;
+  status: number;
+  isDeleted: boolean;
+}
+
+interface AdminRegistration {
+  id: number;
+  user: {
+    name: string;
+    email: string;
+    phoneNumber?: string;
+  };
+  status: number;
+  registeredAt: string;
+}
+
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -35,7 +59,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 interface DeleteConfirmModalProps {
-  event: any | null;
+  event: AdminEventItem | null;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -93,7 +117,7 @@ function DeleteConfirmModal({
 }
 
 interface CancelConfirmModalProps {
-  event: any | null;
+  event: AdminEventItem | null;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -199,7 +223,7 @@ function RegistrationsModal({ eventId, eventTitle, isOpen, onClose }: Registrati
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {registrations.map((reg: any) => (
+                  {registrations.map((reg: AdminRegistration) => (
                     <tr key={reg.id}>
                       <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
                         {reg.user.name}
@@ -269,16 +293,12 @@ export default function AdminEventsPage() {
   const deleteMutation = useSoftDeleteEvent();
   const cancelMutation = useCancelEventMutation();
 
-  const [deleteModalEvent, setDeleteModalEvent] = useState<any | null>(null);
-  const [cancelModalEvent, setCancelModalEvent] = useState<any | null>(null);
+  const [deleteModalEvent, setDeleteModalEvent] = useState<AdminEventItem | null>(null);
+  const [cancelModalEvent, setCancelModalEvent] = useState<AdminEventItem | null>(null);
   const [registrationsModalEvent, setRegistrationsModalEvent] = useState<{
     id: number;
     title: string;
   } | null>(null);
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, statusFilter]);
 
   const handleDelete = async () => {
     if (!deleteModalEvent) return;
@@ -367,7 +387,10 @@ export default function AdminEventsPage() {
             type="text"
             placeholder="Search by title..."
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              setPage(1);
+            }}
             className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 text-gray-900 bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -376,7 +399,10 @@ export default function AdminEventsPage() {
           <FunnelIcon className="h-5 w-5 text-gray-500" />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
             className="rounded-md border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">All Events</option>
@@ -442,7 +468,7 @@ export default function AdminEventsPage() {
                   </td>
                 </tr>
               ) : (
-                data?.events?.map((event: any) => {
+                data?.events?.map((event: AdminEventItem) => {
                   const isDeleted = event.isDeleted;
                   const isCancelled = event.status === 1;
 

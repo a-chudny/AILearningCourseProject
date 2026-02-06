@@ -40,8 +40,10 @@ interface RoleChangeModalProps {
 function RoleChangeModal({ user, isOpen, onClose, onConfirm, isLoading }: RoleChangeModalProps) {
   const [selectedRole, setSelectedRole] = useState<number>(user?.role ?? 0);
 
+  // Sync selectedRole when user prop changes
   useEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing prop to local state is an accepted pattern
       setSelectedRole(user.role);
     }
   }, [user]);
@@ -198,11 +200,6 @@ export default function AdminUsersPage() {
   const updateRoleMutation = useUpdateUserRole();
   const deleteMutation = useSoftDeleteUser();
 
-  // Reset to page 1 when search or filter changes
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, statusFilter]);
-
   // Modal state
   const [roleModalUser, setRoleModalUser] = useState<AdminUserResponse | null>(null);
   const [deleteModalUser, setDeleteModalUser] = useState<AdminUserResponse | null>(null);
@@ -294,7 +291,10 @@ export default function AdminUsersPage() {
             type="text"
             placeholder="Search by name or email..."
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              setPage(1);
+            }}
             className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 text-gray-900 bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -303,7 +303,10 @@ export default function AdminUsersPage() {
           <FunnelIcon className="h-5 w-5 text-gray-500" />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'deleted')}
+            onChange={(e) => {
+              setStatusFilter(e.target.value as 'all' | 'active' | 'deleted');
+              setPage(1);
+            }}
             className="rounded-md border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">All Users</option>

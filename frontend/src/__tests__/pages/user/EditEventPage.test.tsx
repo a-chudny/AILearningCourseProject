@@ -116,12 +116,12 @@ describe('EditEventPage', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useEvent>);
 
     vi.spyOn(useEventsModule, 'useUpdateEvent').mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useUpdateEvent>);
 
     const { container } = renderWithProviders(<EditEventPage />);
 
@@ -137,12 +137,12 @@ describe('EditEventPage', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useEvent>);
 
     vi.spyOn(useEventsModule, 'useUpdateEvent').mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useUpdateEvent>);
 
     renderWithProviders(<EditEventPage />);
 
@@ -162,12 +162,12 @@ describe('EditEventPage', () => {
       isError: true,
       error: new Error('Not found'),
       refetch: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useEvent>);
 
     vi.spyOn(useEventsModule, 'useUpdateEvent').mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useUpdateEvent>);
 
     renderWithProviders(<EditEventPage />);
 
@@ -183,12 +183,12 @@ describe('EditEventPage', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useEvent>);
 
     vi.spyOn(useEventsModule, 'useUpdateEvent').mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useUpdateEvent>);
 
     renderWithProviders(<EditEventPage />, {
       authContext: { ...mockAuthContext, user: mockOtherUser },
@@ -206,12 +206,12 @@ describe('EditEventPage', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useEvent>);
 
     vi.spyOn(useEventsModule, 'useUpdateEvent').mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useUpdateEvent>);
 
     renderWithProviders(<EditEventPage />, {
       authContext: { ...mockAuthContext, user: mockAdminUser },
@@ -231,12 +231,12 @@ describe('EditEventPage', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useEvent>);
 
     vi.spyOn(useEventsModule, 'useUpdateEvent').mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useUpdateEvent>);
 
     renderWithProviders(<EditEventPage />);
 
@@ -257,12 +257,12 @@ describe('EditEventPage', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useEvent>);
 
     vi.spyOn(useEventsModule, 'useUpdateEvent').mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useUpdateEvent>);
 
     renderWithProviders(<EditEventPage />);
 
@@ -280,12 +280,12 @@ describe('EditEventPage', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useEvent>);
 
     vi.spyOn(useEventsModule, 'useUpdateEvent').mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useEventsModule.useUpdateEvent>);
 
     const { container } = renderWithProviders(<EditEventPage />);
 

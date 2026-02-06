@@ -29,9 +29,14 @@ export default function CreateEventPage() {
           eventId: createdEvent.id,
         },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Error will be handled by EventForm's error state
-      throw new Error(error.response?.data?.message || 'Failed to create event');
+      const message =
+        error && typeof error === 'object' && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message ||
+            'Failed to create event'
+          : 'Failed to create event';
+      throw new Error(message);
     }
   };
 

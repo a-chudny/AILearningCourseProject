@@ -110,20 +110,64 @@ export interface AdminEventsQueryParams {
 }
 
 /**
+ * Admin event item in list response
+ */
+export interface AdminEventResponse {
+  id: number;
+  title: string;
+  organizerName: string;
+  startTime: string;
+  durationMinutes: number;
+  registrationCount: number;
+  capacity: number;
+  status: number;
+  isDeleted: boolean;
+}
+
+/**
+ * Admin event list response
+ */
+export interface AdminEventListResponse {
+  events: AdminEventResponse[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
+/**
  * Get paginated list of events for admin management
  * Requires Admin role authentication
  */
-export async function getAdminEvents(params?: AdminEventsQueryParams): Promise<any> {
-  const response = await api.get('/events', { params });
+export async function getAdminEvents(
+  params?: AdminEventsQueryParams
+): Promise<AdminEventListResponse> {
+  const response = await api.get<AdminEventListResponse>('/events', { params });
   return response.data;
+}
+
+/**
+ * Admin registration response
+ */
+export interface AdminRegistrationResponse {
+  id: number;
+  user: {
+    name: string;
+    email: string;
+    phoneNumber?: string;
+  };
+  status: number;
+  registeredAt: string;
 }
 
 /**
  * Get registrations for a specific event
  * Requires Admin or Organizer role authentication
  */
-export async function getEventRegistrations(eventId: number): Promise<any[]> {
-  const response = await api.get(`/events/${eventId}/registrations`);
+export async function getEventRegistrations(eventId: number): Promise<AdminRegistrationResponse[]> {
+  const response = await api.get<AdminRegistrationResponse[]>(`/events/${eventId}/registrations`);
   return response.data;
 }
 

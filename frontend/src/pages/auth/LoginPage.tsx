@@ -22,7 +22,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get return URL from location state (from ProtectedRoute redirect)
-  const from = (location.state as any)?.from?.pathname || '/';
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
 
   // Redirect authenticated users away from login page
   useEffect(() => {
@@ -93,16 +93,17 @@ export default function LoginPage() {
       // Navigate directly after successful login
       // Using window.location for a full page reload to ensure all state is fresh
       window.location.href = from;
-    } catch (error: any) {
+    } catch (error: unknown) {
       let errorMessage = 'An error occurred. Please try again.';
 
       // Handle 401 Unauthorized (invalid credentials)
-      if (error.response?.status === 401) {
+      const axiosError = error as { response?: { status?: number }; message?: string };
+      if (axiosError.response?.status === 401) {
         errorMessage = 'Invalid email or password. Please check your credentials and try again.';
       }
       // Handle other errors
-      else if (error.message) {
-        errorMessage = error.message;
+      else if (axiosError.message) {
+        errorMessage = axiosError.message;
       }
 
       setErrors({ general: errorMessage });
