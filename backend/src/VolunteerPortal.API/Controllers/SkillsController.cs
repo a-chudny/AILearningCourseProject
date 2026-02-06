@@ -1,45 +1,61 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using VolunteerPortal.API.Application.Skills.Commands;
+using VolunteerPortal.API.Application.Skills.Queries;
 using VolunteerPortal.API.Models.DTOs;
 using VolunteerPortal.API.Models.DTOs.Skills;
-using VolunteerPortal.API.Services.Interfaces;
-using System.Security.Claims;
 
 namespace VolunteerPortal.API.Controllers;
 
 /// <summary>
 /// Controller for managing skills and user skill associations.
+/// Provides endpoints for viewing available skills and managing user skill profiles.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Produces("application/json")]
 public class SkillsController : ControllerBase
 {
-    private readonly ISkillService _skillService;
+    private readonly IMediator _mediator;
 
-    public SkillsController(ISkillService skillService)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SkillsController"/> class.
+    /// </summary>
+    /// <param name="mediator">MediatR mediator for dispatching commands and queries.</param>
+    public SkillsController(IMediator mediator)
     {
-        _skillService = skillService;
+        _mediator = mediator;
     }
 
     /// <summary>
-    /// Get all available skills (public endpoint).
+    /// Get all available skills.
     /// </summary>
-    /// <returns>List of all skills.</returns>
-    /// <response code="200">Returns list of all skills.</response>
+    /// <remarks>
+    /// Returns all skills in the system that can be assigned to users or required for events.
+    /// This is a public endpoint accessible without authentication.
+    /// </remarks>
+    /// <returns>List of all available skills.</returns>
+    /// <response code="200">Returns the list of all skills.</response>
     [HttpGet]
     [AllowAnonymous]
     [ProducesResponseType(typeof(List<SkillResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<SkillResponse>>> GetAllSkills()
     {
-        var skills = await _skillService.GetAllSkillsAsync();
+        var query = new GetAllSkillsQuery();
+        var skills = await _mediator.Send(query);
         return Ok(skills);
     }
 
     /// <summary>
-    /// Get current user's skills (authenticated endpoint).
+    /// Get current user's skills.
     /// </summary>
-    /// <returns>List of user's skills.</returns>
-    /// <response code="200">Returns list of user's skills.</response>
+    /// <remarks>
+    /// Returns all skills associated with the authenticated user's profile.
+    /// </remarks>
+    /// <returns>List of user's assigned skills.</returns>
+    /// <response code="200">Returns the user's skills.</response>
     /// <response code="401">User is not authenticated.</response>
     [HttpGet("me")]
     [Authorize]
@@ -47,21 +63,21 @@ public class SkillsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<List<SkillResponse>>> GetMySkills()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
-        {
-            return Unauthorized("User ID not found in token");
-        }
-
-        var skills = await _skillService.GetUserSkillsAsync(userId);
+        var userId = GetCurrentUserId();
+        var query = new GetUserSkillsQuery(userId);
+        var skills = await _mediator.Send(query);
         return Ok(skills);
     }
 
     /// <summary>
-    /// Update current user's skills (authenticated endpoint).
-    /// Replaces all existing skills with the provided list.
+    /// Update current user's skills.
     /// </summary>
-    /// <param name="request">Request containing skill IDs to assign.</param>
+    /// <remarks>
+    /// Replaces all existing skills with the provided list of skill IDs.
+    /// To remove all skills, provide an empty array.
+    /// Invalid skill IDs are ignored.
+    /// </remarks>
+    /// <param name="request">Request containing the skill IDs to assign to the user.</param>
     /// <returns>No content on success.</returns>
     /// <response code="204">Skills updated successfully.</response>
     /// <response code="400">Invalid skill IDs provided.</response>
@@ -73,20 +89,17 @@ public class SkillsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdateMySkills([FromBody] UpdateUserSkillsRequest request)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
-        {
-            return Unauthorized("User ID not found in token");
-        }
+        var userId = GetCurrentUserId();
+        var command = new UpdateUserSkillsCommand(userId, request.SkillIds);
+        await _mediator.Send(command);
+        return NoContent();
+    }
 
-        try
-        {
-            await _skillService.UpdateUserSkillsAsync(userId, request.SkillIds);
-            return NoContent();
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+    private int GetCurrentUserId()
+    {
+        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(claim) || !int.TryParse(claim, out var userId))
+            throw new UnauthorizedAccessException("User ID not found in token");
+        return userId;
     }
 }

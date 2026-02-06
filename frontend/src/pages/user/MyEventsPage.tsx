@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useMyRegistrations, useCancelRegistration } from '@/hooks/useRegistrations';
 import { RegistrationCard } from '@/components/registrations/RegistrationCard';
 import { CancelRegistrationModal } from '@/components/modals/CancelRegistrationModal';
+import { RegistrationCardSkeleton } from '@/components/skeletons/EventSkeletons';
+import { RegistrationStatus } from '@/types/enums';
 import type { RegistrationResponse, EventSummary } from '@/services/registrationService';
 
 export default function MyEventsPage() {
@@ -31,7 +33,7 @@ export default function MyEventsPage() {
     registrations.forEach((reg) => {
       const eventDate = new Date(reg.event.startTime);
 
-      if (reg.status === 'Cancelled') {
+      if (reg.status === RegistrationStatus.Cancelled) {
         cancelled.push(reg);
       } else if (eventDate >= now) {
         upcomingConfirmed.push(reg);
@@ -81,10 +83,14 @@ export default function MyEventsPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
-          <p className="text-gray-600">Loading your events...</p>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">My Events</h1>
+          <div className="space-y-4">
+            {Array.from({ length: 3 }, (_, i) => (
+              <RegistrationCardSkeleton key={i} />
+            ))}
+          </div>
         </div>
       </div>
     );

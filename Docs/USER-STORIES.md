@@ -1547,7 +1547,7 @@ As an admin, I want API endpoints that return Excel files, so that I can downloa
 
 # Phase 8: Polish & Testing
 
-## TST-001: Backend Unit Tests
+## TST-001: Backend Unit Tests ✅
 
 **Title**: Achieve Backend Test Coverage Target
 
@@ -1555,10 +1555,10 @@ As an admin, I want API endpoints that return Excel files, so that I can downloa
 As a developer, I want comprehensive unit tests for the backend, so that I can refactor with confidence.
 
 **Acceptance Criteria**:
-- [ ] Test coverage >70% for service layer
-- [ ] All happy path scenarios tested
-- [ ] Edge cases and error handling tested
-- [ ] Mocking used for dependencies
+- [x] Test coverage >70% for service layer
+- [x] All happy path scenarios tested
+- [x] Edge cases and error handling tested
+- [x] Mocking used for dependencies
 - [ ] Tests run in CI pipeline
 
 **Technical Tasks**:
@@ -1757,6 +1757,75 @@ As a developer, I want documentation for setting up and understanding the projec
 
 ---
 
+## CI-001: Backend CI Pipeline
+
+**Title**: Create Backend Continuous Integration Pipeline
+
+**User Story**:
+As a developer, I want automated CI for the backend, so that code quality is validated on every push.
+
+**Acceptance Criteria**:
+- [ ] GitHub Actions workflow for backend
+- [ ] Build step validates compilation
+- [ ] Unit tests run on every push/PR
+- [ ] Integration tests run (optional separate job)
+- [ ] Code coverage report generated
+- [ ] Pipeline runs on push to main and PRs
+
+**Technical Tasks**:
+1. Create `.github/workflows/backend-ci.yml`
+2. Configure .NET build step:
+   - Restore dependencies
+   - Build solution
+3. Configure unit test step:
+   - Run xUnit tests
+   - Collect code coverage
+   - Upload coverage report
+4. Configure integration test step (separate job):
+   - Set up test database
+   - Run integration tests
+5. Add status badge to README
+
+**Dependencies**: TST-001
+
+**Estimate**: M
+
+---
+
+## CI-002: Frontend CI Pipeline
+
+**Title**: Create Frontend Continuous Integration Pipeline
+
+**User Story**:
+As a developer, I want automated CI for the frontend, so that code quality is validated on every push.
+
+**Acceptance Criteria**:
+- [ ] GitHub Actions workflow for frontend
+- [ ] Lint step validates code style
+- [ ] Build step validates compilation
+- [ ] Unit tests run with coverage
+- [ ] Pipeline runs on push to main and PRs
+
+**Technical Tasks**:
+1. Create `.github/workflows/frontend-ci.yml`
+2. Configure lint step:
+   - Run ESLint
+   - Run TypeScript type checking
+3. Configure build step:
+   - Install dependencies (npm ci)
+   - Build production bundle
+4. Configure test step:
+   - Run Vitest
+   - Collect code coverage
+   - Upload coverage report
+5. Add status badge to README
+
+**Dependencies**: TST-002
+
+**Estimate**: M
+
+---
+
 # Summary
 
 ## Story Count by Phase
@@ -1770,8 +1839,8 @@ As a developer, I want documentation for setting up and understanding the projec
 | Phase 5: Skills | 5 | Medium |
 | Phase 6: Admin | 4 | Medium |
 | Phase 7: Reports | 3 | Medium |
-| Phase 8: Polish & Testing | 6 | Medium |
-| **Total** | **43** | |
+| Phase 8: Polish & Testing | 8 | Medium |
+| **Total** | **45** | |
 
 ## Recommended Sprint Breakdown
 
@@ -1794,7 +1863,8 @@ As a developer, I want documentation for setting up and understanding the projec
 - SKL-003 to SKL-005
 - ADM-001 to ADM-004
 
-**Sprint 6 (Reports + Polish)**:
+**Sprint 6 (Reports + Polish + CI)**:
 - RPT-001 to RPT-003
 - TST-001 to TST-003
 - POL-001 to POL-003
+- CI-001, CI-002

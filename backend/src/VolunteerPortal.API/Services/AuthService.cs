@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using VolunteerPortal.API.Data;
+using VolunteerPortal.API.Exceptions;
 using VolunteerPortal.API.Models.DTOs;
 using VolunteerPortal.API.Models.DTOs.Auth;
 using VolunteerPortal.API.Models.Entities;
@@ -94,7 +95,7 @@ public class AuthService : IAuthService
         if (user == null)
         {
             _logger.LogWarning("Login attempt with non-existent or deleted email: {Email}", request.Email);
-            throw new UnauthorizedAccessException("Invalid email or password");
+            throw new UnauthorizedException("Invalid email or password");
         }
 
         // Verify password with BCrypt
@@ -103,7 +104,7 @@ public class AuthService : IAuthService
         if (!isPasswordValid)
         {
             _logger.LogWarning("Login attempt with invalid password for user: {Email}", user.Email);
-            throw new UnauthorizedAccessException("Invalid email or password");
+            throw new UnauthorizedException("Invalid email or password");
         }
 
         _logger.LogInformation("User logged in successfully: {Email}", user.Email);

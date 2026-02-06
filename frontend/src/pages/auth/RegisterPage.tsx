@@ -211,10 +211,20 @@ export default function RegisterPage() {
 
     try {
       await register({ name: name.trim(), email: email.trim(), password })
-      // Navigation happens automatically via useEffect when isAuthenticated changes
+      // Navigation happens via useEffect when isAuthenticated becomes true
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Registration failed. Please try again.'
+      let errorMessage = 'Registration failed. Please try again.'
+      
+      // Handle specific error cases
+      if (error instanceof Error) {
+        // Check for 409 Conflict (email already exists)
+        if (error.message.includes('409') || error.message.toLowerCase().includes('already')) {
+          errorMessage = 'This email address is already registered. Please use a different email or sign in.'
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
       setErrors({ general: errorMessage })
     } finally {
       setIsSubmitting(false)
@@ -489,10 +499,10 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                className={`flex w-full justify-center rounded-md border border-transparent px-4 py-3 min-h-[44px] text-sm font-medium text-white shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                   isSubmitting
                     ? 'bg-blue-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700'
+                    : 'bg-blue-600 hover:bg-blue-700 hover:shadow-md active:scale-95'
                 }`}
               >
                 {isSubmitting ? (

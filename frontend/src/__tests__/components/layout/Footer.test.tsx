@@ -41,8 +41,8 @@ describe('Footer', () => {
     
     expect(screen.getByRole('heading', { name: 'Contact' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /contact@volunteerportal.org/i })).toHaveAttribute('href', 'mailto:contact@volunteerportal.org')
-    expect(screen.getByRole('link', { name: /\+1 \(555\) 123-4567/i })).toHaveAttribute('href', 'tel:+15551234567')
-    expect(screen.getByText(/123 Community Way/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /\+995 32 212 34 56/i })).toHaveAttribute('href', 'tel:+995322123456')
+    expect(screen.getByText(/9 April Street/i)).toBeInTheDocument()
   })
 
   it('renders social media links', () => {

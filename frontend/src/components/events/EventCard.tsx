@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import type { EventResponse } from '@/services/eventService';
 import { EventStatus } from '@/types/enums';
 import { SkillBadgeList } from '@/components/skills/SkillBadge';
+import { getImageUrl } from '@/utils/imageUrl';
 
 interface EventCardProps {
   event: EventResponse;
@@ -33,13 +34,18 @@ export function EventCard({ event }: EventCardProps) {
   const isFull = availableSpots <= 0;
   const isAlmostFull = capacityPercentage > 80 && !isFull;
 
-  // Check if event is cancelled
+  // Check if event is cancelled or past
   const isCancelled = event.status === EventStatus.Cancelled;
+  const isPastEvent = new Date(event.startTime) < new Date();
 
   return (
     <Link
       to={`/events/${event.id}`}
-      className="group block rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-gray-300"
+      className={`group block rounded-lg border shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-1 min-h-[400px] ${
+        isPastEvent && !isCancelled
+          ? 'border-gray-300 bg-gray-50 opacity-75'
+          : 'border-gray-200 bg-white hover:border-gray-300'
+      }`}
     >
       <div className="flex flex-col h-full relative">
         {/* Gray overlay for cancelled events */}
@@ -55,7 +61,7 @@ export function EventCard({ event }: EventCardProps) {
         <div className="relative h-48 overflow-hidden rounded-t-lg bg-gray-100">
           {event.imageUrl ? (
             <img
-              src={event.imageUrl}
+              src={getImageUrl(event.imageUrl)}
               alt={event.title}
               className="h-full w-full object-cover transition-transform group-hover:scale-105"
             />
@@ -100,6 +106,15 @@ export function EventCard({ event }: EventCardProps) {
             <div className="absolute top-2 right-2">
               <span className="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">
                 Almost Full
+              </span>
+            </div>
+          )}
+
+          {/* Past event badge */}
+          {!isCancelled && isPastEvent && (
+            <div className="absolute top-2 left-2">
+              <span className="inline-flex rounded-full bg-gray-600 px-3 py-1 text-xs font-semibold text-white">
+                Past Event
               </span>
             </div>
           )}

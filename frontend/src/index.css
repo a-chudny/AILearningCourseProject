@@ -57,3 +57,129 @@ body {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* POL-002: Touch-friendly button sizing (minimum 44x44px for WCAG 2.1) */
+button,
+a.btn,
+input[type='button'],
+input[type='submit'],
+input[type='reset'] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* POL-002: Subtle animations for better UX */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* POL-002: Improved mobile touch targets for inputs */
+input,
+select,
+textarea {
+  min-height: 44px;
+  touch-action: manipulation; /* Prevents double-tap zoom on mobile */
+}
+
+/* POL-002: Smooth transitions for interactive elements */
+button,
+a,
+input,
+select,
+textarea {
+  transition: all 0.2s ease-in-out;
+}
+
+/* POL-002: Active state feedback for touch devices */
+button:active:not(:disabled),
+a:active {
+  transform: scale(0.98);
+}
+
+/* POL-002: High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-border: #000000;
+    --color-text-secondary: #000000;
+  }
+  
+  button,
+  a {
+    border: 2px solid currentColor;
+  }
+}
+
+/* POL-002: Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Fix: Remove focus ring from checkboxes - use checked state instead */
+input[type="checkbox"] {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+input[type="checkbox"]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  ring: none !important;
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: none !important;
+}
+
+/* Fix: Ensure dropdown/select placeholder text is visible */
+button[disabled] span,
+select option:disabled,
+.placeholder-text {
+  color: #6b7280 !important; /* gray-500 for better visibility */
+}
+
+/* POL-002: Mobile-optimized touch areas */
+@media (max-width: 640px) {
+  button,
+  a.btn {
+    min-height: 48px;
+    min-width: 48px;
+    font-size: 16px; /* Prevents iOS zoom on input focus */
+  }
+  
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* Prevents iOS zoom on input focus */
+  }
+}

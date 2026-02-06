@@ -15,8 +15,8 @@ export type UserRole = (typeof UserRole)[keyof typeof UserRole];
  * Registration status enum - matches backend RegistrationStatus enum
  */
 export const RegistrationStatus = {
-  Confirmed: 'Confirmed',
-  Cancelled: 'Cancelled',
+  Confirmed: 0,
+  Cancelled: 1,
 } as const;
 
 export type RegistrationStatus = (typeof RegistrationStatus)[keyof typeof RegistrationStatus];
@@ -25,8 +25,8 @@ export type RegistrationStatus = (typeof RegistrationStatus)[keyof typeof Regist
  * Event status enum - matches backend EventStatus enum
  */
 export const EventStatus = {
-  Active: 'Active',
-  Cancelled: 'Cancelled',
+  Active: 0,
+  Cancelled: 1,
 } as const;
 
 export type EventStatus = (typeof EventStatus)[keyof typeof EventStatus];

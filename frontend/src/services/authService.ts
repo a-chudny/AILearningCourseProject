@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api, setLoggingOut } from './api';
 import type { LoginRequest, RegisterRequest, AuthResponse, User } from '@/types';
 
 const AUTH_TOKEN_KEY = 'auth_token';
@@ -50,7 +50,11 @@ export const authService = {
    * Logout the current user
    */
   logout(): void {
+    // Set flag to suppress error toasts during logout
+    setLoggingOut(true);
     localStorage.removeItem(AUTH_TOKEN_KEY);
+    // Reset flag after 4 seconds (longer than the 3s grace period)
+    setTimeout(() => setLoggingOut(false), 4000);
   },
 
   /**

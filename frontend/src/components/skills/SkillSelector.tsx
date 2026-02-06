@@ -17,12 +17,12 @@ interface SkillSelectorProps {
  * Skills are grouped by category with expand/collapse functionality
  */
 export function SkillSelector({ allSkills, selectedSkillIds, onChange, label }: SkillSelectorProps) {
-  // Group skills by category (description field is used as category)
+  // Group skills by category
   const skillsByCategory = useMemo(() => {
     const grouped = new Map<string, Skill[]>()
     
     allSkills.forEach((skill) => {
-      const category = skill.description
+      const category = skill.category
       if (!grouped.has(category)) {
         grouped.set(category, [])
       }
@@ -151,7 +151,7 @@ export function SkillSelector({ allSkills, selectedSkillIds, onChange, label }: 
                         type="checkbox"
                         checked={selectedSkillIds.includes(skill.id)}
                         onChange={() => toggleSkill(skill.id)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                        className="h-4 w-4 text-blue-600 focus:ring-0 focus:ring-offset-0 border-gray-300 rounded cursor-pointer"
                       />
                       <span className="text-sm text-gray-900">{skill.name}</span>
                     </label>

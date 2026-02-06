@@ -13,7 +13,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       
       {/* Main content area with top padding to account for fixed header */}
       <main className="flex-1 pt-16">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-full px-4 py-8 sm:px-6 lg:px-8 2xl:max-w-[1920px]">
           {children}
         </div>
       </main>

@@ -270,7 +270,7 @@ public class EventService : IEventService
             query = query.Where(e => e.EventSkills.Any(es => queryParams.SkillIds.Contains(es.SkillId)));
         }
 
-        // Filter by user's skills - match ANY of user's skills
+        // Filter by user's skills - match ANY of user's skills OR events with no required skills
         if (queryParams.MatchMySkills && currentUserId.HasValue)
         {
             var userSkillIds = await _context.UserSkills
@@ -280,12 +280,15 @@ public class EventService : IEventService
 
             if (userSkillIds.Any())
             {
-                query = query.Where(e => e.EventSkills.Any(es => userSkillIds.Contains(es.SkillId)));
+                // Show events that match user's skills OR have no required skills
+                query = query.Where(e => 
+                    !e.EventSkills.Any() || // Events with no required skills
+                    e.EventSkills.Any(es => userSkillIds.Contains(es.SkillId))); // OR events matching user's skills
             }
             else
             {
-                // User has no skills, return no events
-                query = query.Where(e => false);
+                // User has no skills, only show events with no required skills
+                query = query.Where(e => !e.EventSkills.Any());
             }
         }
 

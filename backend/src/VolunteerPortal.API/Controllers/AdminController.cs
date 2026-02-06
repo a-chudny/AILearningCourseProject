@@ -1,14 +1,18 @@
+using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using VolunteerPortal.API.Data;
+using System.Security.Claims;
+using VolunteerPortal.API.Application.Admin.Commands;
+using VolunteerPortal.API.Application.Admin.Queries;
 using VolunteerPortal.API.Models.DTOs.Admin;
 using VolunteerPortal.API.Models.Enums;
 
 namespace VolunteerPortal.API.Controllers;
 
 /// <summary>
-/// Controller for admin operations and statistics
+/// Controller for admin operations and statistics.
+/// Provides endpoints for dashboard statistics, user management, and administrative tasks.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -16,84 +20,63 @@ namespace VolunteerPortal.API.Controllers;
 [Produces("application/json")]
 public class AdminController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
-    private readonly ILogger<AdminController> _logger;
+    private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
 
-    public AdminController(
-        ApplicationDbContext context,
-        ILogger<AdminController> logger)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AdminController"/> class.
+    /// </summary>
+    /// <param name="mediator">MediatR mediator for dispatching commands and queries.</param>
+    /// <param name="mapper">AutoMapper instance for DTO mapping.</param>
+    public AdminController(IMediator mediator, IMapper mapper)
     {
-        _context = context;
-        _logger = logger;
+        _mediator = mediator;
+        _mapper = mapper;
     }
 
     /// <summary>
-    /// Get admin dashboard statistics
+    /// Get admin dashboard statistics.
     /// </summary>
-    /// <returns>Admin statistics including user counts, event counts, and registrations</returns>
+    /// <remarks>
+    /// Returns aggregated statistics including:
+    /// - Total active users count
+    /// - Total events count
+    /// - Total and monthly registration counts
+    /// - Upcoming events count
+    /// </remarks>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Admin dashboard statistics.</returns>
+    /// <response code="200">Returns the admin statistics.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="403">User does not have admin role.</response>
     [HttpGet("stats")]
     [ProducesResponseType(typeof(AdminStatsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<AdminStatsResponse>> GetStats()
+    public async Task<ActionResult<AdminStatsResponse>> GetStats(CancellationToken cancellationToken)
     {
-        try
-        {
-            // Get first and last day of current month (UTC)
-            var now = DateTime.UtcNow;
-            var firstDayOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-
-            // Total users (excluding soft-deleted)
-            var totalUsers = await _context.Users
-                .Where(u => !u.IsDeleted)
-                .CountAsync();
-
-            // Total events (excluding soft-deleted)
-            var totalEvents = await _context.Events
-                .Where(e => !e.IsDeleted)
-                .CountAsync();
-
-            // Total registrations (all statuses)
-            var totalRegistrations = await _context.Registrations
-                .CountAsync();
-
-            // Registrations this month
-            var registrationsThisMonth = await _context.Registrations
-                .Where(r => r.RegisteredAt >= firstDayOfMonth && r.RegisteredAt <= lastDayOfMonth.AddDays(1))
-                .CountAsync();
-
-            // Upcoming events (future, active, not deleted)
-            var upcomingEvents = await _context.Events
-                .Where(e => e.StartTime > now && e.Status == EventStatus.Active && !e.IsDeleted)
-                .CountAsync();
-
-            return Ok(new AdminStatsResponse
-            {
-                TotalUsers = totalUsers,
-                TotalEvents = totalEvents,
-                TotalRegistrations = totalRegistrations,
-                RegistrationsThisMonth = registrationsThisMonth,
-                UpcomingEvents = upcomingEvents
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving admin statistics");
-            return StatusCode(StatusCodes.Status500InternalServerError, 
-                new { message = "An error occurred while retrieving statistics" });
-        }
+        var query = new GetAdminStatsQuery();
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(_mapper.Map<AdminStatsResponse>(result));
     }
 
     /// <summary>
-    /// Get paginated list of users for admin management
+    /// Get paginated list of users for admin management.
     /// </summary>
-    /// <param name="page">Page number (1-based, default: 1)</param>
-    /// <param name="pageSize">Items per page (default: 10, max: 50)</param>
-    /// <param name="search">Search by name or email</param>
-    /// <param name="includeDeleted">Include soft-deleted users (default: false)</param>
-    /// <param name="status">Filter by status: 'active', 'deleted', or null for all</param>
-    /// <returns>Paginated list of users</returns>
+    /// <remarks>
+    /// Supports filtering by status (active/deleted), search by name or email,
+    /// and pagination with configurable page size (max 50 items per page).
+    /// </remarks>
+    /// <param name="page">Page number (1-based). Default: 1.</param>
+    /// <param name="pageSize">Number of items per page. Default: 10, Max: 50.</param>
+    /// <param name="search">Optional search term to filter by name or email.</param>
+    /// <param name="includeDeleted">Whether to include soft-deleted users. Default: true.</param>
+    /// <param name="status">Filter by status: 'active', 'deleted', or null for all.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Paginated list of users with metadata.</returns>
+    /// <response code="200">Returns the paginated user list.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="403">User does not have admin role.</response>
     [HttpGet("users")]
     [ProducesResponseType(typeof(AdminUserListResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -103,213 +86,81 @@ public class AdminController : ControllerBase
         [FromQuery] int pageSize = 10,
         [FromQuery] string? search = null,
         [FromQuery] bool includeDeleted = true,
-        [FromQuery] string? status = null)
+        [FromQuery] string? status = null,
+        CancellationToken cancellationToken = default)
     {
-        try
-        {
-            // Validate pagination parameters
-            page = Math.Max(1, page);
-            pageSize = Math.Clamp(pageSize, 1, 50);
-
-            // Build query
-            var query = _context.Users.AsQueryable();
-
-            // Filter by status
-            if (!string.IsNullOrEmpty(status))
-            {
-                if (status.Equals("active", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Where(u => !u.IsDeleted);
-                }
-                else if (status.Equals("deleted", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Where(u => u.IsDeleted);
-                }
-            }
-            else if (!includeDeleted)
-            {
-                query = query.Where(u => !u.IsDeleted);
-            }
-
-            // Search by name or email
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                var searchLower = search.ToLower();
-                query = query.Where(u => 
-                    u.Name.ToLower().Contains(searchLower) || 
-                    u.Email.ToLower().Contains(searchLower));
-            }
-
-            // Get total count for pagination
-            var totalCount = await query.CountAsync();
-            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-
-            // Sort by created date (newest first) and paginate
-            var users = await query
-                .OrderByDescending(u => u.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(u => new AdminUserResponse
-                {
-                    Id = u.Id,
-                    Name = u.Name,
-                    Email = u.Email,
-                    Role = (int)u.Role,
-                    RoleName = u.Role.ToString(),
-                    IsDeleted = u.IsDeleted,
-                    CreatedAt = u.CreatedAt,
-                    UpdatedAt = u.UpdatedAt
-                })
-                .ToListAsync();
-
-            return Ok(new AdminUserListResponse
-            {
-                Users = users,
-                Page = page,
-                PageSize = pageSize,
-                TotalCount = totalCount,
-                TotalPages = totalPages,
-                HasPreviousPage = page > 1,
-                HasNextPage = page < totalPages
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving users list");
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while retrieving users" });
-        }
+        var query = new GetUsersQuery(page, pageSize, search, includeDeleted, status);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(_mapper.Map<AdminUserListResponse>(result));
     }
 
     /// <summary>
-    /// Update a user's role
+    /// Update a user's role.
     /// </summary>
-    /// <param name="id">User ID</param>
-    /// <param name="request">New role information</param>
-    /// <returns>Updated user information</returns>
+    /// <remarks>
+    /// Allows changing a user's role between Volunteer, Organizer, and Admin.
+    /// Admins cannot change their own role.
+    /// Deleted users cannot be modified.
+    /// </remarks>
+    /// <param name="id">The ID of the user to update.</param>
+    /// <param name="request">The new role information.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Updated user information.</returns>
+    /// <response code="200">Returns the updated user.</response>
+    /// <response code="400">Cannot change own role or modify deleted user.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="403">User does not have admin role.</response>
+    /// <response code="404">User not found.</response>
     [HttpPut("users/{id}/role")]
     [ProducesResponseType(typeof(AdminUserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<AdminUserResponse>> UpdateUserRole(int id, [FromBody] UpdateUserRoleRequest request)
+    public async Task<ActionResult<AdminUserResponse>> UpdateUserRole(
+        int id,
+        [FromBody] UpdateUserRoleRequest request,
+        CancellationToken cancellationToken)
     {
-        try
-        {
-            // Get current user ID from claims
-            var currentUserIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(currentUserIdClaim) || !int.TryParse(currentUserIdClaim, out var currentUserId))
-            {
-                return Unauthorized(new { message = "Unable to identify current user" });
-            }
-
-            // Cannot change own role
-            if (id == currentUserId)
-            {
-                return BadRequest(new { message = "You cannot change your own role" });
-            }
-
-            // Find the user
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound(new { message = "User not found" });
-            }
-
-            // Cannot modify soft-deleted users
-            if (user.IsDeleted)
-            {
-                return BadRequest(new { message = "Cannot modify a deleted user" });
-            }
-
-            // Update role
-            var oldRole = user.Role;
-            user.Role = (UserRole)request.Role;
-            user.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation("Admin {AdminId} changed user {UserId} role from {OldRole} to {NewRole}",
-                currentUserId, id, oldRole, user.Role);
-
-            return Ok(new AdminUserResponse
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                Role = (int)user.Role,
-                RoleName = user.Role.ToString(),
-                IsDeleted = user.IsDeleted,
-                CreatedAt = user.CreatedAt,
-                UpdatedAt = user.UpdatedAt
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating user role for user {UserId}", id);
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while updating user role" });
-        }
+        var command = new UpdateUserRoleCommand(id, (UserRole)request.Role, GetCurrentUserId());
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(_mapper.Map<AdminUserResponse>(result));
     }
 
     /// <summary>
-    /// Soft delete a user
+    /// Soft delete a user.
     /// </summary>
-    /// <param name="id">User ID to delete</param>
-    /// <returns>Success message</returns>
+    /// <remarks>
+    /// Performs a soft delete, marking the user as deleted without removing their data.
+    /// Admins cannot delete their own account.
+    /// Already deleted users cannot be deleted again.
+    /// </remarks>
+    /// <param name="id">The ID of the user to delete.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Success message confirming deletion.</returns>
+    /// <response code="200">User successfully deleted.</response>
+    /// <response code="400">Cannot delete own account or user already deleted.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="403">User does not have admin role.</response>
+    /// <response code="404">User not found.</response>
     [HttpDelete("users/{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> DeleteUser(int id)
+    public async Task<ActionResult> DeleteUser(int id, CancellationToken cancellationToken)
     {
-        try
-        {
-            // Get current user ID from claims
-            var currentUserIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(currentUserIdClaim) || !int.TryParse(currentUserIdClaim, out var currentUserId))
-            {
-                return Unauthorized(new { message = "Unable to identify current user" });
-            }
+        var command = new DeleteUserCommand(id, GetCurrentUserId());
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(new { message = result.Message });
+    }
 
-            // Cannot delete self
-            if (id == currentUserId)
-            {
-                return BadRequest(new { message = "You cannot delete your own account" });
-            }
-
-            // Find the user
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound(new { message = "User not found" });
-            }
-
-            // Check if already deleted
-            if (user.IsDeleted)
-            {
-                return BadRequest(new { message = "User is already deleted" });
-            }
-
-            // Soft delete
-            user.IsDeleted = true;
-            user.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation("Admin {AdminId} soft-deleted user {UserId} ({UserEmail})",
-                currentUserId, id, user.Email);
-
-            return Ok(new { message = $"User {user.Name} has been deleted successfully" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting user {UserId}", id);
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while deleting the user" });
-        }
+    private int GetCurrentUserId()
+    {
+        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(claim) || !int.TryParse(claim, out var userId))
+            throw new UnauthorizedAccessException("Unable to identify current user");
+        return userId;
     }
 }

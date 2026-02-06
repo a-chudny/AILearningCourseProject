@@ -115,9 +115,11 @@ describe('EventDetailsPage', () => {
     vi.mocked(eventService.getEventById).mockImplementation(() => new Promise(() => {})); // Never resolves
 
     window.history.pushState({}, '', '/events/1');
-    renderWithProviders(<EventDetailsPage />);
+    const { container } = renderWithProviders(<EventDetailsPage />);
 
-    expect(screen.getByText('Loading event details...')).toBeInTheDocument();
+    // POL-002: Loading state now uses skeleton loaders instead of text
+    const skeletons = container.querySelectorAll('.animate-pulse');
+    expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('displays error state when event is not found', async () => {

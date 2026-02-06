@@ -24,7 +24,7 @@ export function SkillBadge({
   onClick,
   onRemove 
 }: SkillBadgeProps) {
-  const colors = getSkillColor(skill.description)
+  const colors = getSkillColor(skill.category)
   
   const sizeClasses = {
     sm: 'px-2.5 py-0.5 text-xs',
@@ -67,9 +67,9 @@ export function SkillBadge({
       <span className="group relative inline-block">
         {badge}
         <span className="invisible absolute left-1/2 bottom-full mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-3 py-1.5 text-xs text-white opacity-0 transition-all group-hover:visible group-hover:opacity-100 z-10">
-          {skill.description}
-          <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+          {skill.category}
         </span>
+        <span className="invisible absolute left-1/2 bottom-full -mb-1 -translate-x-1/2 border-4 border-transparent border-t-gray-900 opacity-0 group-hover:visible group-hover:opacity-100"></span>
       </span>
     )
   }
