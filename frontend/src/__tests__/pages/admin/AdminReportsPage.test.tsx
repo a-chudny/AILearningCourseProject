@@ -14,8 +14,8 @@ vi.mock('@/services/adminService', () => ({
 }));
 
 // Mock URL.createObjectURL and revokeObjectURL
-global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
-global.URL.revokeObjectURL = vi.fn();
+globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+globalThis.URL.revokeObjectURL = vi.fn();
 
 describe('AdminReportsPage', () => {
   beforeEach(() => {

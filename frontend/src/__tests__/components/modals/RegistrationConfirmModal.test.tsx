@@ -12,20 +12,20 @@ const mockEvent: EventResponse = {
   location: '123 Beach St, San Diego, CA',
   capacity: 20,
   registrationCount: 15,
-  status: 'Active',
+  status: 0,
   organizerId: 2,
   organizerName: 'John Doe',
   requiredSkills: [
     {
       id: 1,
       name: 'Teamwork',
-      description: 'Work well in a team',
+      category: 'Teamwork',
       createdAt: new Date().toISOString(),
     },
     {
       id: 2,
       name: 'Physical Fitness',
-      description: 'Able to do physical work',
+      category: 'Physical',
       createdAt: new Date().toISOString(),
     },
   ],

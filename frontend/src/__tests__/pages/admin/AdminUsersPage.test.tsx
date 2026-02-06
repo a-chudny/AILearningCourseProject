@@ -72,6 +72,8 @@ const mockCurrentUser = {
   name: 'Admin User',
   email: 'admin@example.com',
   role: UserRole.Admin,
+  createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
 };
 
 function createQueryClient() {
@@ -102,11 +104,13 @@ describe('AdminUsersPage', () => {
     vi.clearAllMocks();
     vi.mocked(useAuthHook.useAuth).mockReturnValue({
       user: mockCurrentUser,
+      token: 'mock-token',
       isAuthenticated: true,
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
       register: vi.fn(),
+      refetchUser: vi.fn(),
     });
     vi.mocked(adminService.getAdminUsers).mockResolvedValue(mockUserListResponse);
   });
@@ -290,7 +294,16 @@ describe('AdminUsersPage', () => {
 
   it('calls updateUserRole when confirming role change', async () => {
     const user = userEvent.setup();
-    vi.mocked(adminService.updateUserRole).mockResolvedValue();
+    vi.mocked(adminService.updateUserRole).mockResolvedValue({
+      id: 1,
+      email: 'test@example.com',
+      name: 'Test User',
+      role: 1,
+      roleName: 'Organizer',
+      isDeleted: false,
+      createdAt: '2024-01-01T00:00:00',
+      updatedAt: '2024-01-01T00:00:00',
+    });
 
     renderWithProviders(<AdminUsersPage />);
 
@@ -322,7 +335,7 @@ describe('AdminUsersPage', () => {
 
   it('calls deleteUser when confirming delete', async () => {
     const user = userEvent.setup();
-    vi.mocked(adminService.deleteUser).mockResolvedValue();
+    vi.mocked(adminService.deleteUser).mockResolvedValue({ message: 'User deleted successfully' });
 
     renderWithProviders(<AdminUsersPage />);
 

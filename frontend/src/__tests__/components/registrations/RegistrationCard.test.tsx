@@ -9,7 +9,7 @@ const mockRegistration: RegistrationResponse = {
   id: 1,
   eventId: 10,
   userId: 5,
-  status: 'Confirmed',
+  status: 0,
   registeredAt: '2026-02-01T10:00:00Z',
   event: {
     id: 10,

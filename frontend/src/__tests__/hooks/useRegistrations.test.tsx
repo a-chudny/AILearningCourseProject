@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMyRegistrations, useCancelRegistration } from '@/hooks/useRegistrations';
 import * as registrationService from '@/services/registrationService';
 import { toast } from '@/utils/toast';
+import { RegistrationStatus, EventStatus } from '@/types/enums';
 
 // Mock the services
 vi.mock('@/services/registrationService');
@@ -19,19 +20,35 @@ vi.mock('@/utils/toast', () => ({
 const mockRegistrations = [
   {
     id: 1,
+    userId: 1,
     eventId: 10,
-    eventTitle: 'Beach Cleanup',
-    eventDate: '2024-03-01T10:00:00',
-    status: 'Confirmed',
+    status: 0 as RegistrationStatus,
     registeredAt: '2024-02-15T00:00:00',
+    event: {
+      id: 10,
+      title: 'Beach Cleanup',
+      location: 'Beach Location',
+      startTime: '2024-03-01T10:00:00',
+      durationMinutes: 180,
+      status: 0 as EventStatus,
+      imageUrl: undefined,
+    },
   },
   {
     id: 2,
+    userId: 1,
     eventId: 20,
-    eventTitle: 'Food Bank Volunteering',
-    eventDate: '2024-03-15T09:00:00',
-    status: 'Pending',
+    status: 0 as RegistrationStatus,
     registeredAt: '2024-02-20T00:00:00',
+    event: {
+      id: 20,
+      title: 'Food Bank Volunteering',
+      location: 'Food Bank Location',
+      startTime: '2024-03-15T09:00:00',
+      durationMinutes: 120,
+      status: 0 as EventStatus,
+      imageUrl: undefined,
+    },
   },
 ];
 

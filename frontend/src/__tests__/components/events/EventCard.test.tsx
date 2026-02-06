@@ -28,10 +28,10 @@ const mockEvent: EventResponse = {
     {
       id: 1,
       name: 'First Aid',
-      description: 'First aid skills',
+      category: 'Medical',
       createdAt: '2026-01-01T00:00:00Z',
     },
-    { id: 2, name: 'Driving', description: 'Driving skills', createdAt: '2026-01-01T00:00:00Z' },
+    { id: 2, name: 'Driving', category: 'Transportation', createdAt: '2026-01-01T00:00:00Z' },
   ],
   createdAt: '2026-02-01T00:00:00Z',
   updatedAt: '2026-02-01T00:00:00Z',
@@ -107,7 +107,7 @@ describe('EventCard', () => {
     const manySkills = Array.from({ length: 5 }, (_, i) => ({
       id: i + 1,
       name: `Skill ${i + 1}`,
-      description: 'Test Category',
+      category: 'Test Category',
       createdAt: '2026-01-01T00:00:00Z',
     }));
     const eventWithManySkills = { ...mockEvent, requiredSkills: manySkills };
