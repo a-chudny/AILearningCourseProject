@@ -45,7 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const fetchUser = useCallback(async () => {
     const storedToken = authService.getToken();
-    
+
     if (!storedToken) {
       setIsLoading(false);
       return;
@@ -83,10 +83,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Set auth state - use a callback to ensure state is updated
       setToken(response.token);
       setUser(response.user);
-      
+
       // Small delay to ensure React processes the state updates
       // This prevents navigation happening before state propagates
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       // Note: No automatic navigation - let calling component handle redirect
     } catch (error) {
       // Re-throw error to be handled by the component

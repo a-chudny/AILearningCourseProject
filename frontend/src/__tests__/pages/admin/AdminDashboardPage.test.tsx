@@ -57,9 +57,9 @@ describe('AdminDashboardPage', () => {
     renderWithProviders(<AdminDashboardPage />);
 
     // Check for loading skeleton
-    const loadingSkeletons = screen.getAllByRole('generic').filter((el) =>
-      el.className.includes('animate-pulse')
-    );
+    const loadingSkeletons = screen
+      .getAllByRole('generic')
+      .filter((el) => el.className.includes('animate-pulse'));
     expect(loadingSkeletons.length).toBeGreaterThan(0);
   });
 
@@ -103,9 +103,7 @@ describe('AdminDashboardPage', () => {
   });
 
   it('displays error message when stats fail to load', async () => {
-    vi.mocked(adminService.getAdminStats).mockRejectedValue(
-      new Error('Failed to fetch')
-    );
+    vi.mocked(adminService.getAdminStats).mockRejectedValue(new Error('Failed to fetch'));
 
     renderWithProviders(<AdminDashboardPage />);
 

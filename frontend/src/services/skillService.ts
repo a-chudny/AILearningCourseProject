@@ -1,19 +1,19 @@
-﻿import { api } from './api'
-import type { Skill } from '@/types'
+﻿import { api } from './api';
+import type { Skill } from '@/types';
 
 /**
  * DTO for updating user skills
  */
 export interface UpdateUserSkillsRequest {
-  skillIds: number[]
+  skillIds: number[];
 }
 
 /**
  * Get all available skills
  */
 export async function getSkills(): Promise<Skill[]> {
-  const response = await api.get<Skill[]>('/skills')
-  return response.data
+  const response = await api.get<Skill[]>('/skills');
+  return response.data;
 }
 
 /**
@@ -21,8 +21,8 @@ export async function getSkills(): Promise<Skill[]> {
  * Requires authentication
  */
 export async function getUserSkills(): Promise<Skill[]> {
-  const response = await api.get<Skill[]>('/skills/me')
-  return response.data
+  const response = await api.get<Skill[]>('/skills/me');
+  return response.data;
 }
 
 /**
@@ -30,5 +30,5 @@ export async function getUserSkills(): Promise<Skill[]> {
  * Requires authentication
  */
 export async function updateUserSkills(skillIds: number[]): Promise<void> {
-  await api.put('/skills/me', { skillIds })
+  await api.put('/skills/me', { skillIds });
 }

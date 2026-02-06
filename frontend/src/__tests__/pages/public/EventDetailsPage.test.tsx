@@ -35,8 +35,18 @@ const mockEvent: EventResponse = {
   organizerName: 'John Organizer',
   registrationCount: 25,
   requiredSkills: [
-    { id: 1, name: 'First Aid', description: 'Basic first aid and CPR skills', createdAt: '2026-01-01T00:00:00Z' },
-    { id: 2, name: 'Driving', description: 'Valid driver license', createdAt: '2026-01-01T00:00:00Z' },
+    {
+      id: 1,
+      name: 'First Aid',
+      description: 'Basic first aid and CPR skills',
+      createdAt: '2026-01-01T00:00:00Z',
+    },
+    {
+      id: 2,
+      name: 'Driving',
+      description: 'Valid driver license',
+      createdAt: '2026-01-01T00:00:00Z',
+    },
   ],
   createdAt: '2026-02-01T00:00:00Z',
   updatedAt: '2026-02-01T00:00:00Z',
@@ -271,10 +281,7 @@ describe('EventDetailsPage', () => {
 
     await waitFor(() => {
       const locationLink = screen.getByText('123 Beach Road, Coastal City');
-      expect(locationLink).toHaveAttribute(
-        'href',
-        expect.stringContaining('google.com/maps')
-      );
+      expect(locationLink).toHaveAttribute('href', expect.stringContaining('google.com/maps'));
       expect(locationLink).toHaveAttribute('target', '_blank');
     });
   });

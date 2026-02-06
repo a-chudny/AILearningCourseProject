@@ -69,7 +69,9 @@ export async function getAdminStats(): Promise<AdminStatsResponse> {
  * Get paginated list of users for admin management
  * Requires Admin role authentication
  */
-export async function getAdminUsers(params?: AdminUsersQueryParams): Promise<AdminUserListResponse> {
+export async function getAdminUsers(
+  params?: AdminUsersQueryParams
+): Promise<AdminUserListResponse> {
   const response = await api.get<AdminUserListResponse>('/admin/users', { params });
   return response.data;
 }
@@ -78,7 +80,10 @@ export async function getAdminUsers(params?: AdminUsersQueryParams): Promise<Adm
  * Update a user's role
  * Requires Admin role authentication
  */
-export async function updateUserRole(userId: number, request: UpdateUserRoleRequest): Promise<AdminUserResponse> {
+export async function updateUserRole(
+  userId: number,
+  request: UpdateUserRoleRequest
+): Promise<AdminUserResponse> {
   const response = await api.put<AdminUserResponse>(`/admin/users/${userId}/role`, request);
   return response.data;
 }

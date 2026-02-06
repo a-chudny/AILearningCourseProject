@@ -125,9 +125,9 @@ describe('AdminUsersPage', () => {
 
     renderWithProviders(<AdminUsersPage />);
 
-    const loadingSkeletons = screen.getAllByRole('generic').filter((el) =>
-      el.className.includes('animate-pulse')
-    );
+    const loadingSkeletons = screen
+      .getAllByRole('generic')
+      .filter((el) => el.className.includes('animate-pulse'));
     expect(loadingSkeletons.length).toBeGreaterThan(0);
   });
 
@@ -194,11 +194,14 @@ describe('AdminUsersPage', () => {
     await user.type(searchInput, 'john');
 
     // getAdminUsers should be called with search parameter after debounce
-    await waitFor(() => {
-      expect(adminService.getAdminUsers).toHaveBeenCalledWith(
-        expect.objectContaining({ search: 'john' })
-      );
-    }, { timeout: 500 });
+    await waitFor(
+      () => {
+        expect(adminService.getAdminUsers).toHaveBeenCalledWith(
+          expect.objectContaining({ search: 'john' })
+        );
+      },
+      { timeout: 500 }
+    );
   });
 
   it('status filter changes query params', async () => {
@@ -228,8 +231,8 @@ describe('AdminUsersPage', () => {
 
     // Find the row with current user and check buttons are disabled
     const buttons = screen.getAllByRole('button');
-    const editButtons = buttons.filter(btn => btn.title === 'Cannot change own role');
-    const deleteButtons = buttons.filter(btn => btn.title === 'Cannot delete yourself');
+    const editButtons = buttons.filter((btn) => btn.title === 'Cannot change own role');
+    const deleteButtons = buttons.filter((btn) => btn.title === 'Cannot delete yourself');
 
     expect(editButtons.length).toBeGreaterThan(0);
     expect(deleteButtons.length).toBeGreaterThan(0);
@@ -243,8 +246,8 @@ describe('AdminUsersPage', () => {
     });
 
     const buttons = screen.getAllByRole('button');
-    const disabledEditButtons = buttons.filter(btn => btn.title === 'Cannot modify deleted user');
-    const alreadyDeletedButtons = buttons.filter(btn => btn.title === 'Already deleted');
+    const disabledEditButtons = buttons.filter((btn) => btn.title === 'Cannot modify deleted user');
+    const alreadyDeletedButtons = buttons.filter((btn) => btn.title === 'Already deleted');
 
     expect(disabledEditButtons.length).toBeGreaterThan(0);
     expect(alreadyDeletedButtons.length).toBeGreaterThan(0);
@@ -375,9 +378,14 @@ describe('AdminUsersPage', () => {
 
     renderWithProviders(<AdminUsersPage />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Failed to load users. Please try again later.')).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText('Failed to load users. Please try again later.')
+        ).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
   });
 
   it('displays retry button on error', async () => {
@@ -385,9 +393,12 @@ describe('AdminUsersPage', () => {
 
     renderWithProviders(<AdminUsersPage />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Retry')).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText('Retry')).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
   });
 
   it('displays empty state when no users match', async () => {
@@ -440,9 +451,7 @@ describe('AdminUsersPage', () => {
     await user.click(nextButton);
 
     await waitFor(() => {
-      expect(adminService.getAdminUsers).toHaveBeenCalledWith(
-        expect.objectContaining({ page: 2 })
-      );
+      expect(adminService.getAdminUsers).toHaveBeenCalledWith(expect.objectContaining({ page: 2 }));
     });
   });
 });

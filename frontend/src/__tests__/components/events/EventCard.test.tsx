@@ -25,7 +25,12 @@ const mockEvent: EventResponse = {
   organizerName: 'John Organizer',
   registrationCount: 25,
   requiredSkills: [
-    { id: 1, name: 'First Aid', description: 'First aid skills', createdAt: '2026-01-01T00:00:00Z' },
+    {
+      id: 1,
+      name: 'First Aid',
+      description: 'First aid skills',
+      createdAt: '2026-01-01T00:00:00Z',
+    },
     { id: 2, name: 'Driving', description: 'Driving skills', createdAt: '2026-01-01T00:00:00Z' },
   ],
   createdAt: '2026-02-01T00:00:00Z',

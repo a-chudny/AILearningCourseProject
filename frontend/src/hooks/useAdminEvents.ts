@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAdminEvents, getEventRegistrations, type AdminEventsQueryParams } from '@/services/adminService';
+import {
+  getAdminEvents,
+  getEventRegistrations,
+  type AdminEventsQueryParams,
+} from '@/services/adminService';
 import { deleteEvent, cancelEvent } from '@/services/eventService';
 
 // Query key factory for admin events

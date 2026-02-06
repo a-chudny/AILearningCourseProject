@@ -1,10 +1,10 @@
-﻿import { Link } from 'react-router-dom'
-import { ArrowLeftIcon, UserCircleIcon } from '@heroicons/react/24/outline'
-import { useAuth } from '@/hooks/useAuth'
-import { UserRoleLabels } from '@/types/enums'
+﻿import { Link } from 'react-router-dom';
+import { ArrowLeftIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '@/hooks/useAuth';
+import { UserRoleLabels } from '@/types/enums';
 
 export function AdminHeader() {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6 shadow-sm">
@@ -30,5 +30,5 @@ export function AdminHeader() {
         </div>
       </div>
     </header>
-  )
+  );
 }

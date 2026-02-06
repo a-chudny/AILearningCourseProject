@@ -1,7 +1,7 @@
-﻿import { Link } from 'react-router-dom'
+﻿import { Link } from 'react-router-dom';
 
 export function Footer() {
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-gray-50 border-t border-gray-200">
@@ -11,8 +11,8 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-3">About</h3>
             <p className="text-sm text-gray-600 leading-relaxed">
-              Volunteer Event Portal connects passionate volunteers with meaningful opportunities to make a 
-              difference in their communities. Join us in creating positive change together.
+              Volunteer Event Portal connects passionate volunteers with meaningful opportunities to
+              make a difference in their communities. Join us in creating positive change together.
             </p>
           </div>
 
@@ -21,22 +21,34 @@ export function Footer() {
             <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/events" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                <Link
+                  to="/events"
+                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                >
                   Browse Events
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                <Link
+                  to="/about"
+                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                >
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                <Link
+                  to="/privacy"
+                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                >
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                <Link
+                  to="/terms"
+                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                >
                   Terms of Service
                 </Link>
               </li>
@@ -56,7 +68,10 @@ export function Footer() {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
-                <a href="mailto:contact@volunteerportal.org" className="hover:text-blue-600 transition-colors">
+                <a
+                  href="mailto:contact@volunteerportal.org"
+                  className="hover:text-blue-600 transition-colors"
+                >
                   contact@volunteerportal.org
                 </a>
               </li>
@@ -81,7 +96,12 @@ export function Footer() {
                     strokeWidth={2}
                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                   />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
                 </svg>
                 <span>9 April Street, Vake District, Tbilisi 0160, Georgia</span>
               </li>
@@ -92,9 +112,9 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-8 border-t border-gray-200 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-500">
-             {currentYear} Volunteer Event Portal. All rights reserved.
+            {currentYear} Volunteer Event Portal. All rights reserved.
           </p>
-          
+
           {/* Social Links */}
           <div className="flex gap-4">
             <a
@@ -134,5 +154,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

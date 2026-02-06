@@ -1,46 +1,48 @@
-﻿import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
-import { Logo } from '@/assets/Logo'
-import { useAuth } from '@/hooks/useAuth'
-import { UserRole } from '@/types/enums'
+﻿import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Logo } from '@/assets/Logo';
+import { useAuth } from '@/hooks/useAuth';
+import { UserRole } from '@/types/enums';
 
 export function Header() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { isAuthenticated, user, logout } = useAuth()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   const handleLogout = () => {
-    logout()
-    navigate('/')
-    setIsUserDropdownOpen(false)
-  }
+    logout();
+    navigate('/');
+    setIsUserDropdownOpen(false);
+  };
 
-  const isActive = (path: string) => location.pathname === path
+  const isActive = (path: string) => location.pathname === path;
 
   // Navigation links based on auth state
   const publicLinks = [
     { to: '/', label: 'Home' },
     { to: '/events', label: 'Events' },
-  ]
+  ];
 
-  const authenticatedLinks = [...publicLinks, { to: '/my-events', label: 'My Events' }]
+  const authenticatedLinks = [...publicLinks, { to: '/my-events', label: 'My Events' }];
 
   // Role-specific links
   const getRoleSpecificLinks = () => {
-    if (!user) return []
-    const links = []
+    if (!user) return [];
+    const links = [];
     if (user.role === UserRole.Organizer || user.role === UserRole.Admin) {
-      links.push({ to: '/events/create', label: 'Create Event' })
+      links.push({ to: '/events/create', label: 'Create Event' });
     }
     if (user.role === UserRole.Admin) {
-      links.push({ to: '/admin', label: 'Admin Panel' })
+      links.push({ to: '/admin', label: 'Admin Panel' });
     }
-    return links
-  }
+    return links;
+  };
 
-  const navLinks = isAuthenticated ? [...authenticatedLinks, ...getRoleSpecificLinks()] : publicLinks
+  const navLinks = isAuthenticated
+    ? [...authenticatedLinks, ...getRoleSpecificLinks()]
+    : publicLinks;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
@@ -49,7 +51,9 @@ export function Header() {
           {/* Logo and Brand */}
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Logo size={40} />
-            <span className="text-xl font-bold text-gray-900 hidden sm:inline">Volunteer Portal</span>
+            <span className="text-xl font-bold text-gray-900 hidden sm:inline">
+              Volunteer Portal
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -92,7 +96,12 @@ export function Header() {
                     stroke="currentColor"
                     aria-hidden="true"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
 
@@ -105,7 +114,12 @@ export function Header() {
                       onClick={() => setIsUserDropdownOpen(false)}
                     >
                       <div className="flex items-center gap-2">
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -122,7 +136,12 @@ export function Header() {
                       onClick={() => setIsUserDropdownOpen(false)}
                     >
                       <div className="flex items-center gap-2">
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -139,7 +158,12 @@ export function Header() {
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                     >
                       <div className="flex items-center gap-2">
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -180,12 +204,34 @@ export function Header() {
             aria-label="Toggle navigation menu"
           >
             {isMobileMenuOpen ? (
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             ) : (
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             )}
           </button>
@@ -237,8 +283,8 @@ export function Header() {
                 <button
                   type="button"
                   onClick={() => {
-                    handleLogout()
-                    setIsMobileMenuOpen(false)
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
                   }}
                   className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
                 >
@@ -267,5 +313,5 @@ export function Header() {
         )}
       </nav>
     </header>
-  )
+  );
 }

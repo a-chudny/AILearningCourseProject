@@ -1,78 +1,82 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { useSkills, useUserSkills, useUpdateUserSkills } from '@/hooks/useSkills'
-import { SkillSelector } from '@/components/skills/SkillSelector'
-import { UserRoleLabels } from '@/types/enums'
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useSkills, useUserSkills, useUpdateUserSkills } from '@/hooks/useSkills';
+import { SkillSelector } from '@/components/skills/SkillSelector';
+import { UserRoleLabels } from '@/types/enums';
 
 /**
  * User profile page with basic info and skill management
  * Shows read-only profile info (name, email, role) and allows users to manage their skills
  */
 export default function ProfilePage() {
-  const { user, refetchUser } = useAuth()
-  const { data: allSkills, isLoading: isLoadingAllSkills, error: allSkillsError } = useSkills()
-  const { data: userSkills, isLoading: isLoadingUserSkills, error: userSkillsError } = useUserSkills()
-  const updateSkillsMutation = useUpdateUserSkills()
+  const { user, refetchUser } = useAuth();
+  const { data: allSkills, isLoading: isLoadingAllSkills, error: allSkillsError } = useSkills();
+  const {
+    data: userSkills,
+    isLoading: isLoadingUserSkills,
+    error: userSkillsError,
+  } = useUserSkills();
+  const updateSkillsMutation = useUpdateUserSkills();
 
   // Local state for selected skill IDs
-  const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>([])
-  const [hasChanges, setHasChanges] = useState(false)
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   // Initialize selected skills from user's current skills
   useEffect(() => {
     if (userSkills) {
-      const ids = userSkills.map((skill) => skill.id)
-      setSelectedSkillIds(ids)
+      const ids = userSkills.map((skill) => skill.id);
+      setSelectedSkillIds(ids);
     }
-  }, [userSkills])
+  }, [userSkills]);
 
   // Track if there are unsaved changes
   useEffect(() => {
     if (userSkills) {
-      const currentIds = new Set(userSkills.map((s) => s.id))
-      const selectedIds = new Set(selectedSkillIds)
+      const currentIds = new Set(userSkills.map((s) => s.id));
+      const selectedIds = new Set(selectedSkillIds);
       const hasChanged =
         currentIds.size !== selectedIds.size ||
-        Array.from(currentIds).some((id) => !selectedIds.has(id))
-      setHasChanges(hasChanged)
+        Array.from(currentIds).some((id) => !selectedIds.has(id));
+      setHasChanges(hasChanged);
     }
-  }, [selectedSkillIds, userSkills])
+  }, [selectedSkillIds, userSkills]);
 
   const handleSave = async () => {
     try {
-      await updateSkillsMutation.mutateAsync(selectedSkillIds)
+      await updateSkillsMutation.mutateAsync(selectedSkillIds);
       // Refetch user to update skills in auth context
-      await refetchUser()
-      setHasChanges(false)
-      setShowSuccessMessage(true)
-      
+      await refetchUser();
+      setHasChanges(false);
+      setShowSuccessMessage(true);
+
       // Hide success message after 3 seconds
       setTimeout(() => {
-        setShowSuccessMessage(false)
-      }, 3000)
+        setShowSuccessMessage(false);
+      }, 3000);
     } catch (error) {
-      console.error('Failed to update skills:', error)
+      console.error('Failed to update skills:', error);
     }
-  }
+  };
 
   const handleCancel = () => {
     if (userSkills) {
-      setSelectedSkillIds(userSkills.map((skill) => skill.id))
-      setHasChanges(false)
+      setSelectedSkillIds(userSkills.map((skill) => skill.id));
+      setHasChanges(false);
     }
-  }
+  };
 
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600">Please log in to view your profile.</p>
       </div>
-    )
+    );
   }
 
-  const isLoading = isLoadingAllSkills || isLoadingUserSkills
-  const error = allSkillsError || userSkillsError
+  const isLoading = isLoadingAllSkills || isLoadingUserSkills;
+  const error = allSkillsError || userSkillsError;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -112,7 +116,8 @@ export default function ProfilePage() {
             <div>
               <h2 className="text-xl font-semibold text-gray-900">My Skills</h2>
               <p className="mt-1 text-sm text-gray-600">
-                Select your skills to help organizers match you with relevant volunteer opportunities
+                Select your skills to help organizers match you with relevant volunteer
+                opportunities
               </p>
             </div>
           </div>
@@ -140,9 +145,7 @@ export default function ProfilePage() {
           {/* Error Message */}
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-800">
-                Failed to load skills. Please try again later.
-              </p>
+              <p className="text-sm text-red-800">Failed to load skills. Please try again later.</p>
             </div>
           )}
 
@@ -205,7 +208,8 @@ export default function ProfilePage() {
               {updateSkillsMutation.isError && (
                 <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-800">
-                    Failed to update skills: {updateSkillsMutation.error?.message || 'Unknown error'}
+                    Failed to update skills:{' '}
+                    {updateSkillsMutation.error?.message || 'Unknown error'}
                   </p>
                 </div>
               )}
@@ -214,5 +218,5 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,7 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MagnifyingGlassIcon, FunnelIcon, PencilIcon, TrashIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
-import { useAdminEvents, useSoftDeleteEvent, useCancelEventMutation, useEventRegistrations } from '@/hooks/useAdminEvents';
+import {
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  PencilIcon,
+  TrashIcon,
+  XCircleIcon,
+  EyeIcon,
+} from '@heroicons/react/24/outline';
+import {
+  useAdminEvents,
+  useSoftDeleteEvent,
+  useCancelEventMutation,
+  useEventRegistrations,
+} from '@/hooks/useAdminEvents';
 import { toast } from '@/utils/toast';
 import type { AdminEventsQueryParams } from '@/services/adminService';
 
@@ -30,7 +42,13 @@ interface DeleteConfirmModalProps {
   isLoading: boolean;
 }
 
-function DeleteConfirmModal({ event, isOpen, onClose, onConfirm, isLoading }: DeleteConfirmModalProps) {
+function DeleteConfirmModal({
+  event,
+  isOpen,
+  onClose,
+  onConfirm,
+  isLoading,
+}: DeleteConfirmModalProps) {
   if (!isOpen || !event) return null;
 
   return (
@@ -46,7 +64,8 @@ function DeleteConfirmModal({ event, isOpen, onClose, onConfirm, isLoading }: De
             Are you sure you want to delete <strong>{event.title}</strong>?
           </p>
           <p className="mt-2 text-sm text-gray-500">
-            The event will be soft-deleted and hidden from public view. This action can be reversed by updating the database directly.
+            The event will be soft-deleted and hidden from public view. This action can be reversed
+            by updating the database directly.
           </p>
         </div>
 
@@ -81,7 +100,13 @@ interface CancelConfirmModalProps {
   isLoading: boolean;
 }
 
-function CancelConfirmModal({ event, isOpen, onClose, onConfirm, isLoading }: CancelConfirmModalProps) {
+function CancelConfirmModal({
+  event,
+  isOpen,
+  onClose,
+  onConfirm,
+  isLoading,
+}: CancelConfirmModalProps) {
   if (!isOpen || !event) return null;
 
   return (
@@ -156,23 +181,43 @@ function RegistrationsModal({ eventId, eventTitle, isOpen, onClose }: Registrati
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Phone</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Registered</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Phone
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Registered
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {registrations.map((reg: any) => (
                     <tr key={reg.id}>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{reg.user.name}</td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{reg.user.email}</td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{reg.user.phoneNumber || '-'}</td>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                        {reg.user.name}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                        {reg.user.email}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                        {reg.user.phoneNumber || '-'}
+                      </td>
                       <td className="whitespace-nowrap px-6 py-4">
-                        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          reg.status === 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            reg.status === 0
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}
+                        >
                           {reg.status === 0 ? 'Confirmed' : 'Cancelled'}
                         </span>
                       </td>
@@ -226,7 +271,10 @@ export default function AdminEventsPage() {
 
   const [deleteModalEvent, setDeleteModalEvent] = useState<any | null>(null);
   const [cancelModalEvent, setCancelModalEvent] = useState<any | null>(null);
-  const [registrationsModalEvent, setRegistrationsModalEvent] = useState<{ id: number; title: string } | null>(null);
+  const [registrationsModalEvent, setRegistrationsModalEvent] = useState<{
+    id: number;
+    title: string;
+  } | null>(null);
 
   useEffect(() => {
     setPage(1);
@@ -343,12 +391,24 @@ export default function AdminEventsPage() {
           <table className="w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-1/4">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-1/6">Organizer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-1/5">Date/Time</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-24">Registrations</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-24">Status</th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 w-40">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-1/4">
+                  Title
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-1/6">
+                  Organizer
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-1/5">
+                  Date/Time
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-24">
+                  Registrations
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 w-24">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 w-40">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
@@ -389,23 +449,28 @@ export default function AdminEventsPage() {
                   return (
                     <tr key={event.id} className={isDeleted ? 'bg-red-50' : ''}>
                       <td className="px-6 py-4">
-                        <div className={`font-medium break-words ${isDeleted ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
+                        <div
+                          className={`font-medium break-words ${isDeleted ? 'text-gray-500 line-through' : 'text-gray-900'}`}
+                        >
                           {event.title}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {event.organizerName}
-                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{event.organizerName}</td>
                       <td className="px-6 py-4 text-sm text-gray-500">
                         <div className="whitespace-nowrap">{formatDate(event.startTime)}</div>
-                        <div className="whitespace-nowrap text-xs text-gray-400"> {calculateEndTime(event.startTime, event.durationMinutes)}</div>
+                        <div className="whitespace-nowrap text-xs text-gray-400">
+                          {' '}
+                          {calculateEndTime(event.startTime, event.durationMinutes)}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                         {event.registrationCount} / {event.capacity}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1">
-                          <span className={`inline-flex w-fit rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeColor(event.status)}`}>
+                          <span
+                            className={`inline-flex w-fit rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeColor(event.status)}`}
+                          >
                             {event.status === 0 ? 'Active' : 'Cancelled'}
                           </span>
                           {isDeleted && (
@@ -420,13 +485,15 @@ export default function AdminEventsPage() {
                           <button
                             onClick={() => navigate(`/events/${event.id}/edit`)}
                             disabled={isDeleted}
-                            title={isDeleted ? "Cannot edit deleted event" : "Edit event"}
+                            title={isDeleted ? 'Cannot edit deleted event' : 'Edit event'}
                             className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <PencilIcon className="h-5 w-5" />
                           </button>
                           <button
-                            onClick={() => setRegistrationsModalEvent({ id: event.id, title: event.title })}
+                            onClick={() =>
+                              setRegistrationsModalEvent({ id: event.id, title: event.title })
+                            }
                             title="View registrations"
                             className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-green-600"
                           >
@@ -435,7 +502,13 @@ export default function AdminEventsPage() {
                           <button
                             onClick={() => setCancelModalEvent(event)}
                             disabled={isDeleted || isCancelled}
-                            title={isDeleted ? "Cannot cancel deleted event" : isCancelled ? "Already cancelled" : "Cancel event"}
+                            title={
+                              isDeleted
+                                ? 'Cannot cancel deleted event'
+                                : isCancelled
+                                  ? 'Already cancelled'
+                                  : 'Cancel event'
+                            }
                             className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-amber-600 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <XCircleIcon className="h-5 w-5" />
@@ -443,7 +516,7 @@ export default function AdminEventsPage() {
                           <button
                             onClick={() => setDeleteModalEvent(event)}
                             disabled={isDeleted}
-                            title={isDeleted ? "Already deleted" : "Delete event"}
+                            title={isDeleted ? 'Already deleted' : 'Delete event'}
                             className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <TrashIcon className="h-5 w-5" />
@@ -461,7 +534,8 @@ export default function AdminEventsPage() {
         {data && data.totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-gray-200 bg-white px-6 py-3">
             <div className="text-sm text-gray-700">
-              Showing {((data.page - 1) * data.pageSize) + 1} to {Math.min(data.page * data.pageSize, data.totalCount)} of {data.totalCount} events
+              Showing {(data.page - 1) * data.pageSize + 1} to{' '}
+              {Math.min(data.page * data.pageSize, data.totalCount)} of {data.totalCount} events
             </div>
             <div className="flex gap-2">
               <button

@@ -37,7 +37,11 @@ describe('RegistrationCard', () => {
 
   it('shows cancel button when showCancelButton is true', () => {
     renderWithRouter(
-      <RegistrationCard registration={mockRegistration} showCancelButton={true} onCancelClick={vi.fn()} />
+      <RegistrationCard
+        registration={mockRegistration}
+        showCancelButton={true}
+        onCancelClick={vi.fn()}
+      />
     );
 
     expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
@@ -53,7 +57,11 @@ describe('RegistrationCard', () => {
     const onCancelClick = vi.fn();
 
     renderWithRouter(
-      <RegistrationCard registration={mockRegistration} showCancelButton={true} onCancelClick={onCancelClick} />
+      <RegistrationCard
+        registration={mockRegistration}
+        showCancelButton={true}
+        onCancelClick={onCancelClick}
+      />
     );
 
     const cancelButton = screen.getByRole('button', { name: /cancel/i });

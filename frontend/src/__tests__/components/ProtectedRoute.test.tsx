@@ -1,17 +1,17 @@
-﻿import { render, screen } from '@testing-library/react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { AuthContext } from '@/context/AuthContext'
-import type { AuthContextType } from '@/context/AuthContext'
+﻿import { render, screen } from '@testing-library/react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { AuthContext } from '@/context/AuthContext';
+import type { AuthContextType } from '@/context/AuthContext';
 
 // Test component to render inside protected route
 function ProtectedContent() {
-  return <div>Protected Content</div>
+  return <div>Protected Content</div>;
 }
 
 function LoginPage() {
-  return <div>Login Page</div>
+  return <div>Login Page</div>;
 }
 
 describe('ProtectedRoute', () => {
@@ -25,14 +25,14 @@ describe('ProtectedRoute', () => {
     logout: vi.fn(),
     refetchUser: vi.fn(),
     ...overrides,
-  })
+  });
 
   beforeEach(() => {
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
   it('shows loading state while checking authentication', () => {
-    const authContext = mockAuthContext({ isLoading: true })
+    const authContext = mockAuthContext({ isLoading: true });
 
     render(
       <AuthContext value={authContext}>
@@ -42,14 +42,14 @@ describe('ProtectedRoute', () => {
           </ProtectedRoute>
         </BrowserRouter>
       </AuthContext>
-    )
+    );
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
-    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument()
-  })
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+  });
 
   it('redirects to login when user is not authenticated', () => {
-    const authContext = mockAuthContext({ isAuthenticated: false, isLoading: false })
+    const authContext = mockAuthContext({ isAuthenticated: false, isLoading: false });
 
     render(
       <AuthContext value={authContext}>
@@ -67,18 +67,25 @@ describe('ProtectedRoute', () => {
           </Routes>
         </BrowserRouter>
       </AuthContext>
-    )
+    );
 
-    expect(screen.getByText('Login Page')).toBeInTheDocument()
-    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument()
-  })
+    expect(screen.getByText('Login Page')).toBeInTheDocument();
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+  });
 
   it('renders protected content when user is authenticated', () => {
     const authContext = mockAuthContext({
       isAuthenticated: true,
       isLoading: false,
-      user: { id: 1, email: 'test@test.com', name: 'Test User', role: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    })
+      user: {
+        id: 1,
+        email: 'test@test.com',
+        name: 'Test User',
+        role: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    });
 
     render(
       <AuthContext value={authContext}>
@@ -88,9 +95,9 @@ describe('ProtectedRoute', () => {
           </ProtectedRoute>
         </BrowserRouter>
       </AuthContext>
-    )
+    );
 
-    expect(screen.getByText('Protected Content')).toBeInTheDocument()
-    expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
-  })
-})
+    expect(screen.getByText('Protected Content')).toBeInTheDocument();
+    expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+  });
+});

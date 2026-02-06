@@ -1,5 +1,8 @@
 # Volunteer Event Portal
 
+[![Backend CI](https://github.com/YOUR_USERNAME/AILearningCourseProject/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/AILearningCourseProject/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/YOUR_USERNAME/AILearningCourseProject/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/AILearningCourseProject/actions/workflows/frontend-ci.yml)
+
 A full-stack web application for managing volunteer events, built as a learning project for GitHub Copilot AI training. The goal is to achieve ~90% AI-generated code through effective prompting.
 
 ## 🏗️ Tech Stack

@@ -54,14 +54,14 @@ export async function checkUserRegistration(eventId: number): Promise<{
     const registrations = await getMyRegistrations();
     // Only consider confirmed registrations (status = 0), not cancelled ones
     const registration = registrations.find(
-      r => r.eventId === eventId && r.status === RegistrationStatus.Confirmed
+      (r) => r.eventId === eventId && r.status === RegistrationStatus.Confirmed
     );
-    
+
     return {
       isRegistered: !!registration,
       registration,
     };
-  } catch (error) {
+  } catch {
     // If not authenticated or error, return false
     return {
       isRegistered: false,
@@ -73,12 +73,13 @@ export async function checkUserRegistration(eventId: number): Promise<{
 /**
  * Register current user for an event
  */
-export async function registerForEvent(data: CreateRegistrationRequest): Promise<RegistrationResponse> {
+export async function registerForEvent(
+  data: CreateRegistrationRequest
+): Promise<RegistrationResponse> {
   try {
-    const response = await api.post<RegistrationResponse>(
-      `/events/${data.eventId}/register`,
-      { notes: data.notes }
-    );
+    const response = await api.post<RegistrationResponse>(`/events/${data.eventId}/register`, {
+      notes: data.notes,
+    });
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));

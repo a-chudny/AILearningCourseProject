@@ -79,7 +79,8 @@ export function EventFilters({
     setMatchMySkills(false);
   };
 
-  const hasActiveFilters = searchTerm || status || includePastEvents || selectedSkillIds.length > 0 || matchMySkills;
+  const hasActiveFilters =
+    searchTerm || status || includePastEvents || selectedSkillIds.length > 0 || matchMySkills;
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
@@ -141,7 +142,9 @@ export function EventFilters({
             disabled={matchMySkills || skillsLoading}
             className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-left text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-600 disabled:cursor-not-allowed flex justify-between items-center"
           >
-            <span className={`truncate ${selectedSkillIds.length === 0 && !matchMySkills && !skillsLoading ? 'text-gray-500' : ''}`}>
+            <span
+              className={`truncate ${selectedSkillIds.length === 0 && !matchMySkills && !skillsLoading ? 'text-gray-500' : ''}`}
+            >
               {skillsLoading
                 ? 'Loading skills...'
                 : matchMySkills
@@ -156,7 +159,12 @@ export function EventFilters({
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
 

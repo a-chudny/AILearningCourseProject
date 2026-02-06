@@ -55,7 +55,11 @@ export function Pagination({
   }
 
   return (
-    <div className="flex items-center justify-center gap-2" role="navigation" aria-label="Pagination">
+    <div
+      className="flex items-center justify-center gap-2"
+      role="navigation"
+      aria-label="Pagination"
+    >
       {/* Previous button */}
       <button
         onClick={() => onPageChange(currentPage - 1)}

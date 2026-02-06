@@ -56,9 +56,11 @@ export function RegistrationCard({
   const isRegistrationCancelled = status === RegistrationStatus.Cancelled;
 
   return (
-    <div className={`rounded-lg border bg-white p-4 shadow-sm transition-shadow hover:shadow-md ${
-      isRegistrationCancelled ? 'border-gray-300 bg-gray-50 opacity-75' : 'border-gray-200'
-    }`}>
+    <div
+      className={`rounded-lg border bg-white p-4 shadow-sm transition-shadow hover:shadow-md ${
+        isRegistrationCancelled ? 'border-gray-300 bg-gray-50 opacity-75' : 'border-gray-200'
+      }`}
+    >
       <div className="flex gap-4">
         {/* Event image or placeholder */}
         <Link to={`/events/${event.id}`} className="flex-shrink-0">
@@ -70,7 +72,12 @@ export function RegistrationCard({
             />
           ) : (
             <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600">
-              <svg className="h-10 w-10 text-white opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="h-10 w-10 text-white opacity-50"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -95,7 +102,9 @@ export function RegistrationCard({
 
               {/* Status badges */}
               <div className="mt-2 flex flex-wrap gap-2">
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClasses()}`}>
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClasses()}`}
+                >
                   {status === RegistrationStatus.Cancelled ? 'Cancelled' : 'Confirmed'}
                 </span>
                 {isEventCancelled && (
@@ -121,7 +130,12 @@ export function RegistrationCard({
           <div className="mt-3 space-y-1.5">
             {/* Date and time */}
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="h-4 w-4 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -130,27 +144,43 @@ export function RegistrationCard({
                 />
               </svg>
               <span>
-                {formatDate(event.startTime)} at {formatTime(event.startTime)} • {formatDuration(event.durationMinutes)}
+                {formatDate(event.startTime)} at {formatTime(event.startTime)} •{' '}
+                {formatDuration(event.durationMinutes)}
               </span>
             </div>
 
             {/* Location */}
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="h-4 w-4 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
                   d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                 />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
               </svg>
               <span className="truncate">{event.location}</span>
             </div>
 
             {/* Registration date */}
             <div className="flex items-center gap-2 text-sm text-gray-500">
-              <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="h-4 w-4 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

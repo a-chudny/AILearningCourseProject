@@ -1,25 +1,25 @@
-import { Routes, Route } from 'react-router-dom'
-import { Suspense, lazy } from 'react'
-import { MainLayout } from '@/layouts/MainLayout'
-import { AdminLayout } from '@/layouts/AdminLayout'
-import { RoleGuard } from '@/components/RoleGuard'
-import { UserRole } from '@/types/enums'
+import { Routes, Route } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
+import { MainLayout } from '@/layouts/MainLayout';
+import { AdminLayout } from '@/layouts/AdminLayout';
+import { RoleGuard } from '@/components/RoleGuard';
+import { UserRole } from '@/types/enums';
 
 // Lazy load pages for code splitting
-const HomePage = lazy(() => import('@/pages/HomePage'))
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
-const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
-const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'))
-const EventListPage = lazy(() => import('@/pages/public/EventListPage'))
-const EventDetailsPage = lazy(() => import('@/pages/public/EventDetailsPage'))
-const CreateEventPage = lazy(() => import('@/pages/user/CreateEventPage'))
-const EditEventPage = lazy(() => import('@/pages/user/EditEventPage'))
-const MyEventsPage = lazy(() => import('@/pages/user/MyEventsPage'))
-const ProfilePage = lazy(() => import('@/pages/user/ProfilePage'))
-const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'))
-const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'))
-const AdminEventsPage = lazy(() => import('@/pages/admin/AdminEventsPage'))
-const AdminReportsPage = lazy(() => import('@/pages/admin/AdminReportsPage'))
+const HomePage = lazy(() => import('@/pages/HomePage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const EventListPage = lazy(() => import('@/pages/public/EventListPage'));
+const EventDetailsPage = lazy(() => import('@/pages/public/EventDetailsPage'));
+const CreateEventPage = lazy(() => import('@/pages/user/CreateEventPage'));
+const EditEventPage = lazy(() => import('@/pages/user/EditEventPage'));
+const MyEventsPage = lazy(() => import('@/pages/user/MyEventsPage'));
+const ProfilePage = lazy(() => import('@/pages/user/ProfilePage'));
+const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'));
+const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
+const AdminEventsPage = lazy(() => import('@/pages/admin/AdminEventsPage'));
+const AdminReportsPage = lazy(() => import('@/pages/admin/AdminReportsPage'));
 
 // Loading fallback component
 function PageLoader() {
@@ -30,7 +30,7 @@ function PageLoader() {
         <p className="text-gray-600">Loading...</p>
       </div>
     </div>
-  )
+  );
 }
 
 export function AppRoutes() {
@@ -162,5 +162,5 @@ export function AppRoutes() {
         />
       </Routes>
     </Suspense>
-  )
+  );
 }

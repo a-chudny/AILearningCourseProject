@@ -16,8 +16,18 @@ const mockEvent: EventResponse = {
   organizerId: 2,
   organizerName: 'John Doe',
   requiredSkills: [
-    { id: 1, name: 'Teamwork', description: 'Work well in a team', createdAt: new Date().toISOString() },
-    { id: 2, name: 'Physical Fitness', description: 'Able to do physical work', createdAt: new Date().toISOString() },
+    {
+      id: 1,
+      name: 'Teamwork',
+      description: 'Work well in a team',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 2,
+      name: 'Physical Fitness',
+      description: 'Able to do physical work',
+      createdAt: new Date().toISOString(),
+    },
   ],
   imageUrl: undefined,
   createdAt: new Date().toISOString(),

@@ -1,4 +1,4 @@
-﻿import { Link, useLocation } from 'react-router-dom'
+﻿import { Link, useLocation } from 'react-router-dom';
 import {
   HomeIcon,
   UsersIcon,
@@ -6,11 +6,11 @@ import {
   DocumentChartBarIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/24/outline';
 
 interface AdminSidebarProps {
-  isCollapsed: boolean
-  onToggleCollapse: () => void
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
 const navigationLinks = [
@@ -18,17 +18,17 @@ const navigationLinks = [
   { to: '/admin/users', label: 'Users', icon: UsersIcon },
   { to: '/admin/events', label: 'Events', icon: CalendarIcon },
   { to: '/admin/reports', label: 'Reports', icon: DocumentChartBarIcon },
-]
+];
 
 export function AdminSidebar({ isCollapsed, onToggleCollapse }: AdminSidebarProps) {
-  const location = useLocation()
+  const location = useLocation();
 
   const isActive = (path: string) => {
     if (path === '/admin') {
-      return location.pathname === path
+      return location.pathname === path;
     }
-    return location.pathname.startsWith(path)
-  }
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <>
@@ -61,8 +61,8 @@ export function AdminSidebar({ isCollapsed, onToggleCollapse }: AdminSidebarProp
         {/* Navigation Links */}
         <nav className="flex-1 space-y-1 px-3 py-4">
           {navigationLinks.map((link) => {
-            const Icon = link.icon
-            const active = isActive(link.to)
+            const Icon = link.icon;
+            const active = isActive(link.to);
 
             return (
               <Link
@@ -78,7 +78,7 @@ export function AdminSidebar({ isCollapsed, onToggleCollapse }: AdminSidebarProp
                 <Icon className="h-6 w-6 flex-shrink-0" />
                 {!isCollapsed && <span className="font-medium">{link.label}</span>}
               </Link>
-            )
+            );
           })}
         </nav>
       </aside>
@@ -87,8 +87,8 @@ export function AdminSidebar({ isCollapsed, onToggleCollapse }: AdminSidebarProp
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-gray-800 border-t border-gray-700">
         <div className="grid grid-cols-4 gap-1 px-2 py-2">
           {navigationLinks.map((link) => {
-            const Icon = link.icon
-            const active = isActive(link.to)
+            const Icon = link.icon;
+            const active = isActive(link.to);
 
             return (
               <Link
@@ -103,10 +103,10 @@ export function AdminSidebar({ isCollapsed, onToggleCollapse }: AdminSidebarProp
                 <Icon className="h-6 w-6" />
                 <span className="text-xs font-medium">{link.label}</span>
               </Link>
-            )
+            );
           })}
         </div>
       </nav>
     </>
-  )
+  );
 }
