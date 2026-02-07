@@ -67,6 +67,12 @@ cd frontend && npm install && npm run dev
 
 The database is also seeded with 15 predefined skills.
 
+## Demo
+
+See the application in action:
+
+![Demo](Docs/Demo/demo.gif)
+
 ## Running Tests
 
 ```bash
